@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — Login</title>
+<title>canBet — About us</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,7 +12,13 @@ body {
   width: 100vw; height: 100vh;
   overflow: hidden;
   font-family: 'Press Start 2P', monospace;
-  background: #d0d0d0;
+  /* fallback color retained from original */
+  background-color: #d8d8d8;
+  background-image: url('images/aboutbg.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
   display: flex;
   flex-direction: column;
 }
@@ -21,13 +27,13 @@ body {
 .topnav {
   width: 100%;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   padding: 12px 24px;
   background: rgba(255,255,255,0.6);
-  border-bottom: 1px solid #ccc;
   position: relative;
   z-index: 10;
+  border-bottom: 1px solid #ccc;
 }
 .nav-link {
   font-size: 0.5rem;
@@ -44,50 +50,32 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #d0d0d0;
   padding: 2rem;
-  gap: 2rem;
+  position: relative;
 }
+/* background image removed; gradient is handled by body background */
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
-  width: 100%;
-  max-width: 320px;
-}
-
-.form-label {
-  font-size: 0.55rem;
-  color: #333;
-  letter-spacing: 1px;
-  align-self: flex-start;
-}
-
-.form-input {
-  width: 100%;
-  height: 28px;
-  background: #888;
-  border: none;
-  outline: none;
-  padding: 4px 8px;
+.about-title {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.4rem;
-  color: #eee;
-  cursor: pointer;
-}
-.form-input:focus {
-  background: #999;
+  font-size: clamp(1.8rem, 5vw, 3.5rem);
+  color: #1a1a1a;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  line-height: 1.3;
+  position: relative;
+  z-index: 1;
 }
 
-.form-input.submit {
-  cursor: pointer;
-  background: #666;
-  transition: background 0.2s;
-}
-.form-input.submit:hover {
-  background: #555;
+.about-sub {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: #555;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 2;
+  position: relative;
+  z-index: 1;
 }
 </style>
 </head>
@@ -95,18 +83,12 @@ body {
 
 <nav class="topnav">
   <a href="home.html" class="nav-link">Home</a>
+  <a href="login.html" class="nav-link">Login</a>
 </nav>
 
 <div class="page-content">
-  <div class="form-group">
-    <label class="form-label">Login</label>
-    <input type="text" class="form-input" placeholder="">
-  </div>
-
-  <div class="form-group">
-    <label class="form-label">Register</label>
-    <input type="submit" class="form-input submit" value="" onclick="window.location='main_interface.html'">
-  </div>
+  <h1 class="about-title"></h1>
+  <p class="about-sub"></p>
 </div>
 
 </body>

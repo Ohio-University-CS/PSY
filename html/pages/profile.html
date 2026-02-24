@@ -12,21 +12,18 @@ body {
   width: 100vw; height: 100vh;
   overflow: hidden;
   font-family: 'Press Start 2P', monospace;
-  background: #c4c8cc;
+  background-color: #c4c8cc;
+  background-image: url('images/profilebg_pixel.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
-.bg-image {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  -webkit-image-rendering: pixelated;
-}
+/* background image removed; gradient handled via body */
 
 /* PROFILE CARD — green rounded rectangle matching wireframe */
 .profile-card {
@@ -101,12 +98,11 @@ body {
 </head>
 <body>
 
-<img class="bg-image" src="images/profilebg.png" alt="">
 
 <div class="profile-card">
   <div class="avatar-wrap">
     <div class="avatar-circle">
-      <img src="images/avatar.png" alt="UnusualPheasant918">
+      <img src="images/pfp.png" alt="UnusualPheasant918">
     </div>
     <div class="avatar-badge">★</div>
   </div>
@@ -118,7 +114,7 @@ body {
   </div>
 </div>
 
-<a href="main_interface.html" class="menu-btn">Menu</a>
+<a href="main.html" class="menu-btn">Menu</a>
 
 <style>
 .menu-btn {

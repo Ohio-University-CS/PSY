@@ -12,21 +12,18 @@ body {
   width: 100vw; height: 100vh;
   overflow: hidden;
   font-family: 'Press Start 2P', monospace;
-  background: #c8c8c8;
+  background-color: #c8c8c8;
+  background-image: url('images/inventorybg_pixel.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
-.bg-image {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  -webkit-image-rendering: pixelated;
-}
+/* background image removed; gradient handled via body */
 
 /* MAIN LAYOUT — matches wireframe: large blue area left-center, dark panel right */
 .inv-layout {
@@ -138,7 +135,6 @@ body {
 </head>
 <body>
 
-<img class="bg-image" src="images/inventorybg.png" alt="">
 
 <div class="inv-layout">
   <div class="inv-grid-area">
@@ -166,7 +162,7 @@ body {
   </div>
 </div>
 
-<a href="main_interface.html" class="menu-btn">Menu</a>
+<a href="main.html" class="menu-btn">Menu</a>
 
 <script>
 function selectItem(el, icon, name, rarity, color) {

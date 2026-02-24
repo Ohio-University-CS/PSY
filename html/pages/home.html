@@ -12,7 +12,12 @@ body {
   width: 100vw; height: 100vh;
   overflow: hidden;
   font-family: 'Press Start 2P', monospace;
-  background: #5a8a3c;
+  background-color: #5a8a3c;
+  background-image: url('images/homebg_pixel.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
   display: flex;
   flex-direction: column;
 }
@@ -44,14 +49,7 @@ body {
 }
 .nav-right:hover { text-decoration: underline; }
 
-/* BACKGROUND IMAGE */
-.bg-image {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-}
+/* background image removed; gradient handled via body */
 
 /* CONTENT OVERLAY */
 .content {
@@ -93,7 +91,6 @@ body {
 </head>
 <body>
 
-<img class="bg-image" src="images/bg_home_grass.png" alt="">
 
 <nav class="topnav">
   <a href="about.html" class="nav-left">About us</a>

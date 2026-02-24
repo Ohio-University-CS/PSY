@@ -12,21 +12,18 @@ body {
   width: 100vw; height: 100vh;
   overflow: hidden;
   font-family: 'Press Start 2P', monospace;
-  background: #c8c8c8;
+  background-color: #c8c8c8;
+  background-image: url('images/cratebg_pixel.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
-.bg-image {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  -webkit-image-rendering: pixelated;
-}
+/* background image removed; gradient handled via body */
 
 /* CRATE DISPLAY AREA */
 .crate-area {
@@ -40,15 +37,15 @@ body {
   padding-bottom: 60px;
 }
 
-/* The crate itself — teal rectangle */
+/* The crate itself — teal rectangle with some visual flare */
 .crate-box {
   width: 280px;
   height: 200px;
-  background: #6fc8c0;
+  background: linear-gradient(135deg, #6fc8c0 0%, #5ab090 100%);
   border: 3px solid #4aa8a0;
   cursor: pointer;
   position: relative;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2), inset 0 0 10px rgba(0,0,0,0.1);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -67,6 +64,19 @@ body {
   color: #1a1a1a;
   letter-spacing: 1px;
   opacity: 0.7;
+}
+
+/* Price tag in top-left corner */
+.crate-price {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 0.4rem;
+  color: #fff;
+  background: rgba(0,0,0,0.4);
+  padding: 2px 4px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
 }
 
 /* Dark brown bar at bottom — represents the reward/result area */
@@ -159,10 +169,10 @@ body {
 </head>
 <body>
 
-<img class="bg-image" src="images/cratebg.png" alt="">
 
 <div class="crate-area">
   <div class="crate-box" onclick="openCrate()">
+    <div class="crate-price">100 Bits</div>
     <div class="crate-shine"></div>
     <span class="crate-label">Click to Open</span>
   </div>
@@ -171,7 +181,7 @@ body {
   </div>
 </div>
 
-<a href="main_interface.html" class="menu-btn">Menu</a>
+<a href="main.html" class="menu-btn">Menu</a>
 
 <div class="result-overlay" id="resultOverlay">
   <div class="result-popup">
