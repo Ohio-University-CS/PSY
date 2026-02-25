@@ -17,6 +17,9 @@ conn = SQL.connect(
 cursor = conn.cursor()
 
 cursor.execute("SELECT version();")
-print(cursor.fetchone())
+
+cursor.execute("""CREATE TABLE  ()""")
+
+conn.commit()
 
 conn.close()
