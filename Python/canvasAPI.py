@@ -35,9 +35,23 @@ for course in courses:
  
     data = response.json()
     #instead of printing the data, we will write it to a csv file
-    with open(f"{course['name']}_submissions.csv", mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["Submission Date"])
-        for submission in data:
-            submission_date = submission["submitted_at"]
-            writer.writerow([submission_date])
+    if "name" in course:
+        with open(f"{course["name"]}_submissions.csv", mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Submission Date"])
+            for submission in data:
+                if "submitted_at" in submission:
+                    submission_date = submission["submitted_at"] 
+                else:
+                    submission_date = "N/A"
+                writer.writerow([submission_date])
+    else:
+        with open(f"course_{COURSE_ID}_submissions.csv", mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Submission Date"])
+            for submission in data:
+                if "submitted_at" in submission:
+                    submission_date = submission["submitted_at"] 
+                else:
+                    submission_date = "N/A"
+                writer.writerow([submission_date])
