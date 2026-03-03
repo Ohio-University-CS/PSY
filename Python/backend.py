@@ -1,6 +1,6 @@
 import os
 import psycopg2 as SQL
-from dotenv import load_dotenv as env, load_dotenv
+from dotenv import load_dotenv as env
 
 load_dotenv()
 
