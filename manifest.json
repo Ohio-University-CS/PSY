@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "name": "canBet",
+  "version": "1.0",
+  "description": "Canvas gamification extension",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "*://*.instructure.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.instructure.com/*"],
+      "js": ["content_script.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "canbet.business@outlook.com",
+      "strict_min_version": "91.0"
+    }
+  },
+  "icons": {
+    "48": "icons/icon48.png"
+  }
+}
