@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>canBet — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace;
+  background-color: #c8c8c8;
+  /* use the new loginbg and let CSS pixelate it */
+  background-image: url('../images/loginbg.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* TOP NAV */
+.topnav {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 12px 24px;
+  /* match other pages with a translucent nav bar */
+  background: rgba(255,255,255,0.6);
+  border-bottom: 1px solid #ccc;
+  position: relative;
+  z-index: 10;
+}
+.nav-link {
+  font-size: 0.5rem;
+  color: #333;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.nav-link:hover { text-decoration: underline; }
+
+/* MAIN CONTENT */
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* content box now semi‑transparent so the page background can be seen */
+  background: rgba(208,208,208,0.85);
+  padding: 2rem;
+  gap: 2rem;
+  backdrop-filter: blur(4px);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.form-label {
+  font-size: 0.55rem;
+  color: #333;
+  letter-spacing: 1px;
+  align-self: flex-start;
+}
+
+.form-input {
+  width: 100%;
+  height: 28px;
+  background: #888;
+  border: none;
+  outline: none;
+  padding: 4px 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  color: #eee;
+  cursor: pointer;
+}
+.form-input:focus {
+  background: #999;
+}
+
+.form-input.submit {
+  cursor: pointer;
+  background: #666;
+  transition: background 0.2s;
+}
+.form-input.submit:hover {
+  background: #555;
+}
+
+/* login button uses a contrasting color */
+.form-input.login-btn {
+  cursor: pointer;
+  background: #4a8a60;
+  color: #fff;
+  transition: background 0.2s;
+}
+.form-input.login-btn:hover {
+  background: #3a7a50;
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="home.html"><img src="../images/canBet symbol sym..png" class="logo" alt="Logo"></a>
+</nav>
+
+<div class="page-content">
+    <!-- email field -->
+    <div class="form-group">
+      <label class="form-label" for="email-input">Email</label>
+      <input id="email-input" type="email" class="form-input" placeholder="yourname@school.edu">
+    </div>
+
+    <!-- password field -->
+    <div class="form-group">
+      <label class="form-label" for="password-input">Password</label>
+      <input id="password-input" type="password" class="form-input" placeholder="************">
+    </div>
+
+    <!-- login button; different color than inputs -->
+    <div class="form-group">
+      <input type="button" class="form-input login-btn" value="Login" onclick="window.location='main.html'">
+    </div>
+  </div>
+</body>
+</html>

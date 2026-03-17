@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>canBet — Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace;
+  background-color: #5a8a3c;
+  background-image: url('../images/homebg_pixel.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP NAV */
+.topnav {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(2px);
+  position: absolute;
+  top: 0;
+  z-index: 10;
+}
+.nav-left {
+  font-size: 0.55rem;
+  color: #222;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.nav-right {
+  font-size: 0.55rem;
+  color: #222;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.nav-right:hover { text-decoration: underline; }
+
+/* links inside logo nav span */
+.nav-link {
+  font-size: 0.55rem;
+  color: #000;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.nav-link:hover { text-decoration: underline; }
+
+
+/* CONTENT OVERLAY */
+.content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+.title-box {
+  text-align: center;
+}
+
+.game-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  color: #1a1a1a;
+  text-shadow: 
+    3px 3px 0 rgba(0,0,0,0.3),
+    -1px -1px 0 rgba(255,255,255,0.2);
+  letter-spacing: 4px;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: #2a2a2a;
+  letter-spacing: 2px;
+  text-align: center;
+  line-height: 2;
+  opacity: 0.85;
+}
+</style>
+</head>
+<body>
+
+
+<nav class="topnav">
+  <a href="home.html"><img src="../images/canBet symbol sym..png" class="logo" alt="Logo"></a>
+  <span>
+    <a href="about.html" class="nav-link">About us</a>
+    <a href="login.html" class="nav-link">Login</a>
+  </span>
+</nav>
+
+<div class="content">
+  <div class="title-box">
+    <div class="game-title">canBet</div>
+    <div class="subtitle">The canvas addon for procrastinators and gamblers.</div>
+  </div>
+</div>
+
+</body>
+</html>

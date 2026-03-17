@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>canBet — Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #d0d3d7; --panel: #f2f3f5; --panel2: #e8eaed;
+  --border: #b4bac2; --border-dark: #8a9199;
+  --accent: #2e3c4e; --accent2: #5b8db8;
+  --text: #18222e; --text-dim: #7a8694;
+  --green: #2e8a56; --shadow: rgba(30,45,60,0.13); --shine: rgba(255,255,255,0.7);
+}
+html { scroll-behavior: smooth; }
+body {
+  width: 100vw; min-height: 100vh;
+  font-family: 'Press Start 2P', monospace;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 15% 10%, #e8ecf0 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, #c4c9cf 0%, transparent 55%);
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 3px; }
+.topnav {
+  position: sticky; top: 0; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(242,243,245,0.92); border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 16px var(--shadow); backdrop-filter: blur(12px); z-index: 100;
+}
+.nav-logo { font-size: 0.65rem; color: var(--accent); letter-spacing: 3px; text-decoration: none; }
+.nav-back { font-size: 0.32rem; color: var(--text-dim); letter-spacing: 1.5px; text-decoration: none; transition: color 0.2s; }
+.nav-back:hover { color: var(--accent2); }
+.page { max-width: 760px; margin: 0 auto; padding: 48px 24px 60px; display: flex; flex-direction: column; gap: 40px; }
+.section-label { font-size: 0.3rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 14px; padding-left: 10px; border-left: 2px solid var(--accent2); }
+.lb-header {
+  display: grid; grid-template-columns: 48px 1fr 160px 140px;
+  padding: 10px 20px; background: var(--accent);
+  border: 1px solid var(--accent); gap: 8px;
+}
+.lb-th { font-size: 0.28rem; color: rgba(255,255,255,0.7); letter-spacing: 2px; }
+.lb-list { border: 1px solid var(--border); box-shadow: 0 2px 12px var(--shadow); overflow: hidden; border-top: none; }
+.lb-row {
+  display: grid; grid-template-columns: 48px 1fr 160px 140px;
+  align-items: center; gap: 8px; padding: 14px 20px;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-row:hover { background: var(--panel2); }
+.lb-row.you { background: rgba(91,141,184,0.08); }
+.lb-rank { font-size: 0.38rem; color: var(--text-dim); text-align: center; }
+.lb-rank.gold   { color: #c8943a; }
+.lb-rank.silver { color: #8a9199; }
+.lb-rank.bronze { color: #a0623a; }
+.lb-name { font-size: 0.34rem; color: var(--text); letter-spacing: 1px; }
+.lb-name.you { color: var(--accent2); }
+.lb-score { font-size: 0.32rem; color: var(--green); letter-spacing: 1px; }
+.lb-crates { font-size: 0.3rem; color: var(--text-dim); letter-spacing: 1px; }
+.pagination { display: flex; gap: 6px; justify-content: center; padding-top: 4px; }
+.page-btn {
+  font-family: 'Press Start 2P', monospace; font-size: 0.32rem;
+  background: var(--panel); color: var(--text-dim);
+  border: 1px solid var(--border); padding: 8px 12px; cursor: pointer;
+  transition: all 0.15s;
+}
+.page-btn:hover, .page-btn.active { background: var(--accent2); color: white; border-color: var(--accent2); }
+.page-footer {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
+  background: rgba(242,243,245,0.92); border-top: 1px solid var(--border);
+  backdrop-filter: blur(8px); z-index: 100;
+}
+.footer-text { font-size: 0.26rem; color: var(--text-dim); letter-spacing: 1.5px; }
+.status-right { display: flex; align-items: center; gap: 7px; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 5px var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="main.html"><img src="../images/canBet symbol sym..png" class="logo" alt="Logo"></a>
+  <a href="main.html" class="nav-back">◀ Menu</a>
+</nav>
+<div class="page">
+  <section>
+    <div class="section-label">Leaderboard</div>
+    <div class="lb-header">
+      <div class="lb-th">#</div>
+      <div class="lb-th">Username</div>
+      <div class="lb-th">Bit Balance</div>
+      <div class="lb-th">Crates</div>
+    </div>
+    <div class="lb-list">
+      <div class="lb-row"><span class="lb-rank gold">#1</span><span class="lb-name">MasonRunner#033</span><span class="lb-score">1,000,000</span><span class="lb-crates">142</span></div>
+      <div class="lb-row"><span class="lb-rank silver">#2</span><span class="lb-name">Ro_W</span><span class="lb-score">888,888</span><span class="lb-crates">118</span></div>
+      <div class="lb-row"><span class="lb-rank bronze">#3</span><span class="lb-name">RoutineDes#803</span><span class="lb-score">10,000</span><span class="lb-crates">95</span></div>
+      <div class="lb-row"><span class="lb-rank">#4</span><span class="lb-name">PL200</span><span class="lb-score">9,400</span><span class="lb-crates">88</span></div>
+      <div class="lb-row"><span class="lb-rank">#5</span><span class="lb-name">RoutineDev800</span><span class="lb-score">7,200</span><span class="lb-crates">74</span></div>
+      <div class="lb-row"><span class="lb-rank">#6</span><span class="lb-name">UnikaLakoa800</span><span class="lb-score">3,100</span><span class="lb-crates">69</span></div>
+      <div class="lb-row you"><span class="lb-rank" style="color:var(--accent2)">#7</span><span class="lb-name you">PLOB (you)</span><span class="lb-score">1,674</span><span class="lb-crates">67</span></div>
+      <div class="lb-row"><span class="lb-rank">#8</span><span class="lb-name">HappyHhten#700</span><span class="lb-score">1,200</span><span class="lb-crates">51</span></div>
+      <div class="lb-row"><span class="lb-rank">#9</span><span class="lb-name">pynocca3</span><span class="lb-score">980</span><span class="lb-crates">44</span></div>
+      <div class="lb-row"><span class="lb-rank">#10</span><span class="lb-name">vtx.Draxon9c</span><span class="lb-score">740</span><span class="lb-crates">38</span></div>
+    </div>
+  </section>
+  <div class="pagination">
+    <button class="page-btn active">◀</button>
+    <button class="page-btn active">1</button>
+    <button class="page-btn">2</button>
+    <button class="page-btn">3</button>
+    <button class="page-btn">4</button>
+    <button class="page-btn">▶</button>
+  </div>
+</div>
+<footer class="page-footer">
+  <span class="footer-text">CANBET v1.0 — LEADERBOARD</span>
+  <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
+</footer>
+</body>
+</html>

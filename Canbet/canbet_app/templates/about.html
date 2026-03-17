@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>canBet — About us</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace;
+  background-color: #d8d8d8;
+  background-image: url('../images/aboutbg.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP NAV */
+.topnav {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(255,255,255,0.6);
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid #ccc;
+}
+.nav-link {
+  font-size: 0.5rem;
+  color: #333;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.nav-link:hover { text-decoration: underline; }
+
+/* MAIN CONTENT */
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.about-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1.8rem, 5vw, 3.5rem);
+  color: #1a1a1a;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  line-height: 1.3;
+  position: relative;
+  z-index: 1;
+}
+
+.about-sub {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: #555;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 2;
+  position: relative;
+  z-index: 1;
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="home.html"><img src="../images/canBet symbol sym..png" class="logo" alt="Logo"></a>
+  <span>
+    <a href="login.html" class="nav-link">Login</a>
+  </span>
+</nav>
+
+<div class="page-content">
+  <h1 class="about-title"></h1>
+  <p class="about-sub"></p>
+</div>
+
+</body>
+</html>
