@@ -59,7 +59,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'canbet.wsgi.application'
+WSGI_APPLICATION = 'Canbet.wsgi.application'
 
 # ── Database — PostgreSQL ───────────────────────────────────────────────────────
 DATABASES = {
