@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>canBet — Crates</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #d0d3d7; --panel: #f2f3f5; --panel2: #e8eaed;
+  --border: #b4bac2; --border-dark: #8a9199;
+  --accent: #2e3c4e; --accent2: #5b8db8;
+  --text: #18222e; --text-dim: #7a8694;
+  --green: #2e8a56; --shadow: rgba(30,45,60,0.13); --shine: rgba(255,255,255,0.7);
+}
+html { scroll-behavior: smooth; }
+body {
+  width: 100vw; min-height: 100vh;
+  font-family: 'Press Start 2P', monospace;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 15% 10%, #e8ecf0 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, #c4c9cf 0%, transparent 55%);
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 3px; }
+.topnav {
+  position: sticky; top: 0; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(242,243,245,0.92); border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 16px var(--shadow); backdrop-filter: blur(12px); z-index: 100;
+}
+.nav-logo { font-size: 0.65rem; color: var(--accent); letter-spacing: 3px; text-decoration: none; }
+.nav-back { font-size: 0.32rem; color: var(--text-dim); letter-spacing: 1.5px; text-decoration: none; transition: color 0.2s; }
+.nav-back:hover { color: var(--accent2); }
+.page { max-width: 760px; margin: 0 auto; padding: 48px 24px 60px; display: flex; flex-direction: column; gap: 40px; }
+.section-label { font-size: 0.3rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 14px; padding-left: 10px; border-left: 2px solid var(--accent2); }
+.crates-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.crate-card {
+  background: var(--panel); border: 1px solid var(--border);
+  box-shadow: 0 2px 12px var(--shadow), inset 0 1px 0 var(--shine);
+  padding: 28px 20px 20px; display: flex; flex-direction: column;
+  align-items: center; gap: 14px; cursor: pointer; position: relative;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.crate-card:hover { border-color: var(--accent2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(30,45,60,0.18), inset 0 1px 0 var(--shine); }
+.crate-card:active { transform: translateY(0); }
+.crate-icon { font-size: 3.2rem; }
+.crate-name { font-size: 0.38rem; color: var(--text); letter-spacing: 1px; text-align: center; line-height: 2; }
+.crate-price {
+  font-size: 0.32rem; color: var(--green); letter-spacing: 1px;
+  padding: 6px 14px; border: 1px solid var(--border); background: var(--panel2);
+}
+.crate-badge {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 0.24rem; letter-spacing: 1px; padding: 4px 8px;
+  background: var(--accent2); color: white;
+}
+.result-feed { border: 1px solid var(--border); box-shadow: 0 2px 10px var(--shadow); overflow: hidden; }
+.result-row {
+  display: flex; align-items: center; gap: 14px; padding: 12px 20px;
+  background: var(--panel); border-bottom: 1px solid var(--border); transition: background 0.15s;
+}
+.result-row:last-child { border-bottom: none; }
+.result-rarity { font-size: 0.28rem; letter-spacing: 1px; width: 90px; flex-shrink: 0; }
+.result-item { font-size: 0.3rem; color: var(--text); letter-spacing: 0.8px; flex: 1; line-height: 1.8; display: flex; align-items: center; gap: 8px; }
+.result-time { font-size: 0.25rem; color: var(--text-dim); letter-spacing: 1px; }
+.overlay {
+  position: fixed; inset: 0; background: rgba(24,34,46,0.6);
+  display: none; align-items: center; justify-content: center; z-index: 200;
+  backdrop-filter: blur(4px);
+}
+.overlay.show { display: flex; }
+.popup {
+  background: var(--panel); border: 1px solid var(--border);
+  box-shadow: 0 16px 48px rgba(30,45,60,0.3), inset 0 1px 0 var(--shine);
+  padding: 40px 48px; text-align: center; display: flex; flex-direction: column; gap: 16px; min-width: 300px;
+}
+/* Popup sprite: fixed size, pixelated, centered */
+.popup-icon {
+  display: flex; align-items: center; justify-content: center;
+  height: 96px;
+}
+.popup-icon img {
+  width: 96px; height: 96px;
+  image-rendering: pixelated; object-fit: contain;
+}
+.popup-rarity { font-size: 0.5rem; letter-spacing: 2px; }
+.popup-name { font-size: 0.38rem; color: var(--text); letter-spacing: 1px; line-height: 2; }
+.popup-btn {
+  font-family: 'Press Start 2P', monospace; font-size: 0.38rem;
+  background: var(--accent); color: white; border: none;
+  padding: 14px 28px; cursor: pointer; letter-spacing: 1px; margin-top: 8px;
+  transition: background 0.2s;
+}
+.popup-btn:hover { background: var(--accent2); }
+/* Grid/feed sprite size */
+.item-sprite {
+  width: 40px; height: 40px;
+  image-rendering: pixelated; object-fit: contain; flex-shrink: 0;
+}
+.page-footer {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
+  background: rgba(242,243,245,0.92); border-top: 1px solid var(--border);
+  backdrop-filter: blur(8px); z-index: 100;
+}
+.footer-text { font-size: 0.26rem; color: var(--text-dim); letter-spacing: 1.5px; }
+.status-right { display: flex; align-items: center; gap: 7px; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 5px var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="main.html"><img src="../images/canBet symbol sym..png" class="logo" alt="Logo"></a>
+  <a href="main.html" class="nav-back">◀ Menu</a>
+</nav>
+<div class="page">
+  <section>
+    <div class="section-label">Open Crates</div>
+    <div class="crates-grid">
+      <div class="crate-card" onclick="openCrate('Standard',100)">
+        <div class="crate-icon">📦</div>
+        <div class="crate-name">Standard Crate</div>
+        <div class="crate-price">100 Bits</div>
+      </div>
+      <div class="crate-card" onclick="openCrate('Premium',300)">
+        <div class="crate-badge">HOT</div>
+        <div class="crate-icon">🎁</div>
+        <div class="crate-name">Premium Crate</div>
+        <div class="crate-price">300 Bits</div>
+      </div>
+      <div class="crate-card" onclick="openCrate('Legendary',800)">
+        <div class="crate-icon">💎</div>
+        <div class="crate-name">Legendary Crate</div>
+        <div class="crate-price">800 Bits</div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="section-label">Recent Opens</div>
+    <div class="result-feed" id="feed">
+      <div class="result-row">
+        <span class="result-rarity" style="color:#5b8db8">RARE</span>
+        <span class="result-item"><img src="../../Sprites/Items/Vampire.png" class="item-sprite" alt="Vampire">Vampire</span>
+        <span class="result-time">2m ago</span>
+      </div>
+      <div class="result-row">
+        <span class="result-rarity" style="color:#2e8a56">COMMON</span>
+        <span class="result-item"><img src="../../Sprites/Items/Gargoyle.png" class="item-sprite" alt="Gargoyle">Gargoyle</span>
+        <span class="result-time">1h ago</span>
+      </div>
+      <div class="result-row">
+        <span class="result-rarity" style="color:#a855f7">EPIC</span>
+        <span class="result-item"><img src="../../Sprites/Items/Cthulhu.png" class="item-sprite" alt="Cthulhu">Cthulhu</span>
+        <span class="result-time">3h ago</span>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <div class="popup-icon"><img id="pIcon" src="" alt=""></div>
+    <div class="popup-rarity" id="pRarity"></div>
+    <div class="popup-name" id="pName"></div>
+    <button class="popup-btn" onclick="closePopup()">Collect</button>
+  </div>
+</div>
+<footer class="page-footer">
+  <span class="footer-text">CANBET v1.0 — CRATES</span>
+  <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
+</footer>
+<script>
+const pools = {
+  Standard: [
+    {r:'COMMON',   n:'Gargoyle',                    c:'#2e8a56', img:'../../Sprites/Items/Gargoyle.png',                     w:25},
+    {r:'COMMON',   n:'Happy Ghost',                 c:'#2e8a56', img:'../../Sprites/Items/Happy Ghost.png',                  w:20},
+    {r:'COMMON',   n:'Zombie',                      c:'#2e8a56', img:'../../Sprites/Items/zombie.png',                       w:20},
+    {r:'COMMON',   n:'Mummy',                       c:'#2e8a56', img:'../../Sprites/Items/mummy.png',                        w:20},
+    {r:'RARE',     n:'Flying Spaghetti Monster',    c:'#5b8db8', img:'../../Sprites/Items/Flying spaghetti monster.png',     w:10},
+    {r:'EPIC',     n:'Cthulhu',                     c:'#a855f7', img:'../../Sprites/Items/Cthulhu.png',                      w:4},
+    {r:'LEGENDARY',n:'Angery Ghost',                c:'#c8943a', img:'../../Sprites/Items/Angery Ghost.png',                 w:1},
+  ],
+  Premium: [
+    {r:'COMMON',   n:'Happy Ghost',                 c:'#2e8a56', img:'../../Sprites/Items/Happy Ghost.png',                  w:15},
+    {r:'COMMON',   n:'Evil Robot',                  c:'#2e8a56', img:'../../Sprites/Items/evil robot.png',                   w:15},
+    {r:'RARE',     n:'Gargantua',                   c:'#5b8db8', img:'../../Sprites/Items/Gargantua.png',                    w:30},
+    {r:'RARE',     n:'Flying Spaghetti Monster',    c:'#5b8db8', img:'../../Sprites/Items/Flying spaghetti monster.png',     w:20},
+    {r:'EPIC',     n:'Saturn',                      c:'#a855f7', img:'../../Sprites/Items/Saturn.png',                       w:17},
+    {r:'LEGENDARY',n:'Angery Ghost',                c:'#c8943a', img:'../../Sprites/Items/Angery Ghost.png',                 w:3},
+  ],
+  Legendary: [
+    {r:'RARE',     n:'Vampire',                     c:'#5b8db8', img:'../../Sprites/Items/Vampire.png',                      w:20},
+    {r:'RARE',     n:'Creature from the Black Lagoon', c:'#5b8db8', img:'../../Sprites/Items/creature from the black lagoon.png', w:15},
+    {r:'EPIC',     n:'Cthulhu',                     c:'#a855f7', img:'../../Sprites/Items/Cthulhu.png',                      w:30},
+    {r:'EPIC',     n:'Saturn',                      c:'#a855f7', img:'../../Sprites/Items/Saturn.png',                       w:25},
+    {r:'LEGENDARY',n:'Angery Ghost',                c:'#c8943a', img:'../../Sprites/Items/Angery Ghost.png',                 w:10},
+  ],
+};
+
+function roll(pool) {
+  const total = pool.reduce((s, i) => s + i.w, 0);
+  let r = Math.random() * total;
+  for (const item of pool) { r -= item.w; if (r <= 0) return item; }
+  return pool[pool.length - 1];
+}
+
+function openCrate(type, cost) {
+  const item = roll(pools[type]);
+  const icon = document.getElementById('pIcon');
+  icon.src = item.img;
+  icon.alt = item.n;
+  document.getElementById('pRarity').textContent = item.r;
+  document.getElementById('pRarity').style.color = item.c;
+  document.getElementById('pName').textContent = item.n;
+  document.getElementById('overlay').classList.add('show');
+
+  const row = document.createElement('div');
+  row.className = 'result-row';
+  row.innerHTML = `<span class="result-rarity" style="color:${item.c}">${item.r}</span>`
+    + `<span class="result-item"><img src="${item.img}" class="item-sprite" alt="${item.n}">${item.n}</span>`
+    + `<span class="result-time">just now</span>`;
+  const feed = document.getElementById('feed');
+  feed.insertBefore(row, feed.firstChild);
+}
+
+function closePopup() { document.getElementById('overlay').classList.remove('show'); }
+</script>
+</body>
+</html>

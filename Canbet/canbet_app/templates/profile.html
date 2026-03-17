@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>canBet — Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #d0d3d7; --panel: #f2f3f5; --panel2: #e8eaed;
+  --border: #b4bac2; --border-dark: #8a9199;
+  --accent: #2e3c4e; --accent2: #5b8db8;
+  --text: #18222e; --text-dim: #7a8694;
+  --green: #2e8a56; --shadow: rgba(30,45,60,0.13); --shine: rgba(255,255,255,0.7);
+}
+html { scroll-behavior: smooth; }
+body {
+  width: 100vw; min-height: 100vh;
+  font-family: 'Press Start 2P', monospace;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 15% 10%, #e8ecf0 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, #c4c9cf 0%, transparent 55%);
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 3px; }
+.topnav {
+  position: sticky; top: 0; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(242,243,245,0.92); border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 16px var(--shadow); backdrop-filter: blur(12px); z-index: 100;
+}
+.nav-logo { font-size: 0.65rem; color: var(--accent); letter-spacing: 3px; text-decoration: none; }
+.nav-back { font-size: 0.32rem; color: var(--text-dim); letter-spacing: 1.5px; text-decoration: none; transition: color 0.2s; }
+.nav-back:hover { color: var(--accent2); }
+.page { max-width: 760px; margin: 0 auto; padding: 48px 24px 60px; display: flex; flex-direction: column; gap: 40px; }
+.section-label { font-size: 0.3rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 14px; padding-left: 10px; border-left: 2px solid var(--accent2); }
+/* Profile card */
+.profile-card {
+  background: var(--panel); border: 1px solid var(--border);
+  box-shadow: 0 4px 24px var(--shadow), inset 0 1px 0 var(--shine);
+  padding: 32px; display: flex; align-items: center; gap: 28px;
+}
+.avatar-wrap { position: relative; flex-shrink: 0; }
+.avatar {
+  width: 88px; height: 88px; border-radius: 50%;
+  border: 2px solid var(--border);
+  object-fit: cover; image-rendering: pixelated;
+  background: var(--panel2);
+  box-shadow: 0 2px 10px var(--shadow);
+}
+.avatar-badge {
+  position: absolute; bottom: 2px; right: 2px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #c8943a; border: 2px solid var(--panel);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.5rem;
+}
+.profile-info { display: flex; flex-direction: column; gap: 10px; }
+.profile-name { font-size: 0.9rem; color: var(--accent); letter-spacing: 2px; }
+.profile-handle { font-size: 0.3rem; color: var(--text-dim); letter-spacing: 1.5px; }
+/* Stats grid */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat-card {
+  background: var(--panel); border: 1px solid var(--border);
+  box-shadow: 0 2px 10px var(--shadow), inset 0 1px 0 var(--shine);
+  padding: 20px 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.stat-label { font-size: 0.26rem; color: var(--text-dim); letter-spacing: 1.5px; }
+.stat-val { font-size: 0.7rem; color: var(--text); letter-spacing: 1px; }
+.stat-val.green { color: var(--green); }
+.stat-val.blue { color: var(--accent2); }
+.stat-val.gold { color: #c8943a; }
+/* Recent wins */
+.wins-list { border: 1px solid var(--border); box-shadow: 0 2px 10px var(--shadow); overflow: hidden; }
+.win-row {
+  display: flex; align-items: center; gap: 14px; padding: 12px 20px;
+  background: var(--panel); border-bottom: 1px solid var(--border); transition: background 0.15s;
+}
+.win-row:last-child { border-bottom: none; }
+.win-row:hover { background: var(--panel2); }
+.win-icon { font-size: 1.4rem; flex-shrink: 0; }
+.win-name { font-size: 0.3rem; color: var(--text); flex: 1; letter-spacing: 1px; line-height: 2; }
+.win-rarity { font-size: 0.26rem; letter-spacing: 1.5px; flex-shrink: 0; }
+.page-footer {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
+  background: rgba(242,243,245,0.92); border-top: 1px solid var(--border);
+  backdrop-filter: blur(8px); z-index: 100;
+}
+.footer-text { font-size: 0.26rem; color: var(--text-dim); letter-spacing: 1.5px; }
+.status-right { display: flex; align-items: center; gap: 7px; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 5px var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="main.html"><img src="../images/canBet symbol sym..png" class="logo" alt="Logo"></a>
+  <a href="main.html" class="nav-back">◀ Menu</a>
+</nav>
+<div class="page">
+  <section>
+    <div class="section-label">Your Profile</div>
+    <div class="profile-card">
+      <div class="avatar-wrap">
+        <img src="../images/pfp.png" class="avatar" alt="PLOB" onerror="this.style.background='#c4c9cf'">
+        <div class="avatar-badge">★</div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">PLOB</div>
+        <div class="profile-handle">Member since 2025</div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="section-label">Stats</div>
+    <div class="stats-grid">
+      <div class="stat-card"><span class="stat-label">Bit Balance</span><span class="stat-val green">1,674</span></div>
+      <div class="stat-card"><span class="stat-label">Crates Opened</span><span class="stat-val blue">67</span></div>
+      <div class="stat-card"><span class="stat-label">Leaderboard Rank</span><span class="stat-val gold">#7</span></div>
+      <div class="stat-card"><span class="stat-label">Items Owned</span><span class="stat-val">9</span></div>
+      <div class="stat-card"><span class="stat-label">Bits Spent</span><span class="stat-val">8,326</span></div>
+      <div class="stat-card"><span class="stat-label">Best Pull</span><span class="stat-val" style="font-size:0.42rem">Golden Star</span></div>
+    </div>
+  </section>
+  <section>
+    <div class="section-label">Best Pulls</div>
+    <div class="wins-list">
+      <div class="win-row"><div class="win-icon">⭐</div><div class="win-name">Golden Star Skin</div><div class="win-rarity" style="color:#c8943a">LEGENDARY</div></div>
+      <div class="win-row"><div class="win-icon">🪄</div><div class="win-name">Arcane Wand</div><div class="win-rarity" style="color:#a855f7">EPIC</div></div>
+      <div class="win-row"><div class="win-icon">💜</div><div class="win-name">Purple Crystal</div><div class="win-rarity" style="color:#a855f7">EPIC</div></div>
+      <div class="win-row"><div class="win-icon">🛡️</div><div class="win-name">Knight Shield</div><div class="win-rarity" style="color:#5b8db8">RARE</div></div>
+      <div class="win-row"><div class="win-icon">🔮</div><div class="win-name">Mystic Orb</div><div class="win-rarity" style="color:#5b8db8">RARE</div></div>
+    </div>
+  </section>
+</div>
+<footer class="page-footer">
+  <span class="footer-text">CANBET v1.0 — PROFILE</span>
+  <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
+</footer>
+</body>
+</html>
