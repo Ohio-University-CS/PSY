@@ -47,10 +47,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: border-color 0.15s, background 0.15s, transform 0.15s;
 }
-.inv-slot img {
-  width: 60%; height: 60%;
-  image-rendering: pixelated; object-fit: contain;
-}
+.inv-slot img { width: 60%; height: 60%; image-rendering: pixelated; object-fit: contain; }
 .inv-slot:not(.empty):hover { background: var(--bg); border-color: var(--accent2); transform: scale(1.04); }
 .inv-slot.selected { border-color: var(--accent2); background: rgba(91,141,184,0.1); box-shadow: inset 0 0 0 2px var(--accent2); }
 .inv-slot.empty { cursor: default; }
@@ -86,48 +83,7 @@ body {
   <section>
     <div class="section-label">Your Inventory</div>
     <div class="inv-layout">
-      <div class="inv-grid">
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/Angery Ghost.png','Angery Ghost','LEGENDARY','#c8943a')">
-          <img src="../../Sprites/Items/Angery Ghost.png" alt="Angery Ghost">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/Cthulhu.png','Cthulhu','EPIC','#a855f7')">
-          <img src="../../Sprites/Items/Cthulhu.png" alt="Cthulhu">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/Flying spaghetti monster.png','Flying Spaghetti Monster','RARE','#5b8db8')">
-          <img src="../../Sprites/Items/Flying spaghetti monster.png" alt="Flying Spaghetti Monster">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/Gargantua.png','Gargantua','RARE','#5b8db8')">
-          <img src="../../Sprites/Items/Gargantua.png" alt="Gargantua">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/Gargoyle.png','Gargoyle','COMMON','#2e8a56')">
-          <img src="../../Sprites/Items/Gargoyle.png" alt="Gargoyle">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/Happy Ghost.png','Happy Ghost','COMMON','#2e8a56')">
-          <img src="../../Sprites/Items/Happy Ghost.png" alt="Happy Ghost">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/Saturn.png','Saturn','EPIC','#a855f7')">
-          <img src="../../Sprites/Items/Saturn.png" alt="Saturn">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/Vampire.png','Vampire','RARE','#5b8db8')">
-          <img src="../../Sprites/Items/Vampire.png" alt="Vampire">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/creature from the black lagoon.png','Creature from the Black Lagoon','COMMON','#2e8a56')">
-          <img src="../../Sprites/Items/creature from the black lagoon.png" alt="Creature from the Black Lagoon">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/mummy.png','Mummy','COMMON','#2e8a56')">
-          <img src="../../Sprites/Items/mummy.png" alt="Mummy">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/zombie.png','Zombie','COMMON','#2e8a56')">
-          <img src="../../Sprites/Items/zombie.png" alt="Zombie">
-        </div>
-        <div class="inv-slot" onclick="sel(this,'../../Sprites/Items/evil robot.png','Evil Robot','COMMON','#2e8a56')">
-          <img src="../../Sprites/Items/evil robot.png" alt="Evil Robot">
-        </div>
-        <div class="inv-slot empty"></div>
-        <div class="inv-slot empty"></div>
-        <div class="inv-slot empty"></div>
-        <div class="inv-slot empty"></div>
-      </div>
+      <div class="inv-grid" id="grid"></div>
       <div class="inv-sidebar">
         <div class="sidebar-title">Selected Item</div>
         <div id="selContent"><div class="sel-empty">No item<br>selected</div></div>
@@ -140,13 +96,45 @@ body {
   <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
 </footer>
 <script>
-function sel(el, img, name, rarity, color) {
+const BASE = '../../Sprites/Items/Spooky_collection/';
+
+const items = [
+  {img:BASE+'Angery Ghost.png',                    name:'Angery Ghost',                      rarity:'LEGENDARY', color:'#c8943a'},
+  {img:BASE+'Cthulhu.png',                         name:'Cthulhu',                           rarity:'EPIC',      color:'#a855f7'},
+  {img:BASE+'Vampire.png',                         name:'Vampire',                           rarity:'RARE',      color:'#5b8db8'},
+  {img:BASE+'evil robot.png',                      name:'Evil Robot',                        rarity:'RARE',      color:'#5b8db8'},
+  {img:BASE+'Flying spaghetti monster.png',        name:'Flying Spaghetti Monster',          rarity:'RARE',      color:'#5b8db8'},
+  {img:BASE+'creature from the black lagoon.png',  name:'Creature from the Black Lagoon',    rarity:'RARE',      color:'#5b8db8'},
+  {img:BASE+'Gargoyle.png',                        name:'Gargoyle',                          rarity:'COMMON',    color:'#2e8a56'},
+  {img:BASE+'Happy Ghost.png',                     name:'Happy Ghost',                       rarity:'COMMON',    color:'#2e8a56'},
+  {img:BASE+'mummy.png',                           name:'Mummy',                             rarity:'COMMON',    color:'#2e8a56'},
+  {img:BASE+'zombie.png',                          name:'Zombie',                            rarity:'COMMON',    color:'#2e8a56'},
+];
+
+const SLOTS = 16;
+const grid = document.getElementById('grid');
+
+items.forEach(item => {
+  const slot = document.createElement('div');
+  slot.className = 'inv-slot';
+  slot.innerHTML = `<img src="${item.img}" alt="${item.name}">`;
+  slot.onclick = () => sel(slot, item);
+  grid.appendChild(slot);
+});
+
+for (let i = items.length; i < SLOTS; i++) {
+  const empty = document.createElement('div');
+  empty.className = 'inv-slot empty';
+  grid.appendChild(empty);
+}
+
+function sel(el, item) {
   document.querySelectorAll('.inv-slot').forEach(s => s.classList.remove('selected'));
   el.classList.add('selected');
   document.getElementById('selContent').innerHTML =
-    `<div class="sel-icon"><img src="${img}" alt="${name}"></div>`
-    + `<div class="sel-name">${name}</div>`
-    + `<div class="sel-rarity" style="color:${color};border-color:${color}">${rarity}</div>`;
+    `<div class="sel-icon"><img src="${item.img}" alt="${item.name}"></div>`
+    + `<div class="sel-name">${item.name}</div>`
+    + `<div class="sel-rarity" style="color:${item.color};border-color:${item.color}">${item.rarity}</div>`;
 }
 </script>
 </body>

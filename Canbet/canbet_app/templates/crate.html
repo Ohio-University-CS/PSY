@@ -32,12 +32,11 @@ body {
   background: rgba(242,243,245,0.92); border-bottom: 1px solid var(--border);
   box-shadow: 0 2px 16px var(--shadow); backdrop-filter: blur(12px); z-index: 100;
 }
-.nav-logo { font-size: 0.65rem; color: var(--accent); letter-spacing: 3px; text-decoration: none; }
 .nav-back { font-size: 0.32rem; color: var(--text-dim); letter-spacing: 1.5px; text-decoration: none; transition: color 0.2s; }
 .nav-back:hover { color: var(--accent2); }
 .page { max-width: 760px; margin: 0 auto; padding: 48px 24px 60px; display: flex; flex-direction: column; gap: 40px; }
 .section-label { font-size: 0.3rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 14px; padding-left: 10px; border-left: 2px solid var(--accent2); }
-.crates-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.crates-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .crate-card {
   background: var(--panel); border: 1px solid var(--border);
   box-shadow: 0 2px 12px var(--shadow), inset 0 1px 0 var(--shine);
@@ -45,19 +44,25 @@ body {
   align-items: center; gap: 14px; cursor: pointer; position: relative;
   transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
 }
-.crate-card:hover { border-color: var(--accent2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(30,45,60,0.18), inset 0 1px 0 var(--shine); }
-.crate-card:active { transform: translateY(0); }
-.crate-icon { font-size: 3.2rem; }
+.crate-card:hover:not(.locked) { border-color: var(--accent2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(30,45,60,0.18), inset 0 1px 0 var(--shine); }
+.crate-card:active:not(.locked) { transform: translateY(0); }
+.crate-card.locked { cursor: not-allowed; opacity: 0.55; }
+.crate-img { width: 80px; height: 80px; image-rendering: pixelated; object-fit: contain; }
+.crate-emoji { font-size: 3.2rem; line-height: 1; }
 .crate-name { font-size: 0.38rem; color: var(--text); letter-spacing: 1px; text-align: center; line-height: 2; }
+.crate-desc { font-size: 0.26rem; color: var(--text-dim); letter-spacing: 1px; text-align: center; line-height: 2; }
 .crate-price {
   font-size: 0.32rem; color: var(--green); letter-spacing: 1px;
   padding: 6px 14px; border: 1px solid var(--border); background: var(--panel2);
 }
+.crate-price.locked-price { color: var(--text-dim); }
 .crate-badge {
   position: absolute; top: 8px; right: 8px;
-  font-size: 0.24rem; letter-spacing: 1px; padding: 4px 8px;
-  background: var(--accent2); color: white;
+  font-size: 0.24rem; letter-spacing: 1px; padding: 4px 8px; color: white;
 }
+.badge-soon { background: var(--border-dark); }
+.badge-new  { background: var(--accent2); }
+/* Result feed */
 .result-feed { border: 1px solid var(--border); box-shadow: 0 2px 10px var(--shadow); overflow: hidden; }
 .result-row {
   display: flex; align-items: center; gap: 14px; padding: 12px 20px;
@@ -67,6 +72,7 @@ body {
 .result-rarity { font-size: 0.28rem; letter-spacing: 1px; width: 90px; flex-shrink: 0; }
 .result-item { font-size: 0.3rem; color: var(--text); letter-spacing: 0.8px; flex: 1; line-height: 1.8; display: flex; align-items: center; gap: 8px; }
 .result-time { font-size: 0.25rem; color: var(--text-dim); letter-spacing: 1px; }
+/* Overlay */
 .overlay {
   position: fixed; inset: 0; background: rgba(24,34,46,0.6);
   display: none; align-items: center; justify-content: center; z-index: 200;
@@ -78,15 +84,8 @@ body {
   box-shadow: 0 16px 48px rgba(30,45,60,0.3), inset 0 1px 0 var(--shine);
   padding: 40px 48px; text-align: center; display: flex; flex-direction: column; gap: 16px; min-width: 300px;
 }
-/* Popup sprite: fixed size, pixelated, centered */
-.popup-icon {
-  display: flex; align-items: center; justify-content: center;
-  height: 96px;
-}
-.popup-icon img {
-  width: 96px; height: 96px;
-  image-rendering: pixelated; object-fit: contain;
-}
+.popup-icon { display: flex; align-items: center; justify-content: center; height: 96px; }
+.popup-icon img { width: 96px; height: 96px; image-rendering: pixelated; object-fit: contain; }
 .popup-rarity { font-size: 0.5rem; letter-spacing: 2px; }
 .popup-name { font-size: 0.38rem; color: var(--text); letter-spacing: 1px; line-height: 2; }
 .popup-btn {
@@ -96,11 +95,7 @@ body {
   transition: background 0.2s;
 }
 .popup-btn:hover { background: var(--accent2); }
-/* Grid/feed sprite size */
-.item-sprite {
-  width: 40px; height: 40px;
-  image-rendering: pixelated; object-fit: contain; flex-shrink: 0;
-}
+.item-sprite { width: 40px; height: 40px; image-rendering: pixelated; object-fit: contain; flex-shrink: 0; }
 .page-footer {
   position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
   display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
@@ -122,22 +117,43 @@ body {
   <section>
     <div class="section-label">Open Crates</div>
     <div class="crates-grid">
-      <div class="crate-card" onclick="openCrate('Standard',100)">
-        <div class="crate-icon">📦</div>
-        <div class="crate-name">Standard Crate</div>
-        <div class="crate-price">100 Bits</div>
+
+      <!-- SPOOKY -->
+      <div class="crate-card" onclick="openCrate('Spooky',200)">
+        <div class="crate-badge badge-new">NEW</div>
+        <img src="../../Sprites/Items/Spooky_collection/Spooky collection box.png" class="crate-img" alt="Spooky Crate">
+        <div class="crate-name">Spooky Crate</div>
+        <div class="crate-desc">Monsters &amp; ghouls</div>
+        <div class="crate-price">200 Bits</div>
       </div>
-      <div class="crate-card" onclick="openCrate('Premium',300)">
-        <div class="crate-badge">HOT</div>
-        <div class="crate-icon">🎁</div>
-        <div class="crate-name">Premium Crate</div>
-        <div class="crate-price">300 Bits</div>
+
+      <!-- SPACE -->
+      <div class="crate-card locked">
+        <div class="crate-badge badge-soon">SOON</div>
+        <div class="crate-emoji">🌌</div>
+        <div class="crate-name">Space Crate</div>
+        <div class="crate-desc">Coming soon</div>
+        <div class="crate-price locked-price">??? Bits</div>
       </div>
-      <div class="crate-card" onclick="openCrate('Legendary',800)">
-        <div class="crate-icon">💎</div>
-        <div class="crate-name">Legendary Crate</div>
-        <div class="crate-price">800 Bits</div>
+
+      <!-- FANTASY -->
+      <div class="crate-card locked">
+        <div class="crate-badge badge-soon">SOON</div>
+        <div class="crate-emoji">🏰</div>
+        <div class="crate-name">Fantasy Crate</div>
+        <div class="crate-desc">Coming soon</div>
+        <div class="crate-price locked-price">??? Bits</div>
       </div>
+
+      <!-- WEATHER -->
+      <div class="crate-card locked">
+        <div class="crate-badge badge-soon">SOON</div>
+        <div class="crate-emoji">⛈️</div>
+        <div class="crate-name">Weather Crate</div>
+        <div class="crate-desc">Coming soon</div>
+        <div class="crate-price locked-price">??? Bits</div>
+      </div>
+
     </div>
   </section>
   <section>
@@ -145,17 +161,17 @@ body {
     <div class="result-feed" id="feed">
       <div class="result-row">
         <span class="result-rarity" style="color:#5b8db8">RARE</span>
-        <span class="result-item"><img src="../../Sprites/Items/Vampire.png" class="item-sprite" alt="Vampire">Vampire</span>
+        <span class="result-item"><img src="../../Sprites/Items/Spooky_collection/Vampire.png" class="item-sprite" alt="Vampire">Vampire</span>
         <span class="result-time">2m ago</span>
       </div>
       <div class="result-row">
         <span class="result-rarity" style="color:#2e8a56">COMMON</span>
-        <span class="result-item"><img src="../../Sprites/Items/Gargoyle.png" class="item-sprite" alt="Gargoyle">Gargoyle</span>
+        <span class="result-item"><img src="../../Sprites/Items/Spooky_collection/Gargoyle.png" class="item-sprite" alt="Gargoyle">Gargoyle</span>
         <span class="result-time">1h ago</span>
       </div>
       <div class="result-row">
         <span class="result-rarity" style="color:#a855f7">EPIC</span>
-        <span class="result-item"><img src="../../Sprites/Items/Cthulhu.png" class="item-sprite" alt="Cthulhu">Cthulhu</span>
+        <span class="result-item"><img src="../../Sprites/Items/Spooky_collection/Cthulhu.png" class="item-sprite" alt="Cthulhu">Cthulhu</span>
         <span class="result-time">3h ago</span>
       </div>
     </div>
@@ -174,31 +190,25 @@ body {
   <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
 </footer>
 <script>
+const BASE = '../../Sprites/Items/Spooky_collection/';
+
 const pools = {
-  Standard: [
-    {r:'COMMON',   n:'Gargoyle',                    c:'#2e8a56', img:'../../Sprites/Items/Gargoyle.png',                     w:25},
-    {r:'COMMON',   n:'Happy Ghost',                 c:'#2e8a56', img:'../../Sprites/Items/Happy Ghost.png',                  w:20},
-    {r:'COMMON',   n:'Zombie',                      c:'#2e8a56', img:'../../Sprites/Items/zombie.png',                       w:20},
-    {r:'COMMON',   n:'Mummy',                       c:'#2e8a56', img:'../../Sprites/Items/mummy.png',                        w:20},
-    {r:'RARE',     n:'Flying Spaghetti Monster',    c:'#5b8db8', img:'../../Sprites/Items/Flying spaghetti monster.png',     w:10},
-    {r:'EPIC',     n:'Cthulhu',                     c:'#a855f7', img:'../../Sprites/Items/Cthulhu.png',                      w:4},
-    {r:'LEGENDARY',n:'Angery Ghost',                c:'#c8943a', img:'../../Sprites/Items/Angery Ghost.png',                 w:1},
+  Spooky: [
+    {r:'COMMON',   n:'Gargoyle',                      c:'#2e8a56', img:BASE+'Gargoyle.png',                       w:25},
+    {r:'COMMON',   n:'Happy Ghost',                   c:'#2e8a56', img:BASE+'Happy Ghost.png',                    w:20},
+    {r:'COMMON',   n:'Zombie',                        c:'#2e8a56', img:BASE+'zombie.png',                         w:20},
+    {r:'COMMON',   n:'Mummy',                         c:'#2e8a56', img:BASE+'mummy.png',                          w:20},
+    {r:'RARE',     n:'Vampire',                       c:'#5b8db8', img:BASE+'Vampire.png',                        w:20},
+    {r:'RARE',     n:'Evil Robot',                    c:'#5b8db8', img:BASE+'evil robot.png',                     w:15},
+    {r:'RARE',     n:'Flying Spaghetti Monster',      c:'#5b8db8', img:BASE+'Flying spaghetti monster.png',       w:10},
+    {r:'RARE',     n:'Creature from the Black Lagoon',c:'#5b8db8', img:BASE+'creature from the black lagoon.png', w:8},
+    {r:'EPIC',     n:'Cthulhu',                       c:'#a855f7', img:BASE+'Cthulhu.png',                        w:5},
+    {r:'LEGENDARY',n:'Angery Ghost',                  c:'#c8943a', img:BASE+'Angery Ghost.png',                   w:2},
   ],
-  Premium: [
-    {r:'COMMON',   n:'Happy Ghost',                 c:'#2e8a56', img:'../../Sprites/Items/Happy Ghost.png',                  w:15},
-    {r:'COMMON',   n:'Evil Robot',                  c:'#2e8a56', img:'../../Sprites/Items/evil robot.png',                   w:15},
-    {r:'RARE',     n:'Gargantua',                   c:'#5b8db8', img:'../../Sprites/Items/Gargantua.png',                    w:30},
-    {r:'RARE',     n:'Flying Spaghetti Monster',    c:'#5b8db8', img:'../../Sprites/Items/Flying spaghetti monster.png',     w:20},
-    {r:'EPIC',     n:'Saturn',                      c:'#a855f7', img:'../../Sprites/Items/Saturn.png',                       w:17},
-    {r:'LEGENDARY',n:'Angery Ghost',                c:'#c8943a', img:'../../Sprites/Items/Angery Ghost.png',                 w:3},
-  ],
-  Legendary: [
-    {r:'RARE',     n:'Vampire',                     c:'#5b8db8', img:'../../Sprites/Items/Vampire.png',                      w:20},
-    {r:'RARE',     n:'Creature from the Black Lagoon', c:'#5b8db8', img:'../../Sprites/Items/creature from the black lagoon.png', w:15},
-    {r:'EPIC',     n:'Cthulhu',                     c:'#a855f7', img:'../../Sprites/Items/Cthulhu.png',                      w:30},
-    {r:'EPIC',     n:'Saturn',                      c:'#a855f7', img:'../../Sprites/Items/Saturn.png',                       w:25},
-    {r:'LEGENDARY',n:'Angery Ghost',                c:'#c8943a', img:'../../Sprites/Items/Angery Ghost.png',                 w:10},
-  ],
+  // Populate these when the sprite folders are ready:
+  Space:   [],
+  Fantasy: [],
+  Weather: [],
 };
 
 function roll(pool) {
@@ -209,7 +219,9 @@ function roll(pool) {
 }
 
 function openCrate(type, cost) {
-  const item = roll(pools[type]);
+  const pool = pools[type];
+  if (!pool || pool.length === 0) return;
+  const item = roll(pool);
   const icon = document.getElementById('pIcon');
   icon.src = item.img;
   icon.alt = item.n;
