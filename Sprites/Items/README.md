@@ -1,1 +1,0 @@
-This holds the item sprites
