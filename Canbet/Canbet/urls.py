@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/inventory/', views.api_inventory, name='api_inventory'),
     path('api/leaderboard/', views.api_leaderboard, name='api_leaderboard'),
     path('api/recent-opens/', views.api_recent_opens, name='api_recent_opens'),
+    path('register/', views.register_view, name='register'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

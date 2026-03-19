@@ -192,3 +192,22 @@ def api_recent_opens(request):
         }
         for o in opens
     ])
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('main')
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email    = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        confirm  = request.POST.get('confirm', '')
+        if password != confirm:
+            return render(request, 'register.html', {'error': 'Passwords do not match.', 'username': username, 'email': email})
+        if CanBetUser.objects.filter(username=username).exists():
+            return render(request, 'register.html', {'error': 'Username already taken.', 'email': email})
+        if CanBetUser.objects.filter(email=email).exists():
+            return render(request, 'register.html', {'error': 'Email already registered.', 'username': username})
+        user = CanBetUser.objects.create_user(username=username, email=email, password=password)
+        login(request, user)
+        return redirect('main')
+    return render(request, 'register.html')
