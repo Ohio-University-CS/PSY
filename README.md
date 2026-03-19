@@ -57,3 +57,8 @@ The extension runs on any `*.instructure.com` page and automatically pulls your 
 > Firefox temporary add-ons are removed on browser restart.
 
 ---
+
+## Instructions on how to launch django server
+python manage.py runserver
+
+---
