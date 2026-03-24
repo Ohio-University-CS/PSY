@@ -20,6 +20,9 @@ response = requests.get(
 #user data from response
 user_data = response.json()
  
+#get student ID from user data
+STUDENT_ID = user_data["id"]
+
 #get list of courses the student is enrolled in
 response = requests.get(
     f"{CANVAS_DOMAIN}/api/v1/courses?per_page=100",
@@ -29,8 +32,6 @@ response = requests.get(
 #courses from response
 courses = response.json()
 
-#get student ID from user data
-STUDENT_ID = user_data["id"]
 
 #loop through courses and get submission data 
 for course in courses:
@@ -48,7 +49,7 @@ for course in courses:
     
     #check if course has a name, if not, use course ID
     if "name" in course:
-        with open(f"{course["name"]}_submissions.csv", mode='w', newline='') as file:
+        with open(f"submissions/{course["name"]}_submissions.csv", mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["Submission Date"])
             for submission in data:
@@ -59,7 +60,7 @@ for course in courses:
                     submission_date = "N/A"
                 writer.writerow([submission_date])
     else:
-        with open(f"{COURSE_ID}_submissions.csv", mode='w', newline='') as file:
+        with open(f"submissions/{COURSE_ID}_submissions.csv", mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["Submission Date"])
             for submission in data:
