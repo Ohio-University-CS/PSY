@@ -24,3 +24,6 @@ gunicorn>=21.0,<24.0
 
 # Static file serving in production
 whitenoise>=6.6,<7.0
+
+# Server
+dj-database-url>=2.0,<3.0

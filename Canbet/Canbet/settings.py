@@ -5,6 +5,7 @@ Django settings for Canbet project.
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -64,16 +65,10 @@ WSGI_APPLICATION = 'Canbet.wsgi.application'
 
 # ── Database — PostgreSQL ───────────────────────────────────────────────────────
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':     os.getenv('DB_NAME',     'CanbetBackend'),
-        'USER':     os.getenv('DB_USER',     'SQLTeam'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST':     os.getenv('DB_HOST',     'localhost'),
-        'PORT':     os.getenv('DB_PORT',     '5432'),
-    }
+    'default': dj_database_url.config(
+        default=f"postgresql://{os.getenv('DB_USER', 'SQLTeam')}:{os.getenv('DB_PASSWORD', '')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '5432')}/{os.getenv('DB_NAME', 'CanbetBackend')}"
+    )
 }
-
 # ── Auth ────────────────────────────────────────────────────────────────────────
 AUTH_USER_MODEL = 'canbet_app.CanBetUser'   # custom user model
 
