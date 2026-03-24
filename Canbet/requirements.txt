@@ -1,0 +1,26 @@
+# Web framework
+Django>=4.2,<5.3
+
+# Django REST Framework
+djangorestframework>=3.14,<4.0
+
+# CORS headers
+django-cors-headers>=4.0,<5.0
+
+# PostgreSQL adapter
+psycopg2-binary>=2.9,<3.0
+
+# Environment variables
+python-dotenv>=1.0,<2.0
+
+# Image field support (CanBetUser.avatar)
+Pillow>=10.0,<12.0
+
+# HTTP requests (Canvas sync command)
+requests>=2.31,<3.0
+
+# WSGI server for production
+gunicorn>=21.0,<24.0
+
+# Static file serving in production
+whitenoise>=6.6,<7.0

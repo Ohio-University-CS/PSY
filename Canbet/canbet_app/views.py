@@ -11,10 +11,10 @@ from rest_framework import status
 
 import random
 from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  PAGE VIEWS
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def home(request):
     return render(request, 'home.html')
@@ -101,7 +101,6 @@ def crate(request):
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  REST API
-# ═══════════════════════════════════════════════════════════════════════════════
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -172,6 +171,7 @@ def api_inventory(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def api_leaderboard(request):
     return Response([
         {'rank': idx+1, 'username': p.username, 'bit_balance': p.bit_balance, 'crates_opened': p.crates_opened}
@@ -180,6 +180,7 @@ def api_leaderboard(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def api_recent_opens(request):
     opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:20]
     return Response([
