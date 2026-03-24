@@ -28,21 +28,6 @@ The extension runs on any `*.instructure.com` page and automatically pulls your 
 ## Download
 - **Firefox:** [addons.mozilla.org/en-US/firefox/addon/canbet/](https://addons.mozilla.org/en-US/firefox/addon/canbet/)
 - **Chrome:** TBD
-## Installing on Chrome
-1. Go to `chrome://extensions`
-2. Enable **Developer Mode** (top-right toggle)
-3. Click **Load unpacked**
-4. Select the `extension/chrome/` folder
-5. Navigate to any `*.instructure.com` page
-6. Open DevTools (`F12`) → Console to verify output
-## Installing on Firefox
-1. Go to `about:debugging`
-2. Click **This Firefox**
-3. Click **Load Temporary Add-on**
-4. Select `extension/firefox/manifest.json`
-5. Navigate to any `*.instructure.com` page
-6. Open Browser Console (`Ctrl+Shift+J`) to verify output
-> Firefox temporary add-ons are removed on browser restart.
 ---
 ## Instructions on how to launch django server
 python manage.py runserver
