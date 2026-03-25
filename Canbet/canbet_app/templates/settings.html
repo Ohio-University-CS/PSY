@@ -37,6 +37,8 @@ body { width:100vw; min-height:100vh; font-family:'Press Start 2P',monospace; ba
 .toggle-btn:hover { opacity:0.85; }
 .danger-btn { font-family:'Press Start 2P',monospace; font-size:0.32rem; padding:8px 16px; cursor:pointer; letter-spacing:1px; background:var(--panel2); color:#b84040; border:1px solid #d47070; transition:all 0.15s; }
 .danger-btn:hover { background:#b84040; color:white; border-color:#b84040; }
+.info-btn { font-family:'Press Start 2P',monospace; font-size:0.32rem; padding:8px 16px; cursor:pointer; letter-spacing:1px; background:var(--panel2); color:var(--accent2); border:1px solid var(--accent2); transition:all 0.15s; text-decoration:none; display:inline-block; }
+.info-btn:hover { background:var(--accent2); color:white; }
 .page-footer { position:fixed; bottom:0; left:0; right:0; height:28px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; background:rgba(242,243,245,0.92); border-top:1px solid var(--border); backdrop-filter:blur(8px); z-index:100; }
 .footer-text { font-size:0.26rem; color:var(--text-dim); letter-spacing:1.5px; }
 .status-right { display:flex; align-items:center; gap:7px; }
@@ -89,6 +91,10 @@ body { width:100vw; min-height:100vh; font-family:'Press Start 2P',monospace; ba
   <section>
     <div class="section-label">Account</div>
     <div class="settings-panel">
+      <div class="setting-row">
+        <div><div class="setting-label">Privacy Policy</div><div class="setting-sub">Data usage info</div></div>
+        <a href="/privacy/" class="info-btn">View</a>
+      </div>
       <div class="setting-row">
         <div><div class="setting-label">Reset Progress</div><div class="setting-sub">Clears all data</div></div>
         <button class="danger-btn">Reset</button>

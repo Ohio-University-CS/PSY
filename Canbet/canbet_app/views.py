@@ -22,6 +22,9 @@ def home(request):
 def about(request):
     return render(request, 'about.html')
 
+def privacy(request):
+    return render(request, 'privacy.html')
+
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('main')

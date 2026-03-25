@@ -45,6 +45,7 @@ body {
   font-size: 0.4rem; color: #b84040; letter-spacing: 1px; text-align: center;
   background: rgba(184,64,64,0.1); padding: 8px 16px; border: 1px solid #d47070;
 }
+.bottom-links { display: flex; gap: 20px; align-items: center; }
 </style>
 </head>
 <body>
@@ -73,8 +74,12 @@ body {
       <button type="submit" class="login-btn">Login</button>
     </div>
   </form>
-  <div style="font-size:0.38rem;color:#555;letter-spacing:1px;">
-  No account? <a href="/register/" style="color:#4a8a60;text-decoration:none;">Register</a>
+  <div class="bottom-links">
+    <span style="font-size:0.38rem;color:#555;letter-spacing:1px;">
+      No account? <a href="/register/" style="color:#4a8a60;text-decoration:none;">Register</a>
+    </span>
+    <span style="font-size:0.38rem;color:#888;">|</span>
+    <a href="/privacy/" style="font-size:0.38rem;color:#555;letter-spacing:1px;text-decoration:none;">Privacy</a>
   </div>
 </div>
 </body>
