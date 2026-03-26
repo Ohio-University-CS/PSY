@@ -2,57 +2,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — Home</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  width: 100vw; height: 100vh; overflow: hidden;
-  font-family: 'Press Start 2P', monospace;
-  background-color: #c8c8c8;
-  background-image: url("{% static 'images/homebg_pixel.png' %}");
-  background-position: center; background-repeat: no-repeat; background-size: 100% 100%;
-  image-rendering: pixelated; display: flex; flex-direction: column;
-}
-.topnav {
-  width: 100%; display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 24px; background: rgba(255,255,255,0.15); backdrop-filter: blur(2px);
-  position: absolute; top: 0; z-index: 10;
-}
-.nav-link { font-size: 0.55rem; color: #000; text-decoration: none; letter-spacing: 1px; }
-.nav-link:hover { text-decoration: underline; }
-.content {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; padding-top: 40px;
-}
-.title-box { text-align: center; }
-.game-title {
-  font-family: 'Press Start 2P', monospace; font-size: clamp(2.5rem, 7vw, 5rem);
-  color: #1a1a1a; text-shadow: 3px 3px 0 rgba(0,0,0,0.3), -1px -1px 0 rgba(255,255,255,0.2);
-  letter-spacing: 4px; line-height: 1.2; margin-bottom: 1rem;
-}
-.subtitle {
-  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; color: #2a2a2a;
-  letter-spacing: 2px; text-align: center; line-height: 2; opacity: 0.85;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet — Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            width: 100vw; 
+            height: 100vh; 
+            overflow: hidden;
+            font-family: 'Press Start 2P', monospace;
+            background-color: #c8c8c8;
+            background-image: url("{% static 'images/homebg_pixel.png' %}");
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-size: cover;
+            image-rendering: pixelated; 
+            display: flex; 
+            flex-direction: column;
+        }
+
+        .topnav {
+            width: 100%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 18px 40px; 
+            background: rgba(255,255,255,0.15); 
+            backdrop-filter: blur(4px);
+            z-index: 10;
+        }
+
+        /* LEFT SIDE (logo + text) */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo { height: 42px; width: auto; }
+
+        .brand-text {
+            font-size: 1rem;
+            color: #000;
+            letter-spacing: 2px;
+        }
+
+        /* NAV LINKS */
+        .nav-links {
+            display: flex;
+            gap: 28px; /* more spacing */
+        }
+
+        .nav-link {
+            font-size: 0.75rem; /* bigger */
+            color: #000;
+            text-decoration: none;
+            letter-spacing: 1px;
+            padding: 10px 18px;
+            border: 3px solid #000;
+            border-radius: 10px; /* box look */
+            background: rgba(255,255,255,0.4);
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+            padding-bottom: 5vh;
+        }
+
+        .title-box { text-align: center; }
+
+        .game-title {
+            font-size: clamp(3rem, 9vw, 6rem); /* bigger */
+            color: #1a1a1a; 
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+            letter-spacing: 4px; 
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 0.8rem; /* bigger */
+            color: #2a2a2a;
+            letter-spacing: 1px;
+            opacity: 0.85;
+        }
+
+        .button-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem; /* bigger */
+            text-decoration: none;
+            color: white;
+            background-color: #1a1a1a;
+            border-radius: 50px;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+            text-align: center;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.25);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            background-color: #333;
+            box-shadow: 0 7px 0 rgba(0,0,0,0.25);
+        }
+
+        .btn-alt { background-color: #4a4a4a; }
+    </style>
 </head>
 <body>
+
 <nav class="topnav">
-  <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-  <span style="display:flex;gap:16px;">
-    <a href="/about/" class="nav-link">About us</a>
-    <a href="/privacy/" class="nav-link">Privacy</a>
-    <a href="/login/" class="nav-link">Login</a>
-  </span>
+    <!-- LEFT: LOGO + TEXT -->
+    <div class="nav-left">
+        <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
+        <span class="brand-text">canBet</span>
+    </div>
+
+    <!-- RIGHT: NAV LINKS -->
+    <div class="nav-links">
+        <a href="/about/" class="nav-link">About</a>
+        <a href="/login/" class="nav-link">Login</a>
+    </div>
 </nav>
+
 <div class="content">
-  <div class="title-box">
-    <div class="game-title">canBet</div>
-    <div class="subtitle">The canvas addon for procrastinators and gamblers.</div>
-  </div>
+    <div class="title-box">
+        <h1 class="game-title">canBet</h1>
+        <p class="subtitle">The canvas addon for procrastinators.</p>
+    </div>
+
+    <div class="button-container">
+        <a href="/login/" class="btn">Login</a>
+        <a href="register.html" class="btn">Register</a>
+        <a href="/about/" class="btn btn-alt">About Us</a>
+        <a href="/privacy/" class="btn btn-alt">Privacy</a>
+    </div>
 </div>
+
 </body>
 </html>
