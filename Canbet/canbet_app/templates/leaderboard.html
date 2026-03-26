@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,6 +91,11 @@ body {
 <div class="page">
   <section>
     <div class="section-label">Leaderboard</div>
+      <div style="display:flex; gap:6px; margin-bottom:12px;">
+      <a href="?sort=bits&page=1"><button class="page-btn {% if sort == 'bits' %}active{% endif %}">Bits</button></a>
+      <a href="?sort=rarity&page=1"><button class="page-btn {% if sort == 'rarity' %}active{% endif %}">Rarest item</button></a>
+      <a href="?sort=crates&page=1"><button class="page-btn {% if sort == 'crates' %}active{% endif %}">Crates</button></a>
+    </div>
     <div class="lb-header">
       <div class="lb-th">#</div>
       <div class="lb-th">Username</div>
@@ -97,25 +103,40 @@ body {
       <div class="lb-th">Crates</div>
     </div>
     <div class="lb-list">
-      <div class="lb-row"><span class="lb-rank gold">#1</span><span class="lb-name">MasonRunner#033</span><span class="lb-score">1,000,000</span><span class="lb-crates">142</span></div>
-      <div class="lb-row"><span class="lb-rank silver">#2</span><span class="lb-name">Ro_W</span><span class="lb-score">888,888</span><span class="lb-crates">118</span></div>
-      <div class="lb-row"><span class="lb-rank bronze">#3</span><span class="lb-name">RoutineDes#803</span><span class="lb-score">10,000</span><span class="lb-crates">95</span></div>
-      <div class="lb-row"><span class="lb-rank">#4</span><span class="lb-name">PL200</span><span class="lb-score">9,400</span><span class="lb-crates">88</span></div>
-      <div class="lb-row"><span class="lb-rank">#5</span><span class="lb-name">RoutineDev800</span><span class="lb-score">7,200</span><span class="lb-crates">74</span></div>
-      <div class="lb-row"><span class="lb-rank">#6</span><span class="lb-name">UnikaLakoa800</span><span class="lb-score">3,100</span><span class="lb-crates">69</span></div>
-      <div class="lb-row you"><span class="lb-rank" style="color:var(--accent2)">#7</span><span class="lb-name you">PLOB (you)</span><span class="lb-score">1,674</span><span class="lb-crates">67</span></div>
-      <div class="lb-row"><span class="lb-rank">#8</span><span class="lb-name">HappyHhten#700</span><span class="lb-score">1,200</span><span class="lb-crates">51</span></div>
-      <div class="lb-row"><span class="lb-rank">#9</span><span class="lb-name">pynocca3</span><span class="lb-score">980</span><span class="lb-crates">44</span></div>
-      <div class="lb-row"><span class="lb-rank">#10</span><span class="lb-name">vtx.Draxon9c</span><span class="lb-score">740</span><span class="lb-crates">38</span></div>
+      {% for entry in entries %}
+      <div class="lb-row {% if entry.is_you %}you{% endif %}">
+      <span class="lb-rank
+        {% if entry.rank == 1 %}gold
+        {% elif entry.rank == 2 %}silver
+        {% elif entry.rank == 3 %}bronze
+        {% endif %}
+        {% if entry.is_you %}" style="color:var(--accent2){% endif %}">
+        #{{ entry.rank }}
+      </span>
+      <span class="lb-name {% if entry.is_you %}you{% endif %}">
+        {{ entry.username }}{% if entry.is_you %} (you){% endif %}
+      </span>
+      <span class="lb-score">{{ entry.bits|intcomma }}</span>
+      <span class="lb-crates">{{ entry.crates }}</span>
     </div>
-  </section>
+    {% endfor %}
+    </section>
   <div class="pagination">
-    <button class="page-btn active">◀</button>
-    <button class="page-btn active">1</button>
-    <button class="page-btn">2</button>
-    <button class="page-btn">3</button>
-    <button class="page-btn">4</button>
-    <button class="page-btn">▶</button>
+    {% if page > 1 %}
+    <a href="?sort={{ sort }}&page={{ page|add:'-1' }}"><button class="page-btn">◀</button></a>
+    {% endif %}
+
+    {% for p in total_pages|ljust:total_pages %}
+      <a href="?sort={{ sort }}&page={{ forloop.counter }}">
+        <button class="page-btn {% if forloop.counter == page %}active{% endif %}">
+          {{ forloop.counter }}
+        </button>
+      </a>
+    {% endfor %}
+
+    {% if page < total_pages %}
+      <a href="?sort={{ sort }}&page={{ page|add:'1' }}"><button class="page-btn">▶</button></a>
+    {% endif %}
   </div>
 </div>
 <footer class="page-footer">

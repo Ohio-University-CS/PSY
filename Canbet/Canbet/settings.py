@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'canbet_app',          # your main app
+    'canbet_app',
+    'django.contrib.humanize'          # your main app
 ]
 
 MIDDLEWARE = [

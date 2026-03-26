@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, Count, Min, Max
+from .models import UserProfile, CreateOpen
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -70,8 +71,46 @@ def inventory(request):
 
 @login_required
 def leaderboard(request):
-    players = CanBetUser.objects.order_by('-bit_balance')
-    return render(request, 'leaderboard.html', {'players': players, 'user': request.user})
+    sort = request.GET.get('sort', 'bits')
+    page = int(request.GET.get('page', 1))
+    per_page = 10
+
+    qs = UserProfile.object.annotate(
+        create_count = Count('crateopen'),
+        best_rarity = Min('inventory__item__rarity_rank'),
+        rarity_achieved = Min('inventory__obtained_at'),
+        last_crate = Max('crate__open__opened_at') 
+    )
+
+    if sort == 'rarity':
+        qs = qs.order_by('best_rarity', 'rarity_achieved')
+    elif sort == 'crates':
+        qs = qs.order_by('-crate_count', 'last_crate')
+    else:
+        qs = qs.order_by('-bits')
+
+    total = qs.count()
+    total_pages = (total + per_page - 1) // per_page
+    entries = qs[(page -1) * per_page : page * per_page]
+
+    #tag the current row
+    results = []
+    for i, u in enumerate(entries):
+        rank = (page - 1) * per_page + i + 1
+        results.append({
+            'rank': rank,
+            'username': u.user.username,
+            'bits': u.bits
+            'crates': u.crate_count,
+            'is_you': u.user == request.user,
+        })
+
+        return render(request, 'leaderboard.html', {
+            'entries': results,
+            'sort': sort,
+            'page': page,
+            'total_pages': total_pages,
+        })
 
 @login_required
 def profile(request):
