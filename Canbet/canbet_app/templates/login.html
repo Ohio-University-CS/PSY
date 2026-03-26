@@ -1,12 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet — Login</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet">
+    <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   width: 100vw; height: 100vh; overflow: hidden;
@@ -27,60 +29,61 @@ body {
 }
 .form-group {
   display: flex; flex-direction: column; align-items: center;
-  gap: 0.6rem; width: 100%; max-width: 320px;
+  gap: 0.6rem; width: 100%; max-width: 360px;
 }
-.form-label { font-size: 0.55rem; color: #333; letter-spacing: 1px; align-self: flex-start; }
+.form-label { font-size: 0.75rem; color: #333; letter-spacing: 1px; align-self: flex-start; }
 .form-input {
-  width: 100%; height: 28px; background: #888; border: none; outline: none;
-  padding: 4px 8px; font-family: 'Press Start 2P', monospace; font-size: 0.4rem; color: #eee;
+  width: 100%; height: 36px; background: #888; border: none; outline: none;
+  padding: 4px 10px; font-family: 'Press Start 2P', monospace; font-size: 0.6rem; color: #eee;
 }
 .form-input:focus { background: #999; }
 .login-btn {
   cursor: pointer; background: #4a8a60; color: #fff; transition: background 0.2s;
-  width: 100%; height: 28px; border: none; font-family: 'Press Start 2P', monospace;
-  font-size: 0.4rem; letter-spacing: 1px;
+  width: 100%; height: 36px; border: none; font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem; letter-spacing: 1px;
 }
 .login-btn:hover { background: #3a7a50; }
 .error-msg {
-  font-size: 0.4rem; color: #b84040; letter-spacing: 1px; text-align: center;
+  font-size: 0.55rem; color: #b84040; letter-spacing: 1px; text-align: center;
   background: rgba(184,64,64,0.1); padding: 8px 16px; border: 1px solid #d47070;
 }
 .bottom-links { display: flex; gap: 20px; align-items: center; }
 </style>
-</head>
-<body>
-<nav class="topnav">
-  <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-</nav>
-<div class="page-content">
-  <form method="POST" action="/login/" style="display:contents;">
-    {% csrf_token %}
-
-    {% if error %}
-    <div class="error-msg">{{ error }}</div>
-    {% endif %}
-
-    <div class="form-group">
-      <label class="form-label" for="email-input">Email</label>
-      <input id="email-input" name="email" type="email" class="form-input" placeholder="yourname@school.edu" required>
+  </head>
+  <body>
+    <nav class="topnav">
+      <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}"
+          class="logo" alt="Logo"></a>
+    </nav>
+    <div class="page-content">
+      <form method="POST" action="/login/" style="display:contents;">
+        {% csrf_token %}
+        {% if error %}
+        <div class="error-msg">{{ error }}</div>
+        {% endif %}
+        <div class="form-group">
+          <label class="form-label" for="email-input">Email</label>
+          <input id="email-input" name="email" type="email" class="form-input"
+            placeholder="yourname@school.edu" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password-input">Password</label>
+          <input id="password-input" name="password" type="password"
+            class="form-input" placeholder="************" required>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="login-btn">Login</button>
+        </div>
+      </form>
+      <div class="bottom-links">
+        <span style="font-size:0.55rem;color:#555;letter-spacing:1px;">
+          No account? <a href="/register/"
+            style="color:#4a8a60;text-decoration:none;">Register</a>
+        </span>
+        <span style="font-size:0.55rem;color:#888;">|</span>
+        <a href="/privacy/"
+          style="font-size:0.55rem;color:#555;letter-spacing:1px;text-decoration:none;">Privacy</a>
+      </div>
     </div>
-
-    <div class="form-group">
-      <label class="form-label" for="password-input">Password</label>
-      <input id="password-input" name="password" type="password" class="form-input" placeholder="************" required>
-    </div>
-
-    <div class="form-group">
-      <button type="submit" class="login-btn">Login</button>
-    </div>
-  </form>
-  <div class="bottom-links">
-    <span style="font-size:0.38rem;color:#555;letter-spacing:1px;">
-      No account? <a href="/register/" style="color:#4a8a60;text-decoration:none;">Register</a>
-    </span>
-    <span style="font-size:0.38rem;color:#888;">|</span>
-    <a href="/privacy/" style="font-size:0.38rem;color:#555;letter-spacing:1px;text-decoration:none;">Privacy</a>
-  </div>
-</div>
-</body>
+  </body>
 </html>
