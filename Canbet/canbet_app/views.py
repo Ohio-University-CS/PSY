@@ -101,6 +101,14 @@ def shop(request):
 def crate(request):
     return render(request, 'crate.html')
 
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete()
+        return redirect('home') 
+    return redirect('settings')
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  REST API

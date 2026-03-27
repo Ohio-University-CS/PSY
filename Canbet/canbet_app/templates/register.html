@@ -9,114 +9,223 @@
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet">
     <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  width: 100vw; height: 100vh; overflow: hidden;
-  font-family: 'Press Start 2P', monospace;
-  background-color: #c8c8c8;
-  background-image: url("{% static 'images/loginbg.png' %}");
-  background-position: center; background-repeat: no-repeat; background-size: cover;
-  image-rendering: pixelated; display: flex; flex-direction: column; position: relative;
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: #c8c8c8;
+    display: flex;
+    flex-direction: column;
+    color: #1a1a1a;
+  }
+
+  /* --- UNIFIED NAVIGATION --- */
 .topnav {
-  width: 100%; display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 24px; background: rgba(255,255,255,0.6);
-  border-bottom: 1px solid #ccc; position: relative; z-index: 10;
+  width: 100%; 
+  height: 80px; /* Fixed height for consistency */
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  padding: 0 40px; 
+  background: rgba(255, 255, 255, 0.15); 
+  backdrop-filter: blur(4px);
+  position: sticky; 
+  top: 0; 
+  z-index: 100; 
+  border-bottom: 4px solid var(--border);
 }
-.nav-link { font-size: 0.6rem; color: #333; text-decoration: none; letter-spacing: 1px; }
-.nav-link:hover { text-decoration: underline; }
-.page-content {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: rgba(208,208,208,0.85); padding: 2rem; gap: 1.4rem; backdrop-filter: blur(4px);
+
+.nav-left { 
+  display: flex; 
+  align-items: center; 
+  gap: 18px; 
+  height: 100%;
 }
-.page-title {
-  font-size: 0.85rem; color: #1a1a1a; letter-spacing: 2px;
-  text-align: center; margin-bottom: 0.4rem;
+
+.logo { 
+  height: 44px; /* Standardized logo height */
+  width: auto; 
 }
-.form-group {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0.6rem; width: 100%; max-width: 360px;
+
+.brand-text { 
+  font-size: 1rem; 
+  letter-spacing: 2px; 
 }
-.form-label { font-size: 0.75rem; color: #333; letter-spacing: 1px; align-self: flex-start; }
-.form-input {
-  width: 100%; height: 36px; background: #888; border: none; outline: none;
-  padding: 4px 10px; font-family: 'Press Start 2P', monospace; font-size: 0.6rem; color: #eee;
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
-.form-input:focus { background: #999; }
-.register-btn {
-  cursor: pointer; background: #4a8a60; color: #fff; transition: background 0.2s;
-  width: 100%; height: 36px; border: none; font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem; letter-spacing: 1px;
+
+.nav-back {
+  font-size: 0.8rem; 
+  color: #000; 
+  text-decoration: none;
+  padding: 10px 20px; 
+  border: 4px solid #000; 
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.4); 
+  transition: 0.1s;
 }
-.register-btn:hover { background: #3a7a50; }
-.error-msg {
-  font-size: 0.55rem; color: #b84040; letter-spacing: 1px; text-align: center;
-  background: rgba(184,64,64,0.1); padding: 8px 16px; border: 1px solid #d47070;
-  width: 100%; max-width: 360px;
+
+.nav-back:hover { 
+  background: #000; 
+  color: #fff; 
 }
-.login-link {
-  font-size: 0.55rem; color: #555; letter-spacing: 1px; text-align: center;
+
+/* Standardized Balance Display for Shop/Main */
+.nav-bal { 
+  font-size: 0.8rem; 
+  color: var(--green); 
+  background: #fff; 
+  padding: 10px 16px; 
+  border: 4px solid var(--border); 
 }
-.login-link a { color: #4a8a60; text-decoration: none; }
-.login-link a:hover { text-decoration: underline; }
+
+  /* --- REGISTER BOX --- */
+  .container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 500px;
+    background: #f2f3f5;
+    border: 6px solid #1a1a1a;
+    padding: 40px;
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.2);
+  }
+
+  .auth-title {
+    font-size: 1.4rem;
+    margin-bottom: 30px;
+    text-align: center;
+    text-transform: uppercase;
+    border-bottom: 4px solid #1a1a1a;
+    padding-bottom: 15px;
+  }
+
+  .form-group { margin-bottom: 25px; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.6rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 15px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    border: 4px solid #1a1a1a;
+    background: #fff;
+    outline: none;
+  }
+
+  .form-group input:focus { background: #eefbff; }
+
+  /* Error Message */
+  .error-msg {
+    background: #ffdbdb;
+    color: #d32f2f;
+    border: 3px solid #d32f2f;
+    padding: 15px;
+    font-size: 0.55rem;
+    margin-bottom: 25px;
+    line-height: 1.6;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 20px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #555;
+    transition: all 0.1s;
+  }
+
+  .btn-submit:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #555;
+  }
+
+  .auth-footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 0.55rem;
+  }
+
+  .auth-footer a { color: #5b8db8; text-decoration: none; }
+  .auth-footer a:hover { text-decoration: underline; }
 </style>
   </head>
   <body>
+
     <nav class="topnav">
-      <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}"
-          class="logo" alt="Logo"></a>
-      <span style="display:flex;gap:16px;">
-        <a href="/privacy/" class="nav-link">Privacy</a>
-        <a href="/login/" class="nav-link">Login</a>
-      </span>
+      <div class="nav-left">
+        <a href="{% url 'home' %}"><img
+            src="{% static 'images/canBet symbol sym..png' %}" class="logo"
+            alt="Logo"></a>
+        <span class="brand-text">canBet</span>
+      </div>
     </nav>
 
-    <div class="page-content">
-      <div class="page-title">Create Account</div>
-
-      <form method="POST" action="/register/" style="display:contents;">
-        {% csrf_token %}
+    <main class="container">
+      <div class="auth-card">
+        <h1 class="auth-title">Register</h1>
 
         {% if error %}
-        <div class="error-msg">{{ error }}</div>
+        <div class="error-msg">
+          !! ERROR: {{ error }}
+        </div>
         {% endif %}
 
-        <div class="form-group">
-          <label class="form-label" for="username-input">Username</label>
-          <input id="username-input" name="username" type="text"
-            class="form-input"
-            placeholder="YourName" maxlength="32" required
-            value="{{ username|default:'' }}">
-        </div>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" value="{{ username|default:'' }}"
+              required>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label" for="email-input">Email</label>
-          <input id="email-input" name="email" type="email" class="form-input"
-            placeholder="yourname@school.edu" required
-            value="{{ email|default:'' }}">
-        </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" value="{{ email|default:'' }}"
+              required>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label" for="password-input">Password</label>
-          <input id="password-input" name="password" type="password"
-            class="form-input"
-            placeholder="************" required>
-        </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label" for="confirm-input">Confirm Password</label>
-          <input id="confirm-input" name="confirm" type="password"
-            class="form-input"
-            placeholder="************" required>
-        </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" name="confirm" required>
+          </div>
 
-        <div class="form-group">
-          <button type="submit" class="register-btn">Create Account</button>
-        </div>
-      </form>
+          <button type="submit" class="btn-submit">CREATE ACCOUNT</button>
+        </form>
 
-      <div class="login-link">Already have an account? <a
-          href="/login/">Login</a></div>
-    </div>
+        <div class="auth-footer">
+          Already have an account? <br><br>
+          <a href="{% url 'login' %}">Log In Here</a>
+        </div>
+      </div>
+    </main>
+
   </body>
 </html>

@@ -1,135 +1,307 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — Privacy Policy</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-  --bg:#d0d3d7; --panel:#f2f3f5; --panel2:#e8eaed;
-  --border:#b4bac2; --border-dark:#8a9199;
-  --accent:#2e3c4e; --accent2:#5b8db8;
-  --text:#18222e; --text-dim:#7a8694;
-  --green:#2e8a56; --shadow:rgba(30,45,60,0.13); --shine:rgba(255,255,255,0.7);
-}
-html { scroll-behavior: smooth; font-size: 16px; } /* moderately bigger */
-body {
-  width: 100vw; min-height: 100vh;
-  font-family: 'Press Start 2P', monospace;
-  background: var(--bg);
-  background-image: radial-gradient(ellipse at 15% 10%, #e8ecf0 0%, transparent 55%),
-                    radial-gradient(ellipse at 85% 90%, #c4c9cf 0%, transparent 55%);
-  overflow-x: hidden;
-}
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 4px; }
-.topnav {
-  position: sticky; top: 0; height: 60px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 32px;
-  background: rgba(242,243,245,0.92); border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 16px var(--shadow); backdrop-filter: blur(12px); z-index: 100;
-}
-.nav-link { font-size: 0.55rem; color: var(--text-dim); letter-spacing: 1.5px; text-decoration: none; transition: color 0.2s; }
-.nav-link:hover { color: var(--accent2); }
-.page { max-width: 720px; margin: 0 auto; padding: 60px 24px 100px; display: flex; flex-direction: column; gap: 36px; }
-.page-title { font-size: 1.5rem; color: var(--accent); letter-spacing: 4px; padding-bottom: 16px; border-bottom: 2px solid var(--border); }
-.page-meta { font-size: 0.45rem; color: var(--text-dim); letter-spacing: 2px; margin-top: -16px; }
-.section-label { font-size: 0.55rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 12px; padding-left: 10px; border-left: 2px solid var(--accent2); }
-.policy-block { background: var(--panel); border: 1px solid var(--border); box-shadow: 0 2px 12px var(--shadow), inset 0 1px 0 var(--shine); overflow: hidden; }
-.policy-row { display: flex; align-items: flex-start; gap: 16px; padding: 20px 24px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
-.policy-row:last-child { border-bottom: none; }
-.policy-row:hover { background: var(--panel2); }
-.policy-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); box-shadow: 0 0 5px rgba(91,141,184,0.5); flex-shrink: 0; margin-top: 5px; }
-.policy-text { font-size: 0.45rem; color: var(--text); letter-spacing: 0.8px; line-height: 2; }
-.policy-text span { color: var(--accent2); }
-.contact-block { background: var(--panel); border: 1px solid var(--border); box-shadow: 0 2px 12px var(--shadow), inset 0 1px 0 var(--shine); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.contact-label { font-size: 0.42rem; color: var(--text-dim); letter-spacing: 2px; }
-.contact-email { font-size: 0.45rem; color: var(--accent2); letter-spacing: 1px; text-decoration: none; transition: color 0.2s; }
-.contact-email:hover { color: var(--green); }
-.page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; background: rgba(242,243,245,0.92); border-top: 1px solid var(--border); backdrop-filter: blur(8px); z-index: 100; }
-.footer-text { font-size: 0.35rem; color: var(--text-dim); letter-spacing: 1.5px; }
-.status-right { display: flex; align-items: center; gap: 7px; }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 5px var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet — Privacy Policy</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet">
+    <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #c8c8c8;
+    --panel: #f2f3f5;
+    --panel-hover: #ffffff;
+    --border: #000000;
+    --accent: #1a1a1a;
+    --accent-blue: #5b8db8;
+    --text: #18222e;
+    --text-dim: #444;
+    --green: #2e8a56;
+  }
+
+  body {
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* --- CONSISTENT NAVIGATION (FROM HOME) --- */
+  .topnav {
+    width: 100%; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 18px 40px; 
+    background: rgba(255,255,255,0.15); 
+    backdrop-filter: blur(4px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo { height: 42px; width: auto; }
+
+  .brand-text {
+    font-size: 1rem;
+    color: #000;
+    letter-spacing: 2px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+  }
+
+  .nav-link {
+    font-size: 0.75rem;
+    color: #000;
+    text-decoration: none;
+    letter-spacing: 1px;
+    padding: 10px 18px;
+    border: 3px solid #000;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.4);
+    transition: all 0.2s ease;
+  }
+
+  .nav-link:hover {
+    background: #000;
+    color: #fff;
+  }
+
+  /* --- MAIN CONTENT (ENLARGED) --- */
+  .page {
+    max-width: 900px; /* Wider container */
+    margin: 0 auto;
+    padding: 60px 24px 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .page-title { 
+    font-size: 2rem; /* Much bigger */
+    color: var(--accent); 
+    letter-spacing: 4px; 
+    padding-bottom: 20px; 
+    border-bottom: 6px solid var(--accent); 
+    text-transform: uppercase;
+  }
+
+  .page-meta { 
+    font-size: 0.6rem; 
+    color: var(--text-dim); 
+    letter-spacing: 2px; 
+    margin-top: -20px; 
+  }
+
+  /* --- SECTION STYLING --- */
+  .section-label { 
+    font-size: 0.8rem; /* Bigger */
+    color: var(--text); 
+    letter-spacing: 2px; 
+    margin-bottom: 15px; 
+    padding-left: 12px; 
+    border-left: 6px solid var(--accent-blue); 
+    text-transform: uppercase;
+  }
+
+  .policy-block { 
+    background: var(--panel); 
+    border: 4px solid var(--border); 
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+    overflow: hidden; 
+  }
+
+  .policy-row { 
+    display: flex; 
+    align-items: flex-start; 
+    gap: 20px; 
+    padding: 28px 32px; /* Increased padding */
+    border-bottom: 2px solid #ddd; 
+    transition: background 0.15s; 
+  }
+
+  .policy-row:last-child { border-bottom: none; }
+  .policy-row:hover { background: var(--panel-hover); }
+
+  .policy-dot { 
+    width: 12px; 
+    height: 12px; 
+    background: var(--accent-blue); 
+    flex-shrink: 0; 
+    margin-top: 6px; 
+  }
+
+  .policy-text { 
+    font-size: 0.65rem; /* Increased from 0.45rem */
+    color: var(--text); 
+    letter-spacing: 0.5px; 
+    line-height: 2.2; 
+  }
+
+  .policy-text span { 
+    color: #d32f2f; /* Red accent for keywords */
+    font-weight: bold;
+  }
+
+  /* --- CONTACT SECTION --- */
+  .contact-block { 
+    background: var(--panel); 
+    border: 4px solid var(--border); 
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+    padding: 30px; 
+    display: flex; 
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .contact-label { font-size: 0.7rem; color: var(--text-dim); }
+  .contact-email { 
+    font-size: 0.8rem; 
+    color: var(--accent-blue); 
+    text-decoration: underline;
+    transition: color 0.2s; 
+  }
+  .contact-email:hover { color: var(--green); }
+
+  /* --- FOOTER --- */
+  .page-footer { 
+    position: fixed; 
+    bottom: 0; left: 0; right: 0; 
+    height: 40px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 0 40px; 
+    background: #fff; 
+    border-top: 3px solid var(--border); 
+    z-index: 100; 
+  }
+
+  .footer-text { font-size: 0.5rem; color: var(--text-dim); }
+  .status-right { display: flex; align-items: center; gap: 10px; }
+  .status-dot { 
+    width: 10px; height: 10px; 
+    background: var(--green); 
+    box-shadow: 0 0 8px var(--green); 
+    animation: pulse 2s infinite; 
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  @media (max-width: 768px) {
+    .topnav { padding: 18px 20px; }
+    .nav-links { gap: 10px; }
+    .nav-link { font-size: 0.6rem; padding: 8px 12px; }
+    .page-title { font-size: 1.4rem; }
+    .policy-text { font-size: 0.55rem; }
+  }
 </style>
-</head>
-<body>
-<nav class="topnav">
-  <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-  <a href="/" class="nav-link">Home</a>
-</nav>
-<div class="page">
-  <div><div class="page-title">Privacy Policy</div></div>
-  <div class="page-meta">Last updated: March 2026</div>
+  </head>
+  <body>
 
-  <section>
-    <div class="section-label">Data Collection</div>
-    <div class="policy-block">
-      <div class="policy-row">
-        <div class="policy-dot"></div>
-        <div class="policy-text">canBet reads your Canvas LMS <span>name</span>, <span>user ID</span>, <span>course enrollment</span>, and <span>assignment submission data</span> from ohio.instructure.com using your existing authenticated browser session.</div>
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}"
+            class="logo" alt="Logo"></a>
+        <span class="brand-text">canBet</span>
       </div>
-      <div class="policy-row">
-        <div class="policy-dot"></div>
-        <div class="policy-text">No login credentials are ever accessed or stored.</div>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/about/" class="nav-link">About</a>
       </div>
-    </div>
-  </section>
+    </nav>
 
-  <section>
-    <div class="section-label">Data Storage &amp; Transmission</div>
-    <div class="policy-block">
-      <div class="policy-row">
-        <div class="policy-dot"></div>
-        <div class="policy-text">All data is stored locally in your browser using <span>chrome.storage.local</span>.</div>
-      </div>
-      <div class="policy-row">
-        <div class="policy-dot"></div>
-        <div class="policy-text">No data is transmitted to any external server.</div>
-      </div>
-      <div class="policy-row">
-        <div class="policy-dot"></div>
-        <div class="policy-text">No data is sold, shared, or transferred to third parties.</div>
-      </div>
-    </div>
-  </section>
+    <div class="page">
+      <header>
+        <h1 class="page-title">Privacy Policy</h1>
+        <p class="page-meta">Last updated: March 2026</p>
+      </header>
 
-  <section>
-    <div class="section-label">Data Use</div>
-    <div class="policy-block">
-      <div class="policy-row">
-        <div class="policy-dot"></div>
-        <div class="policy-text">Data is used solely to calculate your in-app <span>Bit balance</span> within the canBet extension.</div>
-      </div>
-    </div>
-  </section>
+      <section>
+        <h2 class="section-label">Data Collection</h2>
+        <div class="policy-block">
+          <div class="policy-row">
+            <div class="policy-dot"></div>
+            <div class="policy-text">canBet reads your Canvas LMS
+              <span>name</span>, <span>user ID</span>, <span>course
+                enrollment</span>, and <span>assignment submission data</span>
+              from ohio.instructure.com using your existing authenticated
+              browser session.</div>
+          </div>
+          <div class="policy-row">
+            <div class="policy-dot"></div>
+            <div class="policy-text">No login credentials are ever accessed or
+              stored.</div>
+          </div>
+        </div>
+      </section>
 
-  <section>
-    <div class="section-label">Data Deletion</div>
-    <div class="policy-block">
-      <div class="policy-row">
-        <div class="policy-dot"></div>
-        <div class="policy-text">To delete your data, uninstall the extension or clear extension storage in your browser settings.</div>
-      </div>
-    </div>
-  </section>
+      <section>
+        <h2 class="section-label">Data Storage</h2>
+        <div class="policy-block">
+          <div class="policy-row">
+            <div class="policy-dot"></div>
+            <div class="policy-text">All data is stored locally in your browser
+              using <span>chrome.storage.local</span>.</div>
+          </div>
+          <div class="policy-row">
+            <div class="policy-dot"></div>
+            <div class="policy-text">No data is transmitted to any external
+              server.</div>
+          </div>
+          <div class="policy-row">
+            <div class="policy-dot"></div>
+            <div class="policy-text">No data is sold, shared, or transferred to
+              third parties.</div>
+          </div>
+        </div>
+      </section>
 
-  <section>
-    <div class="section-label">Contact</div>
-    <div class="contact-block">
-      <span class="contact-label">Questions or concerns</span>
-      <a href="mailto:canbet.business@outlook.com" class="contact-email">canbet.business@outlook.com</a>
+      <section>
+        <h2 class="section-label">Data Use</h2>
+        <div class="policy-block">
+          <div class="policy-row">
+            <div class="policy-dot"></div>
+            <div class="policy-text">Data is used solely to calculate your
+              in-app <span>Bit balance</span> within the canBet extension.</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-label">Contact</h2>
+        <div class="contact-block">
+          <span class="contact-label">Questions or concerns?</span>
+          <a href="mailto:canbet.business@outlook.com"
+            class="contact-email">canbet.business@outlook.com</a>
+        </div>
+      </section>
     </div>
-  </section>
-</div>
-<footer class="page-footer">
-  <span class="footer-text">CANBET v1.0 — PRIVACY</span>
-  <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
-</footer>
-</body>
+
+    <footer class="page-footer">
+      <span class="footer-text">CANBET v1.0 — PRIVACY</span>
+      <div class="status-right"><span class="footer-text">ONLINE</span><div
+          class="status-dot"></div></div>
+    </footer>
+
+  </body>
 </html>
