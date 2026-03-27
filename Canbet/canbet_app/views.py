@@ -3,7 +3,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum, Count, Min, Max
-from .models import UserProfile, CreateOpen
+from .models import CanBetUser, InventoryEntry, CrateOpen
+
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -75,11 +76,11 @@ def leaderboard(request):
     page = int(request.GET.get('page', 1))
     per_page = 10
 
-    qs = UserProfile.object.annotate(
-        create_count = Count('crateopen'),
-        best_rarity = Min('inventory__item__rarity_rank'),
-        rarity_achieved = Min('inventory__obtained_at'),
-        last_crate = Max('crate__open__opened_at') 
+    qs = CanBetUser.objects.annotate(
+        crate_count=Count('crate_opens'),
+        best_rarity=Min('inventory__item__rarity'),
+        rarity_achieved=Min('inventory__obtained_at'),
+        last_crate=Max('crate_opens__opened_at'),
     )
 
     if sort == 'rarity':
@@ -87,30 +88,29 @@ def leaderboard(request):
     elif sort == 'crates':
         qs = qs.order_by('-crate_count', 'last_crate')
     else:
-        qs = qs.order_by('-bits')
+        qs = qs.order_by('-bit_balance')
 
     total = qs.count()
-    total_pages = (total + per_page - 1) // per_page
-    entries = qs[(page -1) * per_page : page * per_page]
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    entries = qs[(page - 1) * per_page : page * per_page]
 
-    #tag the current row
     results = []
     for i, u in enumerate(entries):
         rank = (page - 1) * per_page + i + 1
         results.append({
             'rank': rank,
-            'username': u.user.username,
-            'bits': u.bits
+            'username': u.username,
+            'bits': u.bit_balance,
             'crates': u.crate_count,
-            'is_you': u.user == request.user,
+            'is_you': request.user.is_authenticated and u.pk == request.user.pk,
         })
 
-        return render(request, 'leaderboard.html', {
-            'entries': results,
-            'sort': sort,
-            'page': page,
-            'total_pages': total_pages,
-        })
+    return render(request, 'leaderboard.html', {
+        'entries': results,
+        'sort': sort,
+        'page': page,
+        'total_pages': total_pages,
+    })
 
 @login_required
 def profile(request):
