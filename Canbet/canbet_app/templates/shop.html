@@ -1,93 +1,203 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — Shop</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --bg:#d0d3d7; --panel:#f2f3f5; --panel2:#e8eaed;
-  --border:#b4bac2; --border-dark:#8a9199;
-  --accent:#2e3c4e; --accent2:#5b8db8;
-  --text:#18222e; --text-dim:#7a8694;
-  --green:#2e8a56; --shadow:rgba(30,45,60,0.13); --shine:rgba(255,255,255,0.7);
-}
-html { scroll-behavior:smooth; }
-body { width:100vw; min-height:100vh; font-family:'Press Start 2P',monospace; background:var(--bg); background-image:radial-gradient(ellipse at 15% 10%,#e8ecf0 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,#c4c9cf 0%,transparent 55%); overflow-x:hidden; }
-::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:3px}
-.topnav { position:sticky; top:0; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 32px; background:rgba(242,243,245,0.92); border-bottom:1px solid var(--border); box-shadow:0 2px 16px var(--shadow); backdrop-filter:blur(12px); z-index:100; }
-.nav-right { display:flex; align-items:center; gap:16px; }
-.nav-back { font-size:0.32rem; color:var(--text-dim); letter-spacing:1.5px; text-decoration:none; transition:color 0.2s; }
-.nav-back:hover { color:var(--accent2); }
-.nav-bal { font-size:0.32rem; color:var(--green); letter-spacing:1.5px; }
-.page { max-width:760px; margin:0 auto; padding:48px 24px 60px; display:flex; flex-direction:column; gap:40px; }
-.section-label { font-size:0.3rem; color:var(--text-dim); letter-spacing:3px; margin-bottom:14px; padding-left:10px; border-left:2px solid var(--accent2); }
-.shop-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-.shop-card { background:var(--panel); border:1px solid var(--border); box-shadow:0 2px 12px var(--shadow),inset 0 1px 0 var(--shine); padding:24px 16px 18px; display:flex; flex-direction:column; align-items:center; gap:12px; position:relative; transition:border-color 0.2s,transform 0.15s,box-shadow 0.2s; }
-.shop-card:hover { border-color:var(--accent2); transform:translateY(-2px); box-shadow:0 6px 20px rgba(30,45,60,0.18),inset 0 1px 0 var(--shine); }
-.item-sprite { width:72px; height:72px; image-rendering:pixelated; object-fit:contain; }
-.shop-name { font-size:0.32rem; color:var(--text); letter-spacing:0.8px; text-align:center; line-height:2; }
-.shop-rarity { font-size:0.26rem; letter-spacing:1.5px; text-align:center; }
-.shop-price { font-size:0.3rem; color:var(--green); letter-spacing:1px; }
-.shop-badge { position:absolute; top:8px; right:8px; font-size:0.22rem; letter-spacing:1px; padding:3px 7px; background:#c8943a; color:white; }
-.buy-btn { width:100%; font-family:'Press Start 2P',monospace; font-size:0.3rem; background:var(--accent); color:white; border:none; padding:10px; cursor:pointer; letter-spacing:1px; margin-top:4px; transition:background 0.2s; }
-.buy-btn:hover { background:var(--accent2); }
-.buy-btn:disabled { background:var(--border); color:var(--text-dim); cursor:not-allowed; }
-.toast { position:fixed; bottom:40px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--accent); color:white; font-size:0.3rem; letter-spacing:1px; padding:12px 24px; opacity:0; transition:all 0.3s; z-index:300; pointer-events:none; white-space:nowrap; }
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-.page-footer { position:fixed; bottom:0; left:0; right:0; height:28px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; background:rgba(242,243,245,0.92); border-top:1px solid var(--border); backdrop-filter:blur(8px); z-index:100; }
-.footer-text { font-size:0.26rem; color:var(--text-dim); letter-spacing:1.5px; }
-.status-right { display:flex; align-items:center; gap:7px; }
-.status-dot { width:5px; height:5px; border-radius:50%; background:var(--green); box-shadow:0 0 5px var(--green); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet — Shop</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet">
+    <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #c8c8c8;
+    --panel: #f2f3f5;
+    --panel2: #e8eaed;
+    --border: #1a1a1a;
+    --accent-blue: #5b8db8;
+    --green: #2e8a56;
+    --text: #1a1a1a;
+    --rarity-common: #2e8a56;
+    --rarity-rare: #5b8db8;
+    --rarity-epic: #a855f7;
+    --rarity-legendary: #c8943a;
+  }
+
+  body {
+    width: 100%; min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  /* --- UNIFIED NAVIGATION --- */
+  .topnav {
+    width: 100%; height: 80px; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 40px; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+    position: sticky; top: 0; z-index: 100; border-bottom: 4px solid var(--border);
+  }
+  .nav-left { display: flex; align-items: center; gap: 18px; height: 100%; }
+  .logo { height: 44px; width: auto; }
+  .brand-text { font-size: 1rem; letter-spacing: 2px;}
+
+  .nav-right { display: flex; align-items: center; gap: 24px; }
+  
+  .nav-bal { 
+    font-size: 0.8rem; color: var(--green); background: #fff; 
+    padding: 10px 16px; border: 4px solid var(--border); 
+  }
+  
+  .nav-back {
+    font-size: 0.8rem; color: #000; text-decoration: none;
+    padding: 10px 20px; border: 4px solid #000; border-radius: 8px;
+    background: rgba(255,255,255,0.4); transition: 0.1s;
+  }
+  .nav-back:hover { background: #000; color: #fff; }
+
+  /* --- LAYOUT --- */
+  .page {
+    max-width: 1100px; margin: 0 auto; padding: 80px 24px 120px;
+    display: flex; flex-direction: column; gap: 50px;
+  }
+  .section-label {
+    font-size: 1rem; margin-bottom: 30px; padding-left: 16px;
+    border-left: 10px solid var(--accent-blue); text-transform: uppercase;
+  }
+
+  /* --- SHOP GRID --- */
+  .shop-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+    gap: 24px; 
+  }
+
+  .shop-card {
+    background: var(--panel); border: 8px solid var(--border);
+    padding: 30px; display: flex; flex-direction: column; align-items: center;
+    gap: 20px; position: relative;
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.15); transition: 0.1s;
+  }
+  .shop-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 18px 18px 0px var(--accent-blue);
+    background: #fff;
+  }
+
+  .item-sprite { width: 100px; height: 100px; image-rendering: pixelated; object-fit: contain; }
+  .shop-name { font-size: 0.85rem; text-align: center; line-height: 1.6; min-height: 3rem; }
+  .shop-rarity { font-size: 0.65rem; text-transform: uppercase; }
+  .shop-price { font-size: 0.9rem; color: var(--green); font-weight: bold; }
+
+  .shop-badge {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 0.5rem; padding: 6px 10px; color: white; 
+    background: var(--rarity-legendary); border: 3px solid var(--border);
+  }
+
+  /* --- BUTTONS --- */
+  .buy-btn {
+    width: 100%; font-family: 'Press Start 2P', monospace; font-size: 0.8rem;
+    background: var(--text); color: white; border: 4px solid var(--border);
+    padding: 16px; cursor: pointer; transition: 0.1s;
+  }
+  .buy-btn:hover:not(:disabled) {
+    background: var(--accent-blue);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0px var(--border);
+  }
+  .buy-btn:disabled {
+    background: #bbb; color: #777; border-color: #999; cursor: not-allowed;
+  }
+
+  /* --- TOAST --- */
+  .toast {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--text); color: #fff; font-size: 0.8rem;
+    padding: 20px 40px; border: 6px solid var(--accent-blue);
+    opacity: 0; transition: 0.3s; z-index: 300; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* --- FOOTER --- */
+  .page-footer {
+    position: fixed; bottom: 0; width: 100%; height: 48px;
+    background: #fff; border-top: 4px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; font-size: 0.7rem; z-index: 100;
+  }
+
+  @media (max-width: 700px) {
+    .shop-grid { grid-template-columns: 1fr; }
+    .brand-text { display: none; }
+    .nav-bal { font-size: 0.7rem; }
+  }
 </style>
-</head>
-<body>
-<nav class="topnav">
-  <a href="/main/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-  <div class="nav-right">
-    <span class="nav-bal" id="balDisplay">{{ request.user.bit_balance }} Bits</span>
-    <a href="/main/" class="nav-back">◀ Menu</a>
-  </div>
-</nav>
-<div class="page">
-  <section>
-    <div class="section-label">Item Shop — Spooky Collection</div>
-    <div class="shop-grid">
-      {% for item in items %}
-      <div class="shop-card">
-        {% if item.rarity == 'LEGENDARY' %}<div class="shop-badge">LEGENDARY</div>{% endif %}
-        <img src="{% static item.sprite_path %}" class="item-sprite" alt="{{ item.name }}">
-        <div class="shop-name">{{ item.name }}</div>
-        <div class="shop-rarity"
-          style="color:{% if item.rarity == 'LEGENDARY' %}#c8943a{% elif item.rarity == 'EPIC' %}#a855f7{% elif item.rarity == 'RARE' %}#5b8db8{% else %}#2e8a56{% endif %}">
-          {{ item.rarity }}
-        </div>
-        <div class="shop-price">{{ item.shop_price }} Bits</div>
-        {% if item.id in owned_ids %}
-          <button class="buy-btn" disabled>Owned</button>
-        {% else %}
-          <button class="buy-btn"
-                  onclick="buy(this, {{ item.id }}, {{ item.shop_price }}, '{{ item.name }}')">Buy</button>
-        {% endif %}
+  </head>
+  <body>
+
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="{% url 'main' %}"><img
+            src="{% static 'images/canBet symbol sym..png' %}" class="logo"
+            alt="Logo"></a>
+        <span class="brand-text">canBet</span>
       </div>
-      {% empty %}
-      <p style="font-size:0.3rem;color:var(--text-dim);grid-column:1/-1;text-align:center;padding:40px 0;">
-        No items in the shop yet.
-      </p>
-      {% endfor %}
+      <div class="nav-right">
+        <span class="nav-bal" id="balDisplay">{{ request.user.bit_balance }}
+          BITS</span>
+        <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
+      </div>
+    </nav>
+
+    <div class="page">
+      <section>
+        <div class="section-label">Spooky Collection — Exchange</div>
+        <div class="shop-grid">
+          {% for item in items %}
+          <div class="shop-card">
+            {% if item.rarity == 'LEGENDARY' %}<div
+              class="shop-badge">LEGENDARY</div>{% endif %}
+            <img src="{% static item.sprite_path %}" class="item-sprite"
+              alt="{{ item.name }}">
+            <div class="shop-name">{{ item.name }}</div>
+            <div class="shop-rarity"
+              style="color:{% if item.rarity == 'LEGENDARY' %}var(--rarity-legendary){% elif item.rarity == 'EPIC' %}var(--rarity-epic){% elif item.rarity == 'RARE' %}var(--rarity-rare){% else %}var(--rarity-common){% endif %}">
+              {{ item.rarity }}
+            </div>
+            <div class="shop-price">{{ item.shop_price }} BITS</div>
+            {% if item.id in owned_ids %}
+            <button class="buy-btn" disabled>OWNED</button>
+            {% else %}
+            <button class="buy-btn"
+              onclick="buy(this, {{ item.id }}, {{ item.shop_price }}, '{{ item.name }}')">PURCHASE</button>
+            {% endif %}
+          </div>
+          {% empty %}
+          <p
+            style="font-size:0.8rem; color:#777; grid-column:1/-1; text-align:center; padding:60px;">
+            DATABASE EMPTY. NO ITEMS FOUND.
+          </p>
+          {% endfor %}
+        </div>
+      </section>
     </div>
-  </section>
-</div>
-<div class="toast" id="toast"></div>
-<footer class="page-footer">
-  <span class="footer-text">CANBET v1.0 — SHOP</span>
-  <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
-</footer>
-<script>
+
+    <div class="toast" id="toast"></div>
+
+    <footer class="page-footer">
+      <span>CANBET // TRANSACTION_NODE_04</span>
+      <div class="status-right"
+        style="display:flex; align-items:center; gap:12px;">
+        <span>MARKET_ONLINE</span>
+        <div
+          style="width: 12px; height: 12px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green);"></div>
+      </div>
+    </footer>
+
+    <script>
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
 
 async function buy(btn, itemId, cost, name) {
@@ -98,12 +208,12 @@ async function buy(btn, itemId, cost, name) {
   });
   const data = await resp.json();
   if (resp.ok) {
-    btn.textContent = 'Owned';
+    btn.textContent = 'OWNED';
     btn.disabled = true;
-    document.getElementById('balDisplay').textContent = data.new_balance.toLocaleString() + ' Bits';
-    showToast('Purchased: ' + name);
+    document.getElementById('balDisplay').textContent = data.new_balance.toLocaleString() + ' BITS';
+    showToast('SUCCESS: ' + name + ' ACQUIRED');
   } else {
-    showToast(data.error || 'Purchase failed.');
+    showToast('ERROR: ' + (data.error || 'UPLINK FAILED'));
   }
 }
 
@@ -111,8 +221,8 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 </script>
-</body>
+  </body>
 </html>
