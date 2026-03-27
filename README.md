@@ -21,13 +21,14 @@ canBet introduces a reward-based system that:
 ## Backend
 - Python / Django
 ## Integration
-- Canvas LMS REST API
+- Browser Cookies
+- Web Scraping
 ---
 # Browser Extension
 The extension runs on any `*.instructure.com` page and automatically pulls your assignment and submission data using your active Canvas session.
 ## Download
 - **Firefox:** [addons.mozilla.org/en-US/firefox/addon/canbet/](https://addons.mozilla.org/en-US/firefox/addon/canbet/)
-- **Chrome:** TBD
+- **Chrome:** Awaiting Approval
 ---
 ## Instructions on how to launch django server
 python manage.py runserver

@@ -7,103 +7,216 @@
 <title>canBet — Main Interface</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-  --bg:#d0d3d7; --panel:#f2f3f5; --panel2:#e8eaed;
-  --border:#b4bac2; --border-dark:#8a9199;
-  --accent:#2e3c4e; --accent2:#5b8db8;
-  --text:#18222e; --text-dim:#7a8694;
-  --green:#2e8a56; --shadow:rgba(30,45,60,0.13); --shine:rgba(255,255,255,0.7);
-}
-html { scroll-behavior: smooth; }
-body {
-  width:100vw; min-height:100vh; font-family:'Press Start 2P',monospace;
-  background:var(--bg);
-  background-image:radial-gradient(ellipse at 15% 10%,#e8ecf0 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,#c4c9cf 0%,transparent 55%);
-  overflow-x:hidden;
-}
-::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:3px}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #c8c8c8;
+    --panel: #f2f3f5;
+    --border: #1a1a1a;
+    --accent-blue: #5b8db8;
+    --green: #2e8a56;
+    --text: #1a1a1a;
+  }
+
+  body {
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* --- UNIFIED NAVIGATION --- */
 .topnav {
-  position:sticky; top:0; height:56px; display:flex; align-items:center; justify-content:space-between;
-  padding:0 32px; background:rgba(242,243,245,0.92); border-bottom:1px solid var(--border);
-  box-shadow:0 2px 16px var(--shadow); backdrop-filter:blur(12px); z-index:100;
+  width: 100%; 
+  height: 80px; /* Fixed height for consistency */
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  padding: 0 40px; 
+  background: rgba(255, 255, 255, 0.15); 
+  backdrop-filter: blur(4px);
+  position: sticky; 
+  top: 0; 
+  z-index: 100; 
+  border-bottom: 4px solid var(--border);
 }
-.nav-bits { display:flex; align-items:center; gap:10px; background:var(--panel2); border:1px solid var(--border); padding:6px 14px; }
-.bits-label { font-size:0.28rem; color:var(--text-dim); letter-spacing:2px; }
-.bits-sep { width:1px; height:14px; background:var(--border); }
-.bits-val { font-size:0.48rem; color:var(--green); letter-spacing:2px; }
-.nav-logout { font-size:0.3rem; color:var(--text-dim); letter-spacing:1.5px; text-decoration:none; padding:6px 12px; border:1px solid var(--border); background:var(--panel2); transition:color 0.2s,border-color 0.2s; }
-.nav-logout:hover { color:#b84040; border-color:#d47070; }
-.page { max-width:760px; margin:0 auto; padding:48px 24px 60px; display:flex; flex-direction:column; gap:48px; }
-.section-label { font-size:0.3rem; color:var(--text-dim); letter-spacing:3px; margin-bottom:14px; padding-left:10px; border-left:2px solid var(--accent2); }
-.hero { background:var(--panel); border:1px solid var(--border); box-shadow:0 4px 24px var(--shadow),inset 0 1px 0 var(--shine); padding:36px 32px; position:relative; overflow:hidden; }
-.hero::before { content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(91,141,184,0.1) 0%,transparent 70%); pointer-events:none; }
-.hero-greeting { font-size:0.3rem; color:var(--text-dim); letter-spacing:2px; margin-bottom:10px; }
-.hero-name { font-size:1.1rem; color:var(--accent); letter-spacing:2px; margin-bottom:20px; }
-.hero-stats { display:flex; gap:28px; flex-wrap:wrap; }
-.hero-stat { display:flex; flex-direction:column; gap:6px; }
-.hero-stat-label { font-size:0.26rem; color:var(--text-dim); letter-spacing:1.5px; }
-.hero-stat-val { font-size:0.48rem; color:var(--text); letter-spacing:1px; }
-.hero-stat-val.green { color:var(--green); }
-.hero-stat-val.blue  { color:var(--accent2); }
-.nav-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.nav-btn {
-  display:flex; align-items:center; justify-content:space-between; text-decoration:none;
-  font-family:'Press Start 2P',monospace; font-size:0.55rem; color:var(--text); letter-spacing:1.5px;
-  padding:20px; background:var(--panel); border:1px solid var(--border);
-  box-shadow:0 2px 10px var(--shadow),inset 0 1px 0 var(--shine);
-  position:relative; overflow:hidden; cursor:pointer;
-  transition:border-color 0.2s,box-shadow 0.2s,transform 0.15s;
+
+.nav-left { 
+  display: flex; 
+  align-items: center; 
+  gap: 18px; 
+  height: 100%;
 }
-.nav-btn::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--border); transition:background 0.2s; }
-.nav-btn::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,rgba(91,141,184,0.08),transparent); opacity:0; transition:opacity 0.2s; }
-.nav-btn:hover { border-color:var(--accent2); transform:translateY(-2px); box-shadow:0 6px 20px rgba(30,45,60,0.18),inset 0 1px 0 var(--shine); }
-.nav-btn:hover::before { background:var(--accent2); }
-.nav-btn:hover::after  { opacity:1; }
-.nav-btn:active { transform:translateY(0); }
-.nav-label { position:relative; z-index:1; }
-.nav-arrow { font-size:0.4rem; color:var(--border-dark); margin-left:10px; position:relative; z-index:1; transition:color 0.2s,transform 0.2s; }
-.nav-btn:hover .nav-arrow { color:var(--accent2); transform:translateX(3px); }
-.activity-list { border:1px solid var(--border); box-shadow:0 2px 10px var(--shadow); overflow:hidden; }
-.activity-row { display:flex; align-items:center; gap:14px; padding:14px 20px; background:var(--panel); border-bottom:1px solid var(--border); transition:background 0.15s; }
-.activity-row:last-child { border-bottom:none; }
-.activity-row:hover { background:var(--panel2); }
-.activity-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-.dot-green  { background:var(--green);   box-shadow:0 0 5px var(--green); }
-.dot-blue   { background:var(--accent2); box-shadow:0 0 5px var(--accent2); }
-.dot-grey   { background:var(--border-dark); }
-.activity-text { font-size:0.3rem; color:var(--text); letter-spacing:0.8px; flex:1; line-height:1.8; }
-.activity-time { font-size:0.25rem; color:var(--text-dim); letter-spacing:1px; flex-shrink:0; }
-.lb-list { border:1px solid var(--border); box-shadow:0 2px 10px var(--shadow); overflow:hidden; }
-.lb-row { display:flex; align-items:center; gap:14px; padding:12px 20px; background:var(--panel); border-bottom:1px solid var(--border); transition:background 0.15s; }
-.lb-row:last-child { border-bottom:none; }
-.lb-row:hover { background:var(--panel2); }
-.lb-rank { font-size:0.36rem; color:var(--text-dim); width:28px; text-align:right; flex-shrink:0; }
-.lb-rank.gold   { color:#c8943a; }
-.lb-rank.silver { color:#8a9199; }
-.lb-rank.bronze { color:#a0623a; }
-.lb-name { font-size:0.34rem; color:var(--text); flex:1; letter-spacing:1px; }
-.lb-score { font-size:0.32rem; color:var(--green); letter-spacing:1px; flex-shrink:0; }
-.page-footer { position:fixed; bottom:0; left:0; right:0; height:28px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; background:rgba(242,243,245,0.92); border-top:1px solid var(--border); backdrop-filter:blur(8px); z-index:100; }
-.footer-text { font-size:0.26rem; color:var(--text-dim); letter-spacing:1.5px; }
-.status-right { display:flex; align-items:center; gap:7px; }
-.status-dot { width:5px; height:5px; border-radius:50%; background:var(--green); box-shadow:0 0 5px var(--green); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+.logo { 
+  height: 44px; /* Standardized logo height */
+  width: auto; 
+}
+
+.brand-text { 
+  font-size: 1rem; 
+  letter-spacing: 2px; 
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-back {
+  font-size: 0.8rem; 
+  color: #000; 
+  text-decoration: none;
+  padding: 10px 20px; 
+  border: 4px solid #000; 
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.4); 
+  transition: 0.1s;
+}
+
+.nav-back:hover { 
+  background: #000; 
+  color: #fff; 
+}
+
+/* Standardized Balance Display for Shop/Main */
+.nav-bal { 
+  font-size: 0.8rem; 
+  color: var(--green); 
+  background: #fff; 
+  padding: 10px 16px; 
+  border: 4px solid var(--border); 
+}
+
+  /* --- PAGE CONTENT --- */
+  .page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+  }
+
+  .section-label {
+    font-size: 0.8rem;
+    margin-bottom: 20px;
+    padding-left: 12px;
+    border-left: 8px solid var(--accent-blue);
+    text-transform: uppercase;
+  }
+
+  /* HERO BOX */
+  .hero {
+    background: var(--panel);
+    border: 6px solid var(--border);
+    padding: 40px;
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.1);
+  }
+
+  .hero-greeting { font-size: 0.6rem; opacity: 0.7; margin-bottom: 10px; }
+  .hero-name { font-size: 1.8rem; margin-bottom: 30px; border-bottom: 4px solid var(--border); padding-bottom: 10px; }
+  
+  .hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; }
+  .hero-stat { display: flex; flex-direction: column; gap: 10px; }
+  .hero-stat-label { font-size: 0.55rem; color: #555; }
+  .hero-stat-val { font-size: 1rem; }
+  .blue { color: var(--accent-blue); }
+  .green { color: var(--green); }
+
+  /* NAVIGATION GRID */
+  .nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .nav-btn {
+    background: var(--panel);
+    border: 4px solid var(--border);
+    padding: 25px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+    transition: 0.1s;
+  }
+
+  .nav-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 10px 10px 0px var(--accent-blue);
+    background: #fff;
+  }
+
+  /* ACTIVITY & LEADERBOARD LISTS */
+  .list-block {
+    background: var(--panel);
+    border: 4px solid var(--border);
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+  }
+
+  .list-row {
+    padding: 20px 30px;
+    border-bottom: 3px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 0.6rem;
+    line-height: 1.6;
+  }
+
+  .list-row:last-child { border-bottom: none; }
+  .dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  
+  .lb-rank { width: 50px; font-size: 0.8rem; }
+  .gold { color: #c8943a; }
+  .silver { color: #8a9199; }
+  .bronze { color: #a0623a; }
+
+  /* FOOTER */
+  .page-footer {
+    position: fixed;
+    bottom: 0; width: 100%;
+    height: 36px;
+    background: #fff;
+    border-top: 3px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    font-size: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .topnav { padding: 15px 20px; }
+    .brand-text { display: none; }
+    .nav-grid { grid-template-columns: 1fr; }
+    .hero-name { font-size: 1.2rem; }
+  }
 </style>
 </head>
 <body>
+
 <nav class="topnav">
-  <a href="/main/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-  <div class="nav-bits">
-    <span class="bits-label">BIT BALANCE</span>
-    <div class="bits-sep"></div>
-    <span class="bits-val">{{ user.bit_balance|default:"0" }}</span>
+  <div class="nav-left">
+    <a href="{% url 'main' %}"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
+    <span class="brand-text">canBet</span>
   </div>
-  <a href="/logout/" class="nav-logout">Logout ▶</a>
+  <div class="nav-right">
+    <div class="nav-bal">
+      {{ user.bit_balance|default:"0" }} BITS
+    </div>
+    <a href="{% url 'logout' %}" class="nav-back">LOGOUT</a>
+  </div>
 </nav>
 
 <div class="page">
-
   <section>
     <div class="hero">
       <div class="hero-greeting">WELCOME BACK</div>
@@ -118,7 +231,7 @@ body {
           <span class="hero-stat-val green">{{ user.bit_balance }}</span>
         </div>
         <div class="hero-stat">
-          <span class="hero-stat-label">RANK</span>
+          <span class="hero-stat-label">GLOBAL RANK</span>
           <span class="hero-stat-val">#{{ user.rank }}</span>
         </div>
       </div>
@@ -126,65 +239,56 @@ body {
   </section>
 
   <section>
-    <div class="section-label">Navigate</div>
+    <div class="section-label">Main Menu</div>
     <div class="nav-grid">
-      <a href="/inventory/"   class="nav-btn"><span class="nav-label">Inventory</span>   <span class="nav-arrow">▶</span></a>
-      <a href="/leaderboard/" class="nav-btn"><span class="nav-label">Leaderboard</span> <span class="nav-arrow">▶</span></a>
-      <a href="/crate/"       class="nav-btn"><span class="nav-label">Crates</span>      <span class="nav-arrow">▶</span></a>
-      <a href="/shop/"        class="nav-btn"><span class="nav-label">Shop</span>        <span class="nav-arrow">▶</span></a>
-      <a href="/profile/"     class="nav-btn"><span class="nav-label">Profile</span>     <span class="nav-arrow">▶</span></a>
-      <a href="/settings/"    class="nav-btn"><span class="nav-label">Settings</span>    <span class="nav-arrow">▶</span></a>
+      <a href="{% url 'inventory' %}" class="nav-btn"><span>Inventory</span> <span>▶</span></a>
+      <a href="{% url 'leaderboard' %}" class="nav-btn"><span>Leaderboard</span> <span>▶</span></a>
+      <a href="{% url 'crate' %}" class="nav-btn"><span>Crate Hub</span> <span>▶</span></a>
+      <a href="{% url 'shop' %}" class="nav-btn"><span>Marketplace</span> <span>▶</span></a>
+      <a href="{% url 'profile' %}" class="nav-btn"><span>My Profile</span> <span>▶</span></a>
+      <a href="{% url 'settings' %}" class="nav-btn"><span>Settings</span> <span>▶</span></a>
     </div>
   </section>
 
   <section>
-    <div class="section-label">Recent Activity</div>
-    <div class="activity-list">
+    <div class="section-label">Log Feed</div>
+    <div class="list-block">
       {% for activity in recent_activity %}
-        {% if activity.item_won %}
-        <div class="activity-row">
-          <div class="activity-dot dot-green"></div>
-          <span class="activity-text">Opened a crate — got {{ activity.item_won.rarity }} {{ activity.item_won.name }}</span>
-          <span class="activity-time">{{ activity.opened_at|timesince }} ago</span>
+        <div class="list-row">
+          <div class="dot {% if activity.item_won %}green{% else %}blue{% endif %}" 
+               style="background-color: {% if activity.item_won %}var(--green){% else %}var(--accent-blue){% endif %};"></div>
+          <div style="flex: 1;">
+            {% if activity.item_won %}
+              GOT: {{ activity.item_won.rarity }} - {{ activity.item_won.name }}
+            {% else %}
+              BOUGHT: {{ activity.item.name }}
+            {% endif %}
+          </div>
+          <div style="opacity: 0.6; font-size: 0.5rem;">{{ activity.opened_at|timesince }}{{ activity.purchased_at|timesince }} AGO</div>
         </div>
-        {% else %}
-        <div class="activity-row">
-          <div class="activity-dot dot-blue"></div>
-          <span class="activity-text">Purchased {{ activity.item.name }} from Shop</span>
-          <span class="activity-time">{{ activity.purchased_at|timesince }} ago</span>
-        </div>
-        {% endif %}
       {% empty %}
-        <div class="activity-row">
-          <div class="activity-dot dot-grey"></div>
-          <span class="activity-text">No activity yet — open a crate!</span>
-          <span class="activity-time"></span>
-        </div>
+        <div class="list-row" style="opacity: 0.5;">No system logs found. Go open a crate!</div>
       {% endfor %}
     </div>
   </section>
 
   <section>
-    <div class="section-label">Top Players</div>
-    <div class="lb-list">
+    <div class="section-label">Top Competitors</div>
+    <div class="list-block">
       {% for player in top5 %}
-      <div class="lb-row" {% if player == user %}style="background:rgba(91,141,184,0.08)"{% endif %}>
-        <span class="lb-rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}"
-              {% if player == user %}style="color:var(--accent2)"{% endif %}>#{{ forloop.counter }}</span>
-        <span class="lb-name" {% if player == user %}style="color:var(--accent2)"{% endif %}>
-          {{ player.username }}{% if player == user %} (you){% endif %}
+      <div class="list-row" {% if player == user %}style="background:rgba(91,141,184,0.1); border-left: 8px solid var(--accent-blue);"{% endif %}>
+        <span class="lb-rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+          #{{ forloop.counter }}
         </span>
-        <span class="lb-score">{{ player.bit_balance }} Bits</span>
+        <span style="flex: 1;">{{ player.username }}{% if player == user %} (YOU){% endif %}</span>
+        <span class="green">{{ player.bit_balance }} BITS</span>
       </div>
       {% endfor %}
     </div>
   </section>
-
 </div>
 
-<footer class="page-footer">
-  <span class="footer-text">CANBET v1.0</span>
-  <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
-</footer>
+
+
 </body>
 </html>

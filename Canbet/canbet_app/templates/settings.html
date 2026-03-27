@@ -1,121 +1,171 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — Settings</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --bg:#d0d3d7; --panel:#f2f3f5; --panel2:#e8eaed;
-  --border:#b4bac2; --border-dark:#8a9199;
-  --accent:#2e3c4e; --accent2:#5b8db8;
-  --text:#18222e; --text-dim:#7a8694;
-  --green:#2e8a56; --shadow:rgba(30,45,60,0.13); --shine:rgba(255,255,255,0.7);
-}
-html { scroll-behavior:smooth; }
-body { width:100vw; min-height:100vh; font-family:'Press Start 2P',monospace; background:var(--bg); background-image:radial-gradient(ellipse at 15% 10%,#e8ecf0 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,#c4c9cf 0%,transparent 55%); overflow-x:hidden; }
-::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:3px}
-.topnav { position:sticky; top:0; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 32px; background:rgba(242,243,245,0.92); border-bottom:1px solid var(--border); box-shadow:0 2px 16px var(--shadow); backdrop-filter:blur(12px); z-index:100; }
-.nav-back { font-size:0.32rem; color:var(--text-dim); letter-spacing:1.5px; text-decoration:none; transition:color 0.2s; }
-.nav-back:hover { color:var(--accent2); }
-.page { max-width:580px; margin:0 auto; padding:48px 24px 60px; display:flex; flex-direction:column; gap:40px; }
-.section-label { font-size:0.3rem; color:var(--text-dim); letter-spacing:3px; margin-bottom:14px; padding-left:10px; border-left:2px solid var(--accent2); }
-.settings-panel { border:1px solid var(--border); box-shadow:0 2px 12px var(--shadow); overflow:hidden; }
-.setting-row { display:flex; align-items:center; justify-content:space-between; padding:18px 24px; background:var(--panel); border-bottom:1px solid var(--border); gap:20px; }
-.setting-row:last-child { border-bottom:none; }
-.setting-label { font-size:0.35rem; color:var(--text); letter-spacing:1px; flex-shrink:0; }
-.setting-sub { font-size:0.25rem; color:var(--text-dim); letter-spacing:1px; margin-top:5px; }
-.slider-wrap { flex:1; max-width:200px; display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
-.slider { width:100%; -webkit-appearance:none; height:4px; background:var(--border); outline:none; }
-.slider::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; background:var(--accent2); cursor:pointer; border:2px solid var(--panel); box-shadow:0 1px 4px var(--shadow); }
-.slider-val { font-size:0.28rem; color:var(--accent2); letter-spacing:1px; }
-.toggle-btn { font-family:'Press Start 2P',monospace; font-size:0.32rem; padding:8px 16px; cursor:pointer; letter-spacing:1px; border:1px solid var(--border); transition:all 0.15s; background:var(--green); color:white; border-color:var(--green); }
-.toggle-btn.off { background:var(--panel2); color:var(--text-dim); border-color:var(--border); }
-.toggle-btn:hover { opacity:0.85; }
-.danger-btn { font-family:'Press Start 2P',monospace; font-size:0.32rem; padding:8px 16px; cursor:pointer; letter-spacing:1px; background:var(--panel2); color:#b84040; border:1px solid #d47070; transition:all 0.15s; }
-.danger-btn:hover { background:#b84040; color:white; border-color:#b84040; }
-.info-btn { font-family:'Press Start 2P',monospace; font-size:0.32rem; padding:8px 16px; cursor:pointer; letter-spacing:1px; background:var(--panel2); color:var(--accent2); border:1px solid var(--accent2); transition:all 0.15s; text-decoration:none; display:inline-block; }
-.info-btn:hover { background:var(--accent2); color:white; }
-.page-footer { position:fixed; bottom:0; left:0; right:0; height:28px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; background:rgba(242,243,245,0.92); border-top:1px solid var(--border); backdrop-filter:blur(8px); z-index:100; }
-.footer-text { font-size:0.26rem; color:var(--text-dim); letter-spacing:1.5px; }
-.status-right { display:flex; align-items:center; gap:7px; }
-.status-dot { width:5px; height:5px; border-radius:50%; background:var(--green); box-shadow:0 0 5px var(--green); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet — Settings</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet">
+    <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #c8c8c8;
+    --panel: #f2f3f5;
+    --border: #1a1a1a;
+    --accent-blue: #5b8db8;
+    --danger: #b84040;
+    --green: #2e8a56;
+    --text: #1a1a1a;
+  }
+
+  body {
+    width: 100%; min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  /* --- UNIFIED NAVIGATION --- */
+  .topnav {
+    width: 100%; height: 80px; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 40px; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+    position: sticky; top: 0; z-index: 100; border-bottom: 4px solid var(--border);
+  }
+  .nav-left { display: flex; align-items: center; gap: 18px; height: 100%; }
+  .logo { height: 44px; width: auto; }
+  .brand-text { font-size: 1rem; letter-spacing: 2px; }
+
+  .nav-right { display: flex; align-items: center; gap: 24px; }
+  
+  .nav-bal { 
+    font-size: 0.8rem; color: var(--green); background: #fff; 
+    padding: 10px 16px; border: 4px solid var(--border); 
+  }
+  
+  .nav-back {
+    font-size: 0.8rem; color: #000; text-decoration: none;
+    padding: 10px 20px; border: 4px solid #000; border-radius: 8px;
+    background: rgba(255,255,255,0.4); transition: 0.1s;
+  }
+  .nav-back:hover { background: #000; color: #fff; }
+
+  /* --- LAYOUT --- */
+  .page {
+    max-width: 800px; margin: 0 auto; padding: 80px 24px 120px;
+    display: flex; flex-direction: column; gap: 60px;
+  }
+  .section-label {
+    font-size: 1rem; margin-bottom: 30px; padding-left: 16px;
+    border-left: 10px solid var(--accent-blue); text-transform: uppercase;
+  }
+
+  /* --- SETTINGS PANELS --- */
+  .settings-panel { 
+    border: 8px solid var(--border); 
+    background: var(--panel);
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.1);
+    overflow: hidden; 
+  }
+  .setting-row { 
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 30px 40px; border-bottom: 4px solid #ddd; gap: 30px; 
+  }
+  .setting-row:last-child { border-bottom: none; }
+  
+  .setting-label { font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; }
+  .setting-sub { font-size: 0.6rem; color: #666; line-height: 1.4; }
+
+  /* --- BUTTONS --- */
+  .info-btn { 
+    font-family: 'Press Start 2P', monospace; font-size: 0.8rem; 
+    padding: 15px 25px; cursor: pointer; background: #fff; 
+    color: var(--text); border: 4px solid var(--border); text-decoration: none;
+    box-shadow: 6px 6px 0px var(--accent-blue);
+  }
+  .info-btn:hover { background: var(--accent-blue); color: #fff; transform: translate(-2px, -2px); }
+
+  .danger-btn { 
+    font-family: 'Press Start 2P', monospace; font-size: 0.8rem; 
+    padding: 15px 25px; cursor: pointer; background: #fff; 
+    color: var(--danger); border: 4px solid var(--danger);
+    transition: 0.1s;
+  }
+  .danger-btn:hover { background: var(--danger); color: white; box-shadow: 6px 6px 0px var(--border); }
+
+  /* --- FOOTER --- */
+  .page-footer {
+    position: fixed; bottom: 0; width: 100%; height: 48px;
+    background: #fff; border-top: 4px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; font-size: 0.7rem; z-index: 100;
+  }
+
+  @media (max-width: 768px) {
+    .setting-row { flex-direction: column; align-items: flex-start; }
+    .danger-btn, .info-btn { width: 100%; text-align: center; }
+    .brand-text { display: none; }
+  }
 </style>
-</head>
-<body>
-<nav class="topnav">
-  <a href="/main/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-  <a href="/main/" class="nav-back">◀ Menu</a>
-</nav>
-<div class="page">
-  <section>
-    <div class="section-label">Audio</div>
-    <div class="settings-panel">
-      <div class="setting-row">
-        <div><div class="setting-label">Master Volume</div><div class="setting-sub">Overall game audio</div></div>
-        <div class="slider-wrap">
-          <input type="range" class="slider" min="0" max="100" value="75" oninput="this.nextElementSibling.textContent=this.value+'%'">
-          <span class="slider-val">75%</span>
+  </head>
+  <body>
+
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="{% url 'main' %}"><img
+            src="{% static 'images/canBet symbol sym..png' %}" class="logo"
+            alt="Logo"></a>
+        <span class="brand-text">canBet</span>
+      </div>
+      <div class="nav-right">
+        <div class="nav-bal">
+          {{ user.bit_balance|default:"0" }} BITS
         </div>
+        <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
       </div>
-      <div class="setting-row">
-        <div><div class="setting-label">SFX Volume</div><div class="setting-sub">Sound effects</div></div>
-        <div class="slider-wrap">
-          <input type="range" class="slider" min="0" max="100" value="60" oninput="this.nextElementSibling.textContent=this.value+'%'">
-          <span class="slider-val">60%</span>
+    </nav>
+
+    <div class="page">
+      <section>
+        <div class="section-label">Node Management</div>
+        <div class="settings-panel">
+
+          <div class="setting-row">
+            <div><div class="setting-label">Privacy Manifest</div><div
+                class="setting-sub">Data encryption and usage
+                policies.</div></div>
+            <a href="/privacy/" class="info-btn">VIEW</a>
+          </div>
+
+          <div class="setting-row">
+            <div><div class="setting-label">Terminate Session</div><div
+                class="setting-sub">Disconnect safely from the
+                network.</div></div>
+            <a href="{% url 'logout' %}"><button
+                class="danger-btn">LOGOUT</button></a>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-label"
+                style="color:var(--danger)">DESTRUCT_NODE</div>
+              <div class="setting-sub" style="color:var(--danger)">Wipe all
+                credentials and assets permanently.</div>
+            </div>
+            <form action="{% url 'delete_account' %}" method="POST"
+              onsubmit="return confirm('WARNING: THIS ACTION IS IRREVERSIBLE. PURGE ALL DATA?')">
+              {% csrf_token %}
+              <button type="submit" class="danger-btn"
+                style="background:var(--danger); color:white;">DELETE</button>
+            </form>
+          </div>
+
         </div>
-      </div>
+      </section>
     </div>
-  </section>
-  <section>
-    <div class="section-label">Notifications</div>
-    <div class="settings-panel">
-      <div class="setting-row">
-        <div><div class="setting-label">Popup Notifications</div><div class="setting-sub">Show item alerts</div></div>
-        <button class="toggle-btn" onclick="toggle(this)">On</button>
-      </div>
-      <div class="setting-row">
-        <div><div class="setting-label">Rank Changes</div><div class="setting-sub">Leaderboard alerts</div></div>
-        <button class="toggle-btn" onclick="toggle(this)">On</button>
-      </div>
-      <div class="setting-row">
-        <div><div class="setting-label">Shop Restocks</div><div class="setting-sub">New item alerts</div></div>
-        <button class="toggle-btn off" onclick="toggle(this)">Off</button>
-      </div>
-    </div>
-  </section>
-  <section>
-    <div class="section-label">Account</div>
-    <div class="settings-panel">
-      <div class="setting-row">
-        <div><div class="setting-label">Privacy Policy</div><div class="setting-sub">Data usage info</div></div>
-        <a href="/privacy/" class="info-btn">View</a>
-      </div>
-      <div class="setting-row">
-        <div><div class="setting-label">Reset Progress</div><div class="setting-sub">Clears all data</div></div>
-        <button class="danger-btn">Reset</button>
-      </div>
-      <div class="setting-row">
-        <div><div class="setting-label">Log Out</div><div class="setting-sub">Return to login</div></div>
-        <a href="/logout/"><button class="danger-btn">Logout</button></a>
-      </div>
-    </div>
-  </section>
-</div>
-<footer class="page-footer">
-  <span class="footer-text">CANBET v1.0 — SETTINGS</span>
-  <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
-</footer>
-<script>
-function toggle(btn) {
-  const on = btn.textContent.trim() === 'On';
-  btn.textContent = on ? 'Off' : 'On';
-  btn.classList.toggle('off', on);
-}
-</script>
-</body>
+
+  </body>
 </html>
