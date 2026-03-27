@@ -84,18 +84,18 @@
     color: #fff;
   }
 
-  /* --- MAIN CONTENT (ENLARGED) --- */
+  /* --- MAIN CONTENT --- */
   .page {
-    max-width: 900px; /* Wider container */
+    max-width: 900px;
     margin: 0 auto;
-    padding: 60px 24px 120px;
+    padding: 60px 24px 80px; /* Adjusted bottom padding since footer is gone */
     display: flex;
     flex-direction: column;
     gap: 48px;
   }
 
   .page-title { 
-    font-size: 2rem; /* Much bigger */
+    font-size: 2rem;
     color: var(--accent); 
     letter-spacing: 4px; 
     padding-bottom: 20px; 
@@ -112,7 +112,7 @@
 
   /* --- SECTION STYLING --- */
   .section-label { 
-    font-size: 0.8rem; /* Bigger */
+    font-size: 0.8rem;
     color: var(--text); 
     letter-spacing: 2px; 
     margin-bottom: 15px; 
@@ -132,7 +132,7 @@
     display: flex; 
     align-items: flex-start; 
     gap: 20px; 
-    padding: 28px 32px; /* Increased padding */
+    padding: 28px 32px; 
     border-bottom: 2px solid #ddd; 
     transition: background 0.15s; 
   }
@@ -149,14 +149,14 @@
   }
 
   .policy-text { 
-    font-size: 0.65rem; /* Increased from 0.45rem */
+    font-size: 0.65rem; 
     color: var(--text); 
     letter-spacing: 0.5px; 
     line-height: 2.2; 
   }
 
   .policy-text span { 
-    color: #d32f2f; /* Red accent for keywords */
+    color: #d32f2f; 
     font-weight: bold;
   }
 
@@ -181,31 +181,6 @@
     transition: color 0.2s; 
   }
   .contact-email:hover { color: var(--green); }
-
-  /* --- FOOTER --- */
-  .page-footer { 
-    position: fixed; 
-    bottom: 0; left: 0; right: 0; 
-    height: 40px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    padding: 0 40px; 
-    background: #fff; 
-    border-top: 3px solid var(--border); 
-    z-index: 100; 
-  }
-
-  .footer-text { font-size: 0.5rem; color: var(--text-dim); }
-  .status-right { display: flex; align-items: center; gap: 10px; }
-  .status-dot { 
-    width: 10px; height: 10px; 
-    background: var(--green); 
-    box-shadow: 0 0 8px var(--green); 
-    animation: pulse 2s infinite; 
-  }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
   @media (max-width: 768px) {
     .topnav { padding: 18px 20px; }
@@ -296,12 +271,6 @@
         </div>
       </section>
     </div>
-
-    <footer class="page-footer">
-      <span class="footer-text">CANBET v1.0 — PRIVACY</span>
-      <div class="status-right"><span class="footer-text">ONLINE</span><div
-          class="status-dot"></div></div>
-    </footer>
 
   </body>
 </html>

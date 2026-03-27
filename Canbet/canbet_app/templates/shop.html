@@ -59,7 +59,7 @@
 
   /* --- LAYOUT --- */
   .page {
-    max-width: 1100px; margin: 0 auto; padding: 80px 24px 120px;
+    max-width: 1100px; margin: 0 auto; padding: 80px 24px 80px; /* Adjusted bottom padding */
     display: flex; flex-direction: column; gap: 50px;
   }
   .section-label {
@@ -114,20 +114,12 @@
 
   /* --- TOAST --- */
   .toast {
-    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(20px);
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
     background: var(--text); color: #fff; font-size: 0.8rem;
     padding: 20px 40px; border: 6px solid var(--accent-blue);
     opacity: 0; transition: 0.3s; z-index: 300; pointer-events: none;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* --- FOOTER --- */
-  .page-footer {
-    position: fixed; bottom: 0; width: 100%; height: 48px;
-    background: #fff; border-top: 4px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 40px; font-size: 0.7rem; z-index: 100;
-  }
 
   @media (max-width: 700px) {
     .shop-grid { grid-template-columns: 1fr; }
@@ -186,16 +178,6 @@
     </div>
 
     <div class="toast" id="toast"></div>
-
-    <footer class="page-footer">
-      <span>CANBET // TRANSACTION_NODE_04</span>
-      <div class="status-right"
-        style="display:flex; align-items:center; gap:12px;">
-        <span>MARKET_ONLINE</span>
-        <div
-          style="width: 12px; height: 12px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green);"></div>
-      </div>
-    </footer>
 
     <script>
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';

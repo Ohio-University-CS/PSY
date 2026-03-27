@@ -52,7 +52,7 @@
 
     /* --- LAYOUT --- */
     .page {
-      max-width: 1000px; margin: 0 auto; padding: 80px 24px 120px;
+      max-width: 1000px; margin: 0 auto; padding: 80px 24px 80px; /* Adjusted bottom padding */
       display: flex; flex-direction: column; gap: 60px;
     }
     .section-label {
@@ -105,14 +105,6 @@
     .win-sprite { width: 60px; height: 60px; image-rendering: pixelated; object-fit: contain; }
     .win-name { font-size: 0.85rem; flex: 1; }
     .win-rarity { font-size: 0.7rem; text-transform: uppercase; }
-
-    /* --- FOOTER --- */
-    .page-footer {
-      position: fixed; bottom: 0; width: 100%; height: 48px;
-      background: #fff; border-top: 4px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 40px; font-size: 0.7rem; z-index: 100;
-    }
 
     @media (max-width: 768px) {
       .profile-card { flex-direction: column; text-align: center; }
@@ -210,14 +202,6 @@
       </div>
     </section>
   </div>
-
-  <footer class="page-footer">
-    <span>CANBET // PROFILE_NODE_ACCESS</span>
-    <div class="status-right" style="display:flex; align-items:center; gap:12px;">
-      <span>USER_SYNC_OK</span>
-      <div style="width: 12px; height: 12px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green);"></div>
-    </div>
-  </footer>
 
 </body>
 </html>

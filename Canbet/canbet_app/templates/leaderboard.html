@@ -59,7 +59,7 @@
 
   /* --- LAYOUT --- */
   .page {
-    max-width: 900px; margin: 0 auto; padding: 60px 24px 120px;
+    max-width: 900px; margin: 0 auto; padding: 60px 24px 80px; /* Reduced bottom padding */
     display: flex; flex-direction: column; gap: 40px;
   }
   .section-label {
@@ -120,14 +120,6 @@
   .page-btn:hover:not(.active) { background: var(--panel2); transform: translateY(-2px); }
   .page-btn.active { background: var(--accent-blue); color: white; border-color: var(--border); }
 
-  /* --- FOOTER --- */
-  .page-footer {
-    position: fixed; bottom: 0; width: 100%; height: 48px;
-    background: #fff; border-top: 4px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 40px; font-size: 0.7rem; z-index: 100;
-  }
-
   @media (max-width: 768px) {
     .lb-header, .lb-row { grid-template-columns: 60px 1fr 100px; }
     .lb-th:nth-child(4), .crate-count { display: none; }
@@ -164,46 +156,18 @@
             <div class="lb-th">Crates</div>
           </div>
 
-          <div class="lb-list"> <div class="lb-row"><span
-                class="lb-rank gold">#1</span><span
-                class="lb-name">MasonRunner#033</span><span
-                class="lb-score">1,000,000</span><span
-                class="lb-crates">142</span></div> <div class="lb-row"><span
-                class="lb-rank silver">#2</span><span
-                class="lb-name">Ro_W</span><span
-                class="lb-score">888,888</span><span
-                class="lb-crates">118</span></div> <div class="lb-row"><span
-                class="lb-rank bronze">#3</span><span
-                class="lb-name">RoutineDes#803</span><span
-                class="lb-score">10,000</span><span
-                class="lb-crates">95</span></div> <div class="lb-row"><span
-                class="lb-rank">#4</span><span class="lb-name">PL200</span><span
-                class="lb-score">9,400</span><span
-                class="lb-crates">88</span></div> <div class="lb-row"><span
-                class="lb-rank">#5</span><span
-                class="lb-name">RoutineDev800</span><span
-                class="lb-score">7,200</span><span
-                class="lb-crates">74</span></div> <div class="lb-row"><span
-                class="lb-rank">#6</span><span
-                class="lb-name">UnikaLakoa800</span><span
-                class="lb-score">3,100</span><span
-                class="lb-crates">69</span></div> <div class="lb-row you"><span
-                class="lb-rank" style="color:var(--accent2)">#7</span><span
-                class="lb-name you">PLOB (you)</span><span
-                class="lb-score">1,674</span><span
-                class="lb-crates">67</span></div> <div class="lb-row"><span
-                class="lb-rank">#8</span><span
-                class="lb-name">HappyHhten#700</span><span
-                class="lb-score">1,200</span><span
-                class="lb-crates">51</span></div> <div class="lb-row"><span
-                class="lb-rank">#9</span><span
-                class="lb-name">pynocca3</span><span
-                class="lb-score">980</span><span
-                class="lb-crates">44</span></div> <div class="lb-row"><span
-                class="lb-rank">#10</span><span
-                class="lb-name">vtx.Draxon9c</span><span
-                class="lb-score">740</span><span
-                class="lb-crates">38</span></div> </div>
+          <div class="lb-list"> 
+            <div class="lb-row"><span class="lb-rank gold">#1</span><span class="lb-name">MasonRunner#033</span><span class="lb-score">1,000,000</span><span class="lb-crates">142</span></div> 
+            <div class="lb-row"><span class="lb-rank silver">#2</span><span class="lb-name">Ro_W</span><span class="lb-score">888,888</span><span class="lb-crates">118</span></div> 
+            <div class="lb-row"><span class="lb-rank bronze">#3</span><span class="lb-name">RoutineDes#803</span><span class="lb-score">10,000</span><span class="lb-crates">95</span></div> 
+            <div class="lb-row"><span class="lb-rank">#4</span><span class="lb-name">PL200</span><span class="lb-score">9,400</span><span class="lb-crates">88</span></div> 
+            <div class="lb-row"><span class="lb-rank">#5</span><span class="lb-name">RoutineDev800</span><span class="lb-score">7,200</span><span class="lb-crates">74</span></div> 
+            <div class="lb-row"><span class="lb-rank">#6</span><span class="lb-name">UnikaLakoa800</span><span class="lb-score">3,100</span><span class="lb-crates">69</span></div> 
+            <div class="lb-row you"><span class="lb-rank" style="color:var(--accent2)">#7</span><span class="lb-name you">PLOB (you)</span><span class="lb-score">1,674</span><span class="lb-crates">67</span></div> 
+            <div class="lb-row"><span class="lb-rank">#8</span><span class="lb-name">HappyHhten#700</span><span class="lb-score">1,200</span><span class="lb-crates">51</span></div> 
+            <div class="lb-row"><span class="lb-rank">#9</span><span class="lb-name">pynocca3</span><span class="lb-score">980</span><span class="lb-crates">44</span></div> 
+            <div class="lb-row"><span class="lb-rank">#10</span><span class="lb-name">vtx.Draxon9c</span><span class="lb-score">740</span><span class="lb-crates">38</span></div> 
+          </div>
         </div>
 
         <div class="pagination">
@@ -215,16 +179,6 @@
         </div>
       </section>
     </div>
-
-    <footer class="page-footer">
-      <span>CANBET // RANK_NETWORK_V1</span>
-      <div class="status-right"
-        style="display:flex; align-items:center; gap:12px;">
-        <span>UPLINK_STABLE</span>
-        <div
-          style="width: 12px; height: 12px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green);"></div>
-      </div>
-    </footer>
 
   </body>
 </html>

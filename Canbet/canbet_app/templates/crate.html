@@ -59,7 +59,7 @@
 
   /* --- LAYOUT --- */
   .page {
-    max-width: 1000px; margin: 0 auto; padding: 80px 24px 120px;
+    max-width: 1000px; margin: 0 auto; padding: 80px 24px 80px; /* Adjusted bottom padding */
     display: flex; flex-direction: column; gap: 60px;
   }
   .section-label {
@@ -140,14 +140,6 @@
     padding: 20px; cursor: pointer; transition: 0.1s;
   }
   .popup-btn:hover { transform: translate(-4px, -4px); box-shadow: 6px 6px 0px var(--border); }
-
-  /* --- FOOTER --- */
-  .page-footer {
-    position: fixed; bottom: 0; width: 100%; height: 48px;
-    background: #fff; border-top: 4px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 40px; font-size: 0.7rem; z-index: 100;
-  }
 
   @media (max-width: 850px) {
     .crates-grid { grid-template-columns: 1fr; }
@@ -234,16 +226,6 @@
         <button class="popup-btn" onclick="closePopup()">COLLECT ITEM</button>
       </div>
     </div>
-
-    <footer class="page-footer">
-      <span>CANBET // CRATE_HANDLER_V1</span>
-      <div class="status-right"
-        style="display:flex; align-items:center; gap:12px;">
-        <span>UPLINK_STABLE</span>
-        <div
-          style="width: 12px; height: 12px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green);"></div>
-      </div>
-    </footer>
 
     <script>
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
