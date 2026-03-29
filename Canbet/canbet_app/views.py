@@ -10,7 +10,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 import random
-from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase
+from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, Lootbox, LootboxInventoryEntry
+from .services import open_loot_box
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -121,27 +122,29 @@ CRATE_COSTS = {'SPOOKY': 200, 'SPACE': 300, 'FANTASY': 300, 'WEATHER': 300}
 @permission_classes([IsAuthenticated])
 def api_open_crate(request):
     crate_type = request.data.get('crate_type', '').upper()
-    cost = CRATE_COSTS.get(crate_type)
-    if not cost:
-        return Response({'error': 'Unknown crate type.'}, status=status.HTTP_400_BAD_REQUEST)
     user = request.user
-    if user.bit_balance < cost:
-        return Response({'error': 'Not enough Bits.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
-    pool = list(Item.objects.filter(collection=crate_type))
-    if not pool:
-        return Response({'error': 'Crate pool is empty — add items via the admin panel.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-    weights = [i.crate_weight for i in pool]
-    [won]   = random.choices(pool, weights=weights, k=1)
-    with transaction.atomic():
-        user.bit_balance   -= cost
-        user.crates_opened += 1
-        user.save(update_fields=['bit_balance', 'crates_opened'])
-        entry, created = InventoryEntry.objects.get_or_create(user=user, item=won)
-        if not created:
-            entry.quantity += 1
-            entry.save(update_fields=['quantity'])
-        CrateOpen.objects.create(user=user, crate_type=crate_type, item_won=won, bits_spent=cost)
-    return Response({'item': {'name': won.name, 'rarity': won.rarity, 'sprite_path': won.sprite_path}, 'new_balance': user.bit_balance})
+    
+    # Find lootbox by crate_type
+    try:
+        lootbox = Lootbox.objects.get(crate_type=crate_type, is_active=True)
+    except Lootbox.DoesNotExist:
+        return Response({'error': 'Crate type not found.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        won_item = open_loot_box(user, lootbox)
+    except LootboxInventoryEntry.DoesNotExist:
+        return Response({'error': 'You don\'t have this crate.'}, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    
+    return Response({
+        'item': {
+            'name': won_item.name,
+            'rarity': won_item.rarity,
+            'sprite_path': won_item.sprite_path
+        },
+        'new_balance': user.bit_balance
+    })
 
 
 @api_view(['POST'])
@@ -185,7 +188,7 @@ def api_leaderboard(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_recent_opens(request):
-    opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:20]
+    opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:50]
     return Response([
         {
             'username':    o.user.username,
@@ -196,6 +199,68 @@ def api_recent_opens(request):
         }
         for o in opens
     ])
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_buy_lootbox(request):
+    lootbox_id = request.data.get('lootbox_id')
+    lootbox = get_object_or_404(Lootbox, pk=lootbox_id)
+    user = request.user
+    
+    if not lootbox.is_active:
+        return Response({'error': 'This lootbox is not available.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if user.bit_balance < lootbox.cost_bits:
+        return Response({'error': 'Not enough Bits.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
+    
+    with transaction.atomic():
+        user.bit_balance -= lootbox.cost_bits
+        user.save(update_fields=['bit_balance'])
+        
+        entry, _ = LootboxInventoryEntry.objects.get_or_create(
+            user=user, loot_box=lootbox,
+            defaults={'quantity': 0}
+        )
+        entry.quantity += 1
+        entry.save(update_fields=['quantity'])
+    
+    return Response({
+        'message': f'Successfully purchased {lootbox.name}!',
+        'new_balance': user.bit_balance,
+        'lootbox_name': lootbox.name,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_lootboxes(request):
+    lootboxes = Lootbox.objects.filter(is_active=True).values(
+        'id', 'name', 'crate_type', 'cost_bits', 'sprite_path'
+    )
+    user_inventory = request.user.loot_box_inventory.values_list('loot_box_id', 'quantity')
+    user_inventory_map = {lb_id: qty for lb_id, qty in user_inventory}
+    
+    return Response([
+        {
+            **lb,
+            'quantity': user_inventory_map.get(lb['id'], 0)
+        }
+        for lb in lootboxes
+    ])
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_award_bits(request):
+    """Secret endpoint to award bits (for testing/cheats)"""
+    amount = request.data.get('amount', 0)
+    if amount <= 0:
+        return Response({'error': 'Invalid amount.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    request.user.bit_balance += amount
+    request.user.save(update_fields=['bit_balance'])
+    
+    return Response({'new_balance': request.user.bit_balance})
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -215,3 +280,5 @@ def register_view(request):
         login(request, user)
         return redirect('main')
     return render(request, 'register.html')
+
+from .services import open_loot_box, award_loot_box
