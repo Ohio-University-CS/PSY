@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, CanvasSubmission
+from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, CanvasSubmission, Lootbox, LootboxEntry, LootboxInventoryEntry
 
 
 @admin.register(CanBetUser)
@@ -45,3 +45,24 @@ class CanvasSubmissionAdmin(admin.ModelAdmin):
     list_display  = ('user', 'course_name', 'assignment_id', 'submitted_at', 'score')
     list_filter   = ('course_name',)
     search_fields = ('user__username', 'course_name')
+
+
+@admin.register(Lootbox)
+class LootboxAdmin(admin.ModelAdmin):
+    list_display  = ('name', 'crate_type', 'cost_bits', 'is_active')
+    list_filter   = ('crate_type', 'is_active')
+    search_fields = ('name',)
+
+
+@admin.register(LootboxEntry)
+class LootboxEntryAdmin(admin.ModelAdmin):
+    list_display  = ('loot_box', 'item', 'weight', 'drop_chance')
+    list_filter   = ('loot_box', 'item__rarity')
+    search_fields = ('loot_box__name', 'item__name')
+
+
+@admin.register(LootboxInventoryEntry)
+class LootboxInventoryEntryAdmin(admin.ModelAdmin):
+    list_display  = ('user', 'loot_box', 'quantity', 'obtained_at')
+    list_filter   = ('loot_box',)
+    search_fields = ('user__username', 'loot_box__name')
