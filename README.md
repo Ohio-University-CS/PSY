@@ -37,7 +37,7 @@ Compete with other CanBet users to see who can get the rarest items, most bits, 
 - Web Scraping
 ---
 # Where can you access the main site?
-**URL: **[canbet.live](https://canbet.live)
+URL:[canbet.live](https://canbet.live)
 ---
 # Browser Extension
 The extension runs on any `*.instructure.com` page and automatically pulls your assignment and submission data using your active Canvas session.
