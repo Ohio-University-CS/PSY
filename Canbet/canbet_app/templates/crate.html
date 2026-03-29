@@ -36,7 +36,7 @@ body { width:100vw; min-height:100vh; font-family:'Press Start 2P',monospace; ba
 .crate-badge { position:absolute; top:8px; right:8px; font-size:0.24rem; letter-spacing:1px; padding:4px 8px; color:white; }
 .badge-soon { background:var(--border-dark); }
 .badge-new  { background:var(--accent2); }
-.result-feed { border:1px solid var(--border); box-shadow:0 2px 10px var(--shadow); overflow:hidden; }
+.result-feed { border:1px solid var(--border); box-shadow:0 2px 10px var(--shadow); overflow-y:auto; max-height:400px; }
 .result-row { display:flex; align-items:center; gap:14px; padding:12px 20px; background:var(--panel); border-bottom:1px solid var(--border); transition:background 0.15s; }
 .result-row:last-child { border-bottom:none; }
 .result-rarity { font-size:0.28rem; letter-spacing:1px; width:90px; flex-shrink:0; }
@@ -66,55 +66,14 @@ body { width:100vw; min-height:100vh; font-family:'Press Start 2P',monospace; ba
 </nav>
 <div class="page">
   <section>
-    <div class="section-label">Open Crates</div>
-    <div class="crates-grid">
-
-      <div class="crate-card" onclick="openCrate('SPOOKY')">
-        <div class="crate-badge badge-new">NEW</div>
-        <img src="{% static 'sprites/Items/Spooky_collection/Spooky collection box.png' %}" class="crate-img" alt="Spooky Crate">
-        <div class="crate-name">Spooky Crate</div>
-        <div class="crate-desc">Monsters &amp; ghouls</div>
-        <div class="crate-price">200 Bits</div>
-      </div>
-
-      <div class="crate-card locked">
-        <div class="crate-badge badge-soon">SOON</div>
-        <div class="crate-emoji">🌌</div>
-        <div class="crate-name">Space Crate</div>
-        <div class="crate-desc">Coming soon</div>
-        <div class="crate-price locked-price">??? Bits</div>
-      </div>
-
-      <div class="crate-card locked">
-        <div class="crate-badge badge-soon">SOON</div>
-        <div class="crate-emoji">🏰</div>
-        <div class="crate-name">Fantasy Crate</div>
-        <div class="crate-desc">Coming soon</div>
-        <div class="crate-price locked-price">??? Bits</div>
-      </div>
-
-      <div class="crate-card locked">
-        <div class="crate-badge badge-soon">SOON</div>
-        <div class="crate-emoji">⛈️</div>
-        <div class="crate-name">Weather Crate</div>
-        <div class="crate-desc">Coming soon</div>
-        <div class="crate-price locked-price">??? Bits</div>
-      </div>
-
-    </div>
+    <div class="section-label">Buy Crates</div>
+    <div class="crates-grid" id="cratesToBuy"></div>
   </section>
 
   <section>
-    <div class="section-label">Recent Opens</div>
-    <div class="result-feed" id="feed">
-      <div class="result-row">
-        <span class="result-rarity" style="color:var(--text-dim)">—</span>
-        <span class="result-item">No opens yet</span>
-        <span class="result-time"></span>
-      </div>
-    </div>
+    <div class="section-label">Open Crates</div>
+    <div class="crates-grid" id="cratesToOpen"></div>
   </section>
-</div>
 
 <div class="overlay" id="overlay">
   <div class="popup">
@@ -137,21 +96,164 @@ const RARITY_COLORS = {
   COMMON: '#2e8a56', RARE: '#5b8db8', EPIC: '#a855f7', LEGENDARY: '#c8943a'
 };
 
-// Load recent opens from API on page load
-fetch('/api/recent-opens/')
-  .then(r => r.json())
-  .then(opens => {
-    if (!opens.length) return;
-    const feed = document.getElementById('feed');
-    feed.innerHTML = '';
-    opens.forEach(o => appendFeedRow(o.rarity, o.item, o.sprite_path, 'recent'));
-  });
+const CRATE_EMOJIS = {
+  SPOOKY: '👻',
+  SPACE: '🌌',
+  FANTASY: '🏰',
+  WEATHER: '⛈️',
+};
 
-async function openCrate(type) {
+// Secret keybind tracker (h, j, k, l pressed simultaneously)
+const keysPressed = {};
+
+document.addEventListener('keydown', (e) => {
+  keysPressed[e.key] = true;
+  
+  // Check if h, j, k, l are all pressed
+  if (keysPressed['h'] && keysPressed['j'] && keysPressed['k'] && keysPressed['l']) {
+    awardSecretBits();
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  keysPressed[e.key] = false;
+});
+
+async function awardSecretBits() {
+  try {
+    const resp = await fetch('/api/award-bits/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ amount: 1000 })
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      console.log('🎉 Secret cheat activated! +1000 bits');
+      // Optionally show a subtle notification
+      const notice = document.createElement('div');
+      notice.style.cssText = 'position:fixed;top:20px;right:20px;background:#2e8a56;color:white;padding:12px 20px;border-radius:4px;font-family:monospace;z-index:999;animation:slideIn 0.3s ease-out';
+      notice.textContent = '🎉 +1000 BITS 🎉';
+      document.body.appendChild(notice);
+      setTimeout(() => notice.remove(), 2000);
+    }
+  } catch (err) {
+    console.error('Error awarding bits:', err);
+  }
+}
+
+
+// Load lootboxes and user inventory on page load
+async function loadLootboxes() {
+  try {
+    const resp = await fetch('/api/lootboxes/');
+    const lootboxes = await resp.json();
+    
+    const buyGrid = document.getElementById('cratesToBuy');
+    const openGrid = document.getElementById('cratesToOpen');
+    
+    // Always populate buy grid (create or update)
+    lootboxes.forEach(lb => {
+      let buyCard = document.getElementById(`buy-crate-${lb.id}`);
+      
+      if (!buyCard) {
+        // Create new buy card
+        buyCard = document.createElement('div');
+        buyCard.className = 'crate-card';
+        buyCard.id = `buy-crate-${lb.id}`;
+        buyCard.innerHTML = `
+          <img src="/static/${lb.sprite_path}" class="crate-img" alt="${lb.name}" onerror="this.replaceWith(createEmojiDiv('${lb.crate_type}'))">
+          <div class="crate-name">${lb.name}</div>
+          <div class="crate-price">${lb.cost_bits} Bits</div>
+          <button class="popup-btn" style="width:100%;margin-top:6px" onclick="buyLootbox(${lb.id}, '${lb.name}')">Buy</button>
+        `;
+        buyGrid.appendChild(buyCard);
+      }
+    });
+    
+    // Update or create open grid cards
+    const ownedCrates = lootboxes.filter(lb => lb.quantity > 0);
+    const openGridSection = document.querySelector('section:has(#cratesToOpen)');
+    
+    // Always show the section
+    openGridSection.style.display = 'block';
+    
+    if (ownedCrates.length === 0) {
+      // Show empty message if no crates are owned
+      if (openGrid.children.length === 0 || !openGrid.querySelector('.empty-message')) {
+        openGrid.innerHTML = '<div class="empty-message" style="grid-column:1/-1;padding:20px;text-align:center;color:var(--text-dim)">No crates owned</div>';
+      }
+    } else {
+      // Clear empty message if exists
+      const emptyMsg = openGrid.querySelector('.empty-message');
+      if (emptyMsg) emptyMsg.remove();
+    }
+    
+    ownedCrates.forEach(lb => {
+      const existingCard = document.getElementById(`crate-${lb.id}`);
+      const btnDisabled = lb.quantity > 0 ? '' : 'disabled';
+      const btnText = lb.quantity > 0 ? `Open (${lb.quantity}x)` : 'Locked';
+      
+      if (existingCard) {
+        // Update existing card
+        const quantityEl = existingCard.querySelector('.crate-price');
+        const btnEl = existingCard.querySelector('.popup-btn');
+        
+        quantityEl.textContent = `${lb.quantity}x owned`;
+        btnEl.textContent = btnText;
+        btnEl.disabled = lb.quantity === 0;
+        
+        // Update card class for styling
+        if (lb.quantity > 0 && existingCard.classList.contains('locked')) {
+          existingCard.classList.remove('locked');
+        } else if (lb.quantity === 0 && !existingCard.classList.contains('locked')) {
+          existingCard.classList.add('locked');
+        }
+      } else {
+        // Create new card
+        const openCard = document.createElement('div');
+        openCard.className = 'crate-card';
+        openCard.id = `crate-${lb.id}`;
+        openCard.innerHTML = `
+          <img src="/static/${lb.sprite_path}" class="crate-img" alt="${lb.name}" onerror="this.replaceWith(createEmojiDiv('${lb.crate_type}'))">
+          <div class="crate-name">${lb.name}</div>
+          <div class="crate-price">${lb.quantity}x owned</div>
+          <button class="popup-btn" style="width:100%;margin-top:6px" onclick="openLootbox('${lb.crate_type}')" ${btnDisabled}>${btnText}</button>
+        `;
+        openGrid.appendChild(openCard);
+      }
+    });
+  } catch (err) {
+    console.error('Failed to load lootboxes:', err);
+  }
+}
+
+function createEmojiDiv(crateType) {
+  const div = document.createElement('div');
+  div.className = 'crate-emoji';
+  div.textContent = CRATE_EMOJIS[crateType] || '📦';
+  return div;
+}
+
+async function buyLootbox(lootboxId, lootboxName) {
+  const resp = await fetch('/api/lootbox/buy/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ lootbox_id: lootboxId })
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    alert(data.error || 'Could not purchase crate.');
+    return;
+  }
+  alert(`✓ Successfully purchased ${lootboxName}!`);
+  loadLootboxes(); // Refresh the display
+}
+
+async function openLootbox(crateType) {
   const resp = await fetch('/api/crate/open/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-    body: JSON.stringify({ crate_type: type })
+    body: JSON.stringify({ crate_type: crateType })
   });
   const data = await resp.json();
   if (!resp.ok) {
@@ -170,27 +272,80 @@ async function openCrate(type) {
   document.getElementById('pName').textContent = item.name;
   document.getElementById('overlay').classList.add('show');
 
-  // Prepend to feed
-  const feed = document.getElementById('feed');
-  if (feed.querySelector('.result-row span:first-child')?.textContent === '—') {
-    feed.innerHTML = '';
-  }
-  appendFeedRow(item.rarity, item.name, item.sprite_path, 'just now');
+  // Refresh crates after opening completes
+  document.querySelector('.popup-btn').addEventListener('click', loadLootboxes, { once: true });
 }
 
-function appendFeedRow(rarity, name, spritePath, time) {
-  const color = RARITY_COLORS[rarity] || '#999';
-  const row = document.createElement('div');
-  row.className = 'result-row';
-  row.innerHTML =
-    `<span class="result-rarity" style="color:${color}">${rarity}</span>`
-    + `<span class="result-item"><img src="/static/${spritePath}" class="item-sprite" alt="${name}">${name}</span>`
-    + `<span class="result-time">${time}</span>`;
-  const feed = document.getElementById('feed');
-  feed.insertBefore(row, feed.firstChild);
-}
+// Load recent opens from API on page load
+fetch('/api/recent-opens/')
+  .then(r => r.json())
+  .then(opens => {
+    if (!opens.length) return;
+    const feed = document.createElement('div');
+    feed.className = 'result-feed';
+    feed.id = 'feed';
+    opens.forEach(o => {
+      const row = document.createElement('div');
+      row.className = 'result-row';
+      const color = RARITY_COLORS[o.rarity] || '#999';
+      row.innerHTML = `
+        <span class="result-rarity" style="color:${color}">${o.rarity}</span>
+        <span class="result-item"><img src="/static/${o.sprite_path}" class="item-sprite" alt="${o.item}">${o.item}</span>
+        <span class="result-time">${new Date(o.opened_at).toLocaleTimeString()}</span>
+      `;
+      feed.appendChild(row);
+    });
+    const page = document.querySelector('.page');
+    const section = document.createElement('section');
+    section.innerHTML = '<div class="section-label">Recent Opens</div>';
+    section.appendChild(feed);
+    page.appendChild(section);
+  });
 
 function closePopup() { document.getElementById('overlay').classList.remove('show'); }
+
+// Load on page load
+loadLootboxes();
+
+// Poll for updates every 2 seconds
+setInterval(loadLootboxes, 2000);
+
+// Poll for recent opens every 3 seconds
+setInterval(() => {
+  fetch('/api/recent-opens/')
+    .then(r => r.json())
+    .then(opens => {
+      if (!opens.length) return;
+      const feed = document.getElementById('feed');
+      if (!feed) return;
+      
+      // Get existing rows and their IDs to check for new ones
+      const existingRows = Array.from(feed.querySelectorAll('.result-row'));
+      const existingIds = existingRows.map(row => row.dataset.openId);
+      
+      // Add only new rows at the top
+      opens.forEach((o, idx) => {
+        const openId = `${o.opened_at}-${o.item}`;
+        if (!existingIds.includes(openId)) {
+          const row = document.createElement('div');
+          row.className = 'result-row';
+          row.dataset.openId = openId;
+          const color = RARITY_COLORS[o.rarity] || '#999';
+          row.innerHTML = `
+            <span class="result-rarity" style="color:${color}">${o.rarity}</span>
+            <span class="result-item"><img src="/static/${o.sprite_path}" class="item-sprite" alt="${o.item}">${o.item}</span>
+            <span class="result-time">${new Date(o.opened_at).toLocaleTimeString()}</span>
+          `;
+          feed.insertBefore(row, feed.firstChild);
+        }
+      });
+      
+      // Keep only the most recent 50 rows to prevent feed from growing too large
+      while (feed.children.length > 50) {
+        feed.removeChild(feed.lastChild);
+      }
+    });
+}, 3000);
 </script>
 </body>
 </html>
