@@ -31,6 +31,9 @@ urlpatterns = [
     path('api/inventory/', views.api_inventory, name='api_inventory'),
     path('api/leaderboard/', views.api_leaderboard, name='api_leaderboard'),
     path('api/recent-opens/', views.api_recent_opens, name='api_recent_opens'),
+    path('api/lootboxes/', views.api_lootboxes, name='api_lootboxes'),
+    path('api/lootbox/buy/', views.api_buy_lootbox, name='api_buy_lootbox'),
+    path('api/award-bits/', views.api_award_bits, name='api_award_bits'),
     path('register/', views.register_view, name='register'),
 ]
 
