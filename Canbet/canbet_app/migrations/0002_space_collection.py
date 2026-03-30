@@ -5,36 +5,41 @@ from django.db import migrations
 
 
 SPACE_ITEMS = [
-    # (name, rarity, crate_weight)
-    ('Mercury',   'COMMON',    100),
-    ('Star',      'COMMON',    100),
-    ('Mars',      'RARE',       40),
-    ('Jupiter',   'RARE',       40),
-    ('Earth',     'RARE',       40),
-    ('Saturn',    'EPIC',       15),
-    ('Neptune',   'EPIC',       15),
-    ('Gargantua', 'LEGENDARY',   5),
-    ('Dyson Sphere', 'LEGENDARY', 5),
+    # (name, rarity, crate_weight, sprite_path)
+    ('Mercury',   'COMMON',    100, 'sprites/Items/SpaceCollection/Mercury.png'),
+    ('Star',      'COMMON',    100, 'sprites/Items/SpaceCollection/Star.png'),
+    ('Mars',      'RARE',       40, 'sprites/Items/SpaceCollection/Mars.png'),
+    ('Jupiter',   'RARE',       40, 'sprites/Items/SpaceCollection/Jupiter.png'),
+    ('Earth',     'RARE',       40, 'sprites/Items/SpaceCollection/Earth.png'),
+    ('Saturn',    'EPIC',       15, 'sprites/Items/SpaceCollection/Saturn.png'),
+    ('Neptune',   'EPIC',       15, 'sprites/Items/SpaceCollection/Neptune.png'),
+    ('Gargantua', 'LEGENDARY',   5, 'sprites/Items/SpaceCollection/Gargantua.png'),
+    ('Dyson Sphere', 'LEGENDARY', 5, 'sprites/Items/SpaceCollection/DysonSphere.png'),
 ]
 
 
 def create_space_crate(apps, schema_editor):
-    Item        = apps.get_model('canbet_app', 'Item')
-    Lootbox     = apps.get_model('canbet_app', 'Lootbox')
+    Item         = apps.get_model('canbet_app', 'Item')
+    Lootbox      = apps.get_model('canbet_app', 'Lootbox')
     LootboxEntry = apps.get_model('canbet_app', 'LootboxEntry')
 
     # 1. Create all Space items
     items = []
-    for name, rarity, weight in SPACE_ITEMS:
-        item, _ = Item.objects.get_or_create(
+    for name, rarity, weight, sprite_path in SPACE_ITEMS:
+        item, created = Item.objects.get_or_create(
             name=name,
+            collection='SPACE',
             defaults={
                 'rarity':       rarity,
-                'collection':   'SPACE',
                 'shop_price':   0,
                 'crate_weight': weight,
+                'sprite_path':  sprite_path,
             }
         )
+        # Update sprite_path even if item already exists
+        if item.sprite_path != sprite_path:
+            item.sprite_path = sprite_path
+            item.save()
         items.append((item, weight))
 
     # 2. Create the Space LootBox
