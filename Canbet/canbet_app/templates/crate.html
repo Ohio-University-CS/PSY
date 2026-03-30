@@ -277,6 +277,8 @@ async function openLootbox(crateType) {
 }
 
 // Load recent opens from API on page load
+let lastSeenOpenId = null;
+
 fetch('/api/recent-opens/')
   .then(r => r.json())
   .then(opens => {
@@ -287,6 +289,7 @@ fetch('/api/recent-opens/')
     opens.forEach(o => {
       const row = document.createElement('div');
       row.className = 'result-row';
+      row.dataset.openId = o.id;
       const color = RARITY_COLORS[o.rarity] || '#999';
       row.innerHTML = `
         <span class="result-rarity" style="color:${color}">${o.rarity}</span>
@@ -295,6 +298,9 @@ fetch('/api/recent-opens/')
       `;
       feed.appendChild(row);
     });
+    if (opens.length > 0) {
+      lastSeenOpenId = opens[0].id;
+    }
     const page = document.querySelector('.page');
     const section = document.createElement('section');
     section.innerHTML = '<div class="section-label">Recent Opens</div>';
@@ -310,7 +316,7 @@ loadLootboxes();
 // Poll for updates every 2 seconds
 setInterval(loadLootboxes, 2000);
 
-// Poll for recent opens every 3 seconds
+// Poll for recent opens every 3 seconds - only add truly new opens
 setInterval(() => {
   fetch('/api/recent-opens/')
     .then(r => r.json())
@@ -319,30 +325,34 @@ setInterval(() => {
       const feed = document.getElementById('feed');
       if (!feed) return;
       
-      // Get existing rows and their IDs to check for new ones
-      const existingRows = Array.from(feed.querySelectorAll('.result-row'));
-      const existingIds = existingRows.map(row => row.dataset.openId);
-      
-      // Add only new rows at the top
-      opens.forEach((o, idx) => {
-        const openId = `${o.opened_at}-${o.item}`;
-        if (!existingIds.includes(openId)) {
-          const row = document.createElement('div');
-          row.className = 'result-row';
-          row.dataset.openId = openId;
-          const color = RARITY_COLORS[o.rarity] || '#999';
-          row.innerHTML = `
-            <span class="result-rarity" style="color:${color}">${o.rarity}</span>
-            <span class="result-item"><img src="/static/${o.sprite_path}" class="item-sprite" alt="${o.item}">${o.item}</span>
-            <span class="result-time">${new Date(o.opened_at).toLocaleTimeString()}</span>
-          `;
-          feed.insertBefore(row, feed.firstChild);
+      // Process opens from newest to oldest, stopping when we find one we've already shown
+      let addedAny = false;
+      for (let i = 0; i < opens.length; i++) {
+        const o = opens[i];
+        // If this is the last one we saw, stop - everything else is old
+        if (lastSeenOpenId !== null && o.id === lastSeenOpenId) {
+          break;
         }
-      });
+        // This is a new open we haven't shown yet
+        const row = document.createElement('div');
+        row.className = 'result-row';
+        row.dataset.openId = o.id;
+        const color = RARITY_COLORS[o.rarity] || '#999';
+        row.innerHTML = `
+          <span class="result-rarity" style="color:${color}">${o.rarity}</span>
+          <span class="result-item"><img src="/static/${o.sprite_path}" class="item-sprite" alt="${o.item}">${o.item}</span>
+          <span class="result-time">${new Date(o.opened_at).toLocaleTimeString()}</span>
+        `;
+        feed.appendChild(row);
+        if (!addedAny) {
+          lastSeenOpenId = o.id;
+          addedAny = true;
+        }
+      }
       
       // Keep only the most recent 50 rows to prevent feed from growing too large
       while (feed.children.length > 50) {
-        feed.removeChild(feed.lastChild);
+        feed.removeChild(feed.firstChild);
       }
     });
 }, 3000);
