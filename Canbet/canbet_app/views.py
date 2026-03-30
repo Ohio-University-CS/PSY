@@ -4,16 +4,18 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum, Count, Min, Max
 from .models import CanBetUser, InventoryEntry, CrateOpen
-
+from django.db.models import Sum
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
 import random
-from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, CanvasSubmission
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  PAGE VIEWS
@@ -262,3 +264,102 @@ def register_view(request):
         login(request, user)
         return redirect('main')
     return render(request, 'register.html')
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  EXTENSION SYNC API
+
+BITS_PER_SUBMISSION = 50
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_canvas_sync(request):
+    """
+    Receives submission data posted by the browser extension.
+    The user must be logged into canbet.live (session cookie auth).
+
+    Payload:
+    {
+        "canvas_user_id": "12345",
+        "submissions": [
+            {
+                "course_id":     "111",
+                "course_name":   "CS101",
+                "assignment_id": "42",
+                "submitted_at":  "2025-09-01T10:00:00Z",
+                "score":         90.0   // nullable
+            },
+            ...
+        ]
+    }
+    """
+    canvas_user_id = str(request.data.get('canvas_user_id', '')).strip()
+    submissions    = request.data.get('submissions', [])
+
+    if not canvas_user_id:
+        return Response({'error': 'canvas_user_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not isinstance(submissions, list) or len(submissions) == 0:
+        return Response({'error': 'submissions must be a non-empty list.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = request.user
+
+    # Bind canvas_user_id to this account on first sync (if not already set)
+    if not user.canvas_user_id:
+        if CanBetUser.objects.filter(canvas_user_id=canvas_user_id).exclude(pk=user.pk).exists():
+            return Response(
+                {'error': 'That Canvas account is already linked to another canBet user.'},
+                status=status.HTTP_409_CONFLICT
+            )
+        user.canvas_user_id = canvas_user_id
+        user.save(update_fields=['canvas_user_id'])
+    elif user.canvas_user_id != canvas_user_id:
+        return Response(
+            {'error': 'canvas_user_id does not match the linked Canvas account for this user.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    created_count = 0
+    bits_awarded  = 0
+
+    for sub in submissions:
+        course_id        = str(sub.get('course_id', '')).strip()
+        course_name      = str(sub.get('course_name', course_id)).strip()
+        assignment_id    = str(sub.get('assignment_id', '')).strip()
+        submitted_at_raw = sub.get('submitted_at')
+        score            = sub.get('score')
+
+        if not course_id or not assignment_id or not submitted_at_raw:
+            continue  # skip malformed entries silently
+
+        submitted_at = parse_datetime(submitted_at_raw)
+        if submitted_at is None:
+            continue  # skip unparseable timestamps
+
+        _, created = CanvasSubmission.objects.update_or_create(
+            user=user,
+            course_id=course_id,
+            assignment_id=assignment_id,
+            defaults={
+                'course_name':  course_name,
+                'submitted_at': submitted_at,
+                'score':        score if score is not None else None,
+                'fetched_at':   timezone.now(),
+            }
+        )
+
+        if created:
+            created_count += 1
+            bits_awarded  += BITS_PER_SUBMISSION
+
+    if bits_awarded:
+        with transaction.atomic():
+            fresh = CanBetUser.objects.filter(pk=user.pk).values_list('bit_balance', flat=True)[0]
+            CanBetUser.objects.filter(pk=user.pk).update(bit_balance=fresh + bits_awarded)
+            user.bit_balance = fresh + bits_awarded
+
+    return Response({
+        'created':      created_count,
+        'bits_awarded': bits_awarded,
+        'new_balance':  user.bit_balance,
+    })
