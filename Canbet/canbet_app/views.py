@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Sum, Count, Min, Max
+from .models import CanBetUser, InventoryEntry, CrateOpen
 from django.db.models import Sum
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -72,8 +74,45 @@ def inventory(request):
 
 @login_required
 def leaderboard(request):
-    players = CanBetUser.objects.order_by('-bit_balance')
-    return render(request, 'leaderboard.html', {'players': players, 'user': request.user})
+    sort = request.GET.get('sort', 'bits')
+    page = int(request.GET.get('page', 1))
+    per_page = 10
+
+    qs = CanBetUser.objects.annotate(
+        crate_count=Count('crate_opens'),
+        best_rarity=Min('inventory__item__rarity'),
+        rarity_achieved=Min('inventory__obtained_at'),
+        last_crate=Max('crate_opens__opened_at'),
+    )
+
+    if sort == 'rarity':
+        qs = qs.order_by('best_rarity', 'rarity_achieved')
+    elif sort == 'crates':
+        qs = qs.order_by('-crate_count', 'last_crate')
+    else:
+        qs = qs.order_by('-bit_balance')
+
+    total = qs.count()
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    entries = qs[(page - 1) * per_page : page * per_page]
+
+    results = []
+    for i, u in enumerate(entries):
+        rank = (page - 1) * per_page + i + 1
+        results.append({
+            'rank': rank,
+            'username': u.username,
+            'bits': u.bit_balance,
+            'crates': u.crate_count,
+            'is_you': request.user.is_authenticated and u.pk == request.user.pk,
+        })
+
+    return render(request, 'leaderboard.html', {
+        'entries': results,
+        'sort': sort,
+        'page': page,
+        'total_pages': total_pages,
+    })
 
 @login_required
 def profile(request):
@@ -102,6 +141,14 @@ def shop(request):
 @login_required
 def crate(request):
     return render(request, 'crate.html')
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete()
+        return redirect('home') 
+    return redirect('settings')
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
