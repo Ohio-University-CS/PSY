@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "Canvas gamification extension",
   "permissions": ["storage", "activeTab"],
-  "host_permissions": ["*://*.instructure.com/*"],
+  "host_permissions": ["*://*.instructure.com/*", "https//:canbet.live/*"],
   "content_scripts": [
     {
       "matches": ["*://*.instructure.com/*"],
