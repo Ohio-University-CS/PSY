@@ -4,17 +4,17 @@ from django.db import migrations
 
 
 SPOOKY_ITEMS = [
-    # (name, rarity, crate_weight)
-    ('Angry Ghost',                 'COMMON',     100),
-    ('Happy Ghost',                 'COMMON',     100),
-    ('Zombie',                      'COMMON',     100),
-    ('Mummy',                       'RARE',        50),
-    ('Vampire',                     'RARE',        50),
-    ('Gargoyle',                    'RARE',        50),
-    ('Creature from the Black Lagoon', 'EPIC',     20),
-    ('Evil Robot',                  'EPIC',        20),
-    ('Flying Spaghetti Monster',    'LEGENDARY',    5),
-    ('Cthulhu',                     'LEGENDARY',    5),
+    # (name, rarity, crate_weight, sprite_path)
+    ('Angry Ghost',                 'COMMON',     100, 'sprites/Items/SpookyCollection/Angery Ghost.png'),
+    ('Happy Ghost',                 'COMMON',     100, 'sprites/Items/SpookyCollection/Happy Ghost.png'),
+    ('Zombie',                      'COMMON',     100, 'sprites/Items/SpookyCollection/zombie.png'),
+    ('Mummy',                       'RARE',        50, 'sprites/Items/SpookyCollection/mummy.png'),
+    ('Vampire',                     'RARE',        50, 'sprites/Items/SpookyCollection/Vampire.png'),
+    ('Gargoyle',                    'RARE',        50, 'sprites/Items/SpookyCollection/Gargoyle.png'),
+    ('Creature from the Black Lagoon', 'EPIC',     20, 'sprites/Items/SpookyCollection/creature from the black lagoon.png'),
+    ('Evil Robot',                  'EPIC',        20, 'sprites/Items/SpookyCollection/evil robot.png'),
+    ('Flying Spaghetti Monster',    'LEGENDARY',    5, 'sprites/Items/SpookyCollection/Flying spaghetti monster.png'),
+    ('Cthulhu',                     'LEGENDARY',    5, 'sprites/Items/SpookyCollection/Cthulhu.png'),
 ]
 
 
@@ -25,16 +25,21 @@ def create_spooky_crate(apps, schema_editor):
 
     # 1. Create all Spooky items
     items = []
-    for name, rarity, weight in SPOOKY_ITEMS:
-        item, _ = Item.objects.get_or_create(
+    for name, rarity, weight, sprite_path in SPOOKY_ITEMS:
+        item, created = Item.objects.get_or_create(
             name=name,
+            collection='SPOOKY',
             defaults={
                 'rarity':       rarity,
-                'collection':   'SPOOKY',
                 'shop_price':   0,
                 'crate_weight': weight,
+                'sprite_path':  sprite_path,
             }
         )
+        # Update sprite_path even if item already exists
+        if item.sprite_path != sprite_path:
+            item.sprite_path = sprite_path
+            item.save()
         items.append((item, weight))
 
     # 2. Create the Spooky LootBox
