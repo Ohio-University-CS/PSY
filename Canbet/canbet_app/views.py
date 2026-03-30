@@ -191,6 +191,7 @@ def api_recent_opens(request):
     opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:50]
     return Response([
         {
+            'id':          o.id,
             'username':    o.user.username,
             'item':        o.item_won.name if o.item_won else '?',
             'rarity':      o.item_won.rarity if o.item_won else '?',
