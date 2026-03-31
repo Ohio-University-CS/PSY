@@ -47,7 +47,7 @@ def create_spooky_crate(apps, schema_editor):
         name='Spooky Crate',
         defaults={
             'crate_type': 'SPOOKY',
-            'cost_bits':  100,
+            'cost_bits':  200,
             'is_active':  True,
         }
     )
