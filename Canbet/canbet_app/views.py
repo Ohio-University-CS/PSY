@@ -116,8 +116,6 @@ def api_me(request):
     })
 
 
-CRATE_COSTS = {'SPOOKY': 200, 'SPACE': 300, 'FANTASY': 300, 'WEATHER': 300}
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_open_crate(request):
