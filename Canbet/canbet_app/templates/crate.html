@@ -103,45 +103,6 @@ const CRATE_EMOJIS = {
   WEATHER: '⛈️',
 };
 
-// Secret keybind tracker (h, j, k, l pressed simultaneously)
-const keysPressed = {};
-
-document.addEventListener('keydown', (e) => {
-  keysPressed[e.key] = true;
-  
-  // Check if h, j, k, l are all pressed
-  if (keysPressed['h'] && keysPressed['j'] && keysPressed['k'] && keysPressed['l']) {
-    awardSecretBits();
-  }
-});
-
-document.addEventListener('keyup', (e) => {
-  keysPressed[e.key] = false;
-});
-
-async function awardSecretBits() {
-  try {
-    const resp = await fetch('/api/award-bits/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-      body: JSON.stringify({ amount: 1000 })
-    });
-    const data = await resp.json();
-    if (resp.ok) {
-      console.log('🎉 Secret cheat activated! +1000 bits');
-      // Optionally show a subtle notification
-      const notice = document.createElement('div');
-      notice.style.cssText = 'position:fixed;top:20px;right:20px;background:#2e8a56;color:white;padding:12px 20px;border-radius:4px;font-family:monospace;z-index:999;animation:slideIn 0.3s ease-out';
-      notice.textContent = '🎉 +1000 BITS 🎉';
-      document.body.appendChild(notice);
-      setTimeout(() => notice.remove(), 2000);
-    }
-  } catch (err) {
-    console.error('Error awarding bits:', err);
-  }
-}
-
-
 // Load lootboxes and user inventory on page load
 async function loadLootboxes() {
   try {
