@@ -27,7 +27,6 @@ urlpatterns = [
     path('crate/', views.crate, name='crate'),
     path('api/me/', views.api_me, name='api_me'),
     path('api/crate/open/', views.api_open_crate, name='api_open_crate'),
-    path('api/shop/buy/', views.api_buy_item, name='api_buy_item'),
     path('api/inventory/', views.api_inventory, name='api_inventory'),
     path('api/leaderboard/', views.api_leaderboard, name='api_leaderboard'),
     path('api/recent-opens/', views.api_recent_opens, name='api_recent_opens'),
