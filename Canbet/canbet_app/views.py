@@ -250,19 +250,6 @@ def api_lootboxes(request):
     ])
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def api_award_bits(request):
-    """Secret endpoint to award bits (for testing/cheats)"""
-    amount = request.data.get('amount', 0)
-    if amount <= 0:
-        return Response({'error': 'Invalid amount.'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    request.user.bit_balance += amount
-    request.user.save(update_fields=['bit_balance'])
-    
-    return Response({'new_balance': request.user.bit_balance})
-
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('main')
