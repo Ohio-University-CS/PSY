@@ -107,6 +107,7 @@
   .result-feed { 
     background: var(--panel); border: 8px solid var(--border);
     box-shadow: 12px 12px 0px rgba(0,0,0,0.1); overflow-y: auto; max-height: 400px;
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.1); overflow: hidden;
   }
   .result-row {
     display: flex; align-items: center; gap: 20px; padding: 20px 30px;
@@ -205,6 +206,29 @@
           </div>
 
           <div class="crate-card locked" data-crate-type="FANTASY">
+
+    <div class="page">
+      <section>
+        <div class="section-label">Available Crates</div>
+        <div class="crates-grid">
+
+          <div class="crate-card" onclick="openCrate('SPOOKY')">
+            <div class="crate-badge badge-new">NEW</div>
+            <div class="crate-emoji">👻</div>
+            <div class="crate-name">Spooky Crate</div>
+            <div class="crate-desc">Monsters & ghouls from the deep web.</div>
+            <div class="crate-price">200 Bits</div>
+          </div>
+
+          <div class="crate-card locked">
+            <div class="crate-badge badge-soon">SOON</div>
+            <div class="crate-emoji">🌌</div>
+            <div class="crate-name">Space Crate</div>
+            <div class="crate-desc">Rare data from the void.</div>
+            <div class="crate-price locked-price">??? Bits</div>
+          </div>
+
+          <div class="crate-card locked">
             <div class="crate-badge badge-soon">SOON</div>
             <div class="crate-emoji">🏰</div>
             <div class="crate-name">Fantasy Crate</div>
@@ -213,6 +237,10 @@
           </div>
 
           <div class="crate-card locked" data-crate-type="WEATHER">
+            <div class="crate-price locked-price">??? Bits</div>
+          </div>
+
+          <div class="crate-card locked">
             <div class="crate-badge badge-soon">SOON</div>
             <div class="crate-emoji">⛈️</div>
             <div class="crate-name">Weather Crate</div>
@@ -265,6 +293,32 @@
         <div class="purchase-cost" id="insufficientBitsRequired"></div>
         <div class="purchase-balance" id="insufficientBitsBalance"></div>
         <button class="popup-btn" onclick="closeInsufficientBitsPopup()">OK</button>
+            <div class="crate-price locked-price">??? Bits</div>
+          </div>
+
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Loot Feed</div>
+        <div class="result-feed" id="feed">
+          <div class="result-row"
+            style="justify-content: center; opacity: 0.5;">
+            <span class="result-item">No data packets decrypted yet.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="overlay" id="overlay">
+      <div class="popup">
+        <div class="sidebar-title"
+          style="font-size:0.6rem; margin-bottom: 10px; color:#777; border-bottom: 4px solid #ddd; padding-bottom: 15px;">DECRYPTION
+          COMPLETE</div>
+        <div class="popup-icon"><img id="pIcon" src alt></div>
+        <div class="popup-rarity" id="pRarity"></div>
+        <div class="popup-name" id="pName"></div>
+        <button class="popup-btn" onclick="closePopup()">COLLECT ITEM</button>
       </div>
     </div>
 
@@ -395,6 +449,13 @@ async function buyLootbox(lootboxId, lootboxName, crateType) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
     body: JSON.stringify({ lootbox_id: lootboxId })
+fetch('/api/recent-opens/')
+  .then(r => r.json())
+  .then(opens => {
+    if (!opens.length) return;
+    const feed = document.getElementById('feed');
+    feed.innerHTML = '';
+    opens.forEach(o => appendFeedRow(o.rarity, o.item, o.sprite_path, 'RECENT'));
   });
   const data = await resp.json();
   if (!resp.ok) {
@@ -442,16 +503,14 @@ async function openLootbox(crateType) {
   });
   const data = await resp.json();
   if (!resp.ok) {
-    alert(data.error || 'Could not open crate.');
+    alert(data.error || 'Insufficient Bits.');
     return;
   }
   const item = data.item;
   const color = RARITY_COLORS[item.rarity] || '#999';
 
-  // Show popup
   const icon = document.getElementById('pIcon');
   icon.src = '/static/' + item.sprite_path;
-  icon.alt = item.name;
   document.getElementById('pRarity').textContent = item.rarity;
   document.getElementById('pRarity').style.color = color;
   document.getElementById('pName').textContent = item.name;
@@ -462,6 +521,9 @@ async function openLootbox(crateType) {
   if (collectBtn) {
     collectBtn.addEventListener('click', loadLootboxes, { once: true });
   }
+  const feed = document.getElementById('feed');
+  if (feed.innerText.includes('No data packets')) feed.innerHTML = '';
+  appendFeedRow(item.rarity, item.name, item.sprite_path, 'JUST NOW');
 }
 
 // Track the latest open ID we've added to prevent duplicates

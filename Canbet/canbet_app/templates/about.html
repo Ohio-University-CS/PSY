@@ -1,55 +1,171 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — About us</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  width: 100vw; height: 100vh; overflow: hidden;
-  font-family: 'Press Start 2P', monospace;
-  background-color: #d8d8d8;
-  background-image: url("{% static 'images/aboutbg.png' %}");
-  background-position: center; background-repeat: no-repeat; background-size: cover;
-  image-rendering: pixelated; display: flex; flex-direction: column;
-}
-.topnav {
-  width: 100%; display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 24px; background: rgba(255,255,255,0.6);
-  position: relative; z-index: 10; border-bottom: 1px solid #ccc;
-}
-.nav-link { font-size: 0.5rem; color: #333; text-decoration: none; letter-spacing: 1px; }
-.nav-link:hover { text-decoration: underline; }
-.page-content {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 2rem; position: relative;
-}
-.about-title {
-  font-family: 'Press Start 2P', monospace; font-size: clamp(1.8rem, 5vw, 3.5rem);
-  color: #1a1a1a; letter-spacing: 2px; margin-bottom: 1.5rem;
-  text-align: center; line-height: 1.3; position: relative; z-index: 1;
-}
-.about-sub {
-  font-family: 'Press Start 2P', monospace; font-size: 0.55rem;
-  color: #555; letter-spacing: 1px; text-align: center; line-height: 2;
-  position: relative; z-index: 1;
-}
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet — About us</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet">
+    <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: #c8c8c8;
+    display: flex;
+    flex-direction: column;
+    color: #1a1a1a;
+    overflow-x: hidden;
+  }
+
+  /* --- CONSISTENT NAVIGATION --- */
+  .topnav {
+    width: 100%; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 18px 40px; 
+    background: rgba(255,255,255,0.15); 
+    backdrop-filter: blur(4px);
+    z-index: 10;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo { height: 42px; width: auto; }
+
+  .brand-text {
+    font-size: 1rem;
+    color: #000;
+    letter-spacing: 2px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+  }
+
+  .nav-link {
+    font-size: 0.75rem;
+    color: #000;
+    text-decoration: none;
+    letter-spacing: 1px;
+    padding: 10px 18px;
+    border: 3px solid #000;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.4);
+    transition: all 0.2s ease;
+  }
+
+  .nav-link:hover {
+    background: #000;
+    color: #fff;
+  }
+
+  /* --- PAGE CONTENT LAYOUT --- */
+  .page-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  /* Hero Row: Title vs Large Image */
+  .hero-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .about-title {
+    flex: 1; 
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.3;
+    text-align: left;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  }
+
+  .about-image-container {
+    flex: 1.5; /* Image is 50% larger than the title block */
+    display: flex;
+    justify-content: center;
+  }
+
+  .about-image {
+    max-width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+    border: 6px solid #1a1a1a;
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.2);
+  }
+
+  /* Description Box */
+  .about-sub {
+    width: 100%;
+    font-size: 0.8rem;
+    color: #2a2a2a;
+    line-height: 2.2;
+    text-align: left;
+    background: rgba(255,255,255,0.3);
+    padding: 2.5rem;
+    border-left: 10px solid #1a1a1a;
+    border-radius: 4px;
+  }
+
+  .accent { color: #f00; }
+
+  /* Responsive Fixes */
+  @media (max-width: 850px) {
+    .hero-row { flex-direction: column; text-align: center; }
+    .about-title { text-align: center; margin-bottom: 1rem; }
+    .about-image-container { flex: 1; width: 100%; }
+    .about-sub { text-align: center; border-left: none; border-top: 10px solid #1a1a1a; }
+    .topnav { padding: 18px 20px; }
+  }
 </style>
-</head>
-<body>
-<nav class="topnav">
-  <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-  <span style="display:flex;gap:16px;">
-    <a href="/privacy/" class="nav-link">Privacy</a>
-    <a href="/login/" class="nav-link">Login</a>
-  </span>
-</nav>
-<div class="page-content">
-  <h1 class="about-title">About canBet</h1>
-  <p class="about-sub">A Canvas LMS addon that rewards students<br>for staying on top of their coursework.<br><br>Earn Bits. Open crates. Flex on the leaderboard.</p>
-</div>
-</body>
+  </head>
+  <body>
+
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}"
+            class="logo" alt="Logo"></a>
+        <span class="brand-text">canBet</span>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/login/" class="nav-link">Login</a>
+      </div>
+    </nav>
+
+    <main class="page-content">
+      <section class="hero-row">
+        <h1 class="about-title">About<br>canBet</h1>
+        <div class="about-image-container">
+          <img src="{% static 'images/aboutbg.png' %}" class="about-image"
+            alt="canBet Preview">
+        </div>
+      </section>
+
+      <section class="about-sub">
+        A <span class="accent">Canvas LMS</span> addon that rewards students for
+        staying on top of their coursework.
+        <br><br>
+        Earn Bits. Open crates. Flex on the leaderboard.
+      </section>
+    </main>
+
+  </body>
 </html>
