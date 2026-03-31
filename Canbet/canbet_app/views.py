@@ -7,6 +7,8 @@ from .models import CanBetUser, InventoryEntry, CrateOpen
 from django.db.models import Sum
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -195,9 +197,10 @@ def api_open_crate(request):
     })
 
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_buy_item(request):
+def api_canvas_sync(request):
     item = get_object_or_404(Item, pk=request.data.get('item_id'))
     user = request.user
     if item.shop_price <= 0:
@@ -327,25 +330,6 @@ BITS_PER_SUBMISSION = 50
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_canvas_sync(request):
-    """
-    Receives submission data posted by the browser extension.
-    The user must be logged into canbet.live (session cookie auth).
-
-    Payload:
-    {
-        "canvas_user_id": "12345",
-        "submissions": [
-            {
-                "course_id":     "111",
-                "course_name":   "CS101",
-                "assignment_id": "42",
-                "submitted_at":  "2025-09-01T10:00:00Z",
-                "score":         90.0   // nullable
-            },
-            ...
-        ]
-    }
-    """
     canvas_user_id = str(request.data.get('canvas_user_id', '')).strip()
     submissions    = request.data.get('submissions', [])
 
