@@ -45,3 +45,9 @@ The extension runs on any `*.instructure.com` page and automatically pulls your 
 - **Firefox:** [addons.mozilla.org/en-US/firefox/addon/canbet/](https://addons.mozilla.org/en-US/firefox/addon/canbet/)
 - **Chrome:** Awaiting Approval
 ---
+# How can I locally host our service?
+Step 1: Clone the repository
+Step 2: Install dependancies found in requirements.txt using the command "pip install -r requirements.txt"
+Step 3: Run the command python manage.py runserver
+--- 
+
