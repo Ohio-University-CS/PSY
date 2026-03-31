@@ -106,8 +106,10 @@
   /* --- RECENT FEED --- */
   .result-feed { 
     background: var(--panel); border: 8px solid var(--border);
-    box-shadow: 12px 12px 0px rgba(0,0,0,0.1); overflow-y: auto; max-height: 400px;
-    box-shadow: 12px 12px 0px rgba(0,0,0,0.1); overflow: hidden;
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 400px;
   }
   .result-row {
     display: flex; align-items: center; gap: 20px; padding: 20px 30px;
@@ -191,7 +193,7 @@
         <div class="crates-grid" id="cratesToBuy">
           <div class="crate-card" data-crate-type="SPOOKY" onclick="buyCrateByType('SPOOKY', 'Spooky Crate')">
             <div class="crate-badge badge-new">NEW</div>
-            <div class="crate-emoji">👻</div>
+            <img src="{% static 'sprites/Items/SpookyCollection/Spooky collection box.png' %}" class="crate-emoji" style="width: 120px; height: auto; image-rendering: pixelated;">
             <div class="crate-name">Spooky Crate</div>
             <div class="crate-desc">Monsters & ghouls from the deep web.</div>
             <div class="crate-price" data-price-type="buy">Loading...</div>
@@ -206,29 +208,6 @@
           </div>
 
           <div class="crate-card locked" data-crate-type="FANTASY">
-
-    <div class="page">
-      <section>
-        <div class="section-label">Available Crates</div>
-        <div class="crates-grid">
-
-          <div class="crate-card" onclick="openCrate('SPOOKY')">
-            <div class="crate-badge badge-new">NEW</div>
-            <div class="crate-emoji">👻</div>
-            <div class="crate-name">Spooky Crate</div>
-            <div class="crate-desc">Monsters & ghouls from the deep web.</div>
-            <div class="crate-price">200 Bits</div>
-          </div>
-
-          <div class="crate-card locked">
-            <div class="crate-badge badge-soon">SOON</div>
-            <div class="crate-emoji">🌌</div>
-            <div class="crate-name">Space Crate</div>
-            <div class="crate-desc">Rare data from the void.</div>
-            <div class="crate-price locked-price">??? Bits</div>
-          </div>
-
-          <div class="crate-card locked">
             <div class="crate-badge badge-soon">SOON</div>
             <div class="crate-emoji">🏰</div>
             <div class="crate-name">Fantasy Crate</div>
@@ -237,10 +216,6 @@
           </div>
 
           <div class="crate-card locked" data-crate-type="WEATHER">
-            <div class="crate-price locked-price">??? Bits</div>
-          </div>
-
-          <div class="crate-card locked">
             <div class="crate-badge badge-soon">SOON</div>
             <div class="crate-emoji">⛈️</div>
             <div class="crate-name">Weather Crate</div>
@@ -276,8 +251,8 @@
 
     <div class="overlay" id="purchaseOverlay">
       <div class="popup">
-        <div class="purchase-emoji" id="purchaseEmoji"></div>
         <div class="purchase-title">PURCHASED!</div>
+        <div class="purchase-emoji" id="purchaseEmoji"></div>
         <div class="purchase-name" id="purchaseName"></div>
         <div class="purchase-cost" id="purchaseCost"></div>
         <div class="purchase-balance" id="purchaseBalance"></div>
@@ -293,32 +268,6 @@
         <div class="purchase-cost" id="insufficientBitsRequired"></div>
         <div class="purchase-balance" id="insufficientBitsBalance"></div>
         <button class="popup-btn" onclick="closeInsufficientBitsPopup()">OK</button>
-            <div class="crate-price locked-price">??? Bits</div>
-          </div>
-
-        </div>
-      </section>
-
-      <section>
-        <div class="section-label">Loot Feed</div>
-        <div class="result-feed" id="feed">
-          <div class="result-row"
-            style="justify-content: center; opacity: 0.5;">
-            <span class="result-item">No data packets decrypted yet.</span>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <div class="overlay" id="overlay">
-      <div class="popup">
-        <div class="sidebar-title"
-          style="font-size:0.6rem; margin-bottom: 10px; color:#777; border-bottom: 4px solid #ddd; padding-bottom: 15px;">DECRYPTION
-          COMPLETE</div>
-        <div class="popup-icon"><img id="pIcon" src alt></div>
-        <div class="popup-rarity" id="pRarity"></div>
-        <div class="popup-name" id="pName"></div>
-        <button class="popup-btn" onclick="closePopup()">COLLECT ITEM</button>
       </div>
     </div>
 
@@ -330,7 +279,7 @@ const RARITY_COLORS = {
 };
 
 const CRATE_EMOJIS = {
-  SPOOKY: '👻',
+  SPOOKY: '<img src="/static/sprites/Items/SpookyCollection/Spooky collection box.png" style="width:80px;height:auto;image-rendering:pixelated;">',
   SPACE: '🌌',
   FANTASY: '🏰',
   WEATHER: '⛈️',
@@ -449,13 +398,6 @@ async function buyLootbox(lootboxId, lootboxName, crateType) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
     body: JSON.stringify({ lootbox_id: lootboxId })
-fetch('/api/recent-opens/')
-  .then(r => r.json())
-  .then(opens => {
-    if (!opens.length) return;
-    const feed = document.getElementById('feed');
-    feed.innerHTML = '';
-    opens.forEach(o => appendFeedRow(o.rarity, o.item, o.sprite_path, 'RECENT'));
   });
   const data = await resp.json();
   if (!resp.ok) {
@@ -515,6 +457,8 @@ async function openLootbox(crateType) {
   document.getElementById('pRarity').style.color = color;
   document.getElementById('pName').textContent = item.name;
   document.getElementById('overlay').classList.add('show');
+  request.user.crates_opened += 1
+  request.user.save(update_fields=['crates_opened'])
 
   // Refresh crates after opening completes
   const collectBtn = document.querySelector('.popup-btn');
@@ -561,8 +505,9 @@ function showInsufficientBitsPopup(crateName, requiredBits, crateType) {
   const bitsNeeded = requiredBits - currentUserBalance;
   const emoji = CRATE_EMOJIS[crateType] || '❓';
   
-  document.getElementById('insufficientBitsEmoji').textContent = emoji;
+  
   document.getElementById('insufficientBitsName').textContent = crateName;
+  document.getElementById('insufficientBitsEmoji').innerHTML = emoji;
   document.getElementById('insufficientBitsRequired').textContent = `You need ${bitsNeeded} more Bits`;
   document.getElementById('insufficientBitsBalance').textContent = `Your Balance: ${currentUserBalance} BITS`;
   
@@ -576,7 +521,7 @@ function closeInsufficientBitsPopup() {
 function showPurchasePopup(crateName, crateType) {
   const emoji = CRATE_EMOJIS[crateType] || '❓';
   
-  document.getElementById('purchaseEmoji').textContent = emoji;
+  document.getElementById('purchaseEmoji').innerHTML = emoji;
   document.getElementById('purchaseName').textContent = crateName;
   document.getElementById('purchaseCost').textContent = '✓ Purchase confirmed';
   document.getElementById('purchaseBalance').textContent = `New Balance: ${currentUserBalance} BITS`;
