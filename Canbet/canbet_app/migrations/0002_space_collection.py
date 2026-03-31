@@ -47,7 +47,7 @@ def create_space_crate(apps, schema_editor):
         name='Space Crate',
         defaults={
             'crate_type': 'SPACE',
-            'cost_bits':  100,
+            'cost_bits':  200,
             'is_active':  True,
         }
     )
