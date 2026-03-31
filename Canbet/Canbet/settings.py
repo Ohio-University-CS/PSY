@@ -105,9 +105,11 @@ REST_FRAMEWORK = {
 }
 
 # ── CORS (dev only) ─────────────────────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = [
-    'https://canbet.live',
-    'https://www.canbet.live',
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https://canbet\.live$',
+    r'^https://www\.canbet\.live$',
+    r'^moz-extension://.*$',
+    r'^chrome-extension://.*$',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
