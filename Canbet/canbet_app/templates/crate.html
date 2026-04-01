@@ -10,6 +10,8 @@
       rel="stylesheet">
     <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  .result-time { font-size: 0.6rem; color: #777; }
+  .result-user { color: var(--accent-blue); }
   
   :root {
     --bg: #c8c8c8;
@@ -270,9 +272,10 @@
         <button class="popup-btn" onclick="closeInsufficientBitsPopup()">OK</button>
       </div>
     </div>
-
-    <script>
+<script>const CURRENT_USERNAME = "{{ user.username }}";</script>
+<script>
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
+
 
 const RARITY_COLORS = {
   COMMON: '#2e8a56', RARE: '#5b8db8', EPIC: '#a855f7', LEGENDARY: '#c8943a'
@@ -467,7 +470,7 @@ async function openLootbox(crateType) {
   }
   const feed = document.getElementById('feed');
   if (feed.innerText.includes('No data packets')) feed.innerHTML = '';
-  appendFeedRow(item.rarity, item.name, item.sprite_path, 'JUST NOW');
+  appendFeedRow(item.rarity, item.name, item.sprite_path, 'JUST NOW', CURRENT_USERNAME);
 }
 
 // Track the latest open ID we've added to prevent duplicates
@@ -480,20 +483,19 @@ fetch('/api/recent-opens/')
     if (!opens.length) return;
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
-    opens.forEach(o => appendFeedRow(o.rarity, o.item, o.sprite_path, new Date(o.opened_at).toLocaleTimeString()));
-    if (opens.length > 0) {
+    opens.forEach(o => appendFeedRow(o.rarity, o.item, o.sprite_path, new Date(o.opened_at).toLocaleTimeString(), o.username));    if (opens.length > 0) {
       lastSeenOpenId = opens[0].id;
     }
   });
 
-function appendFeedRow(rarity, name, spritePath, time) {
+function appendFeedRow(rarity, name, spritePath, time, username) {
   const color = RARITY_COLORS[rarity] || '#999';
   const row = document.createElement('div');
   row.className = 'result-row';
   row.innerHTML = `
     <span class="result-rarity" style="color:${color}">${rarity}</span>
     <span class="result-item"><img src="/static/${spritePath}" class="item-sprite" alt="${name}">${name}</span>
-    <span class="result-time">${time}</span>
+    <span class="result-time">${username ? `<span class="result-user">${username}</span> · ` : ''}${time}</span>
   `;
   const feed = document.getElementById('feed');
   feed.appendChild(row);
@@ -536,7 +538,7 @@ function closePurchasePopup() {
 loadCratePrices();
 loadLootboxes();
 
-// Poll for updates every 2 seconds
+// Poll for updates every 1 seconds
 setInterval(loadLootboxes, 1000);
 
 // Load prices on page load and whenever lootboxes update
@@ -564,8 +566,7 @@ setInterval(() => {
           lastSeenOpenId = o.id;
           addedAny = true;
         }
-        appendFeedRow(o.rarity, o.item, o.sprite_path, new Date(o.opened_at).toLocaleTimeString());
-      }
+          appendFeedRow(o.rarity, o.item, o.sprite_path, new Date(o.opened_at).toLocaleTimeString(), o.username);      }
       
       // Keep only the most recent 50 rows to prevent feed from growing too large
       while (feed.children.length > 50) {
