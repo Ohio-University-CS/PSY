@@ -83,7 +83,7 @@ def leaderboard(request):
     per_page = 10
 
     qs = CanBetUser.objects.annotate(
-        crate_count=Count('crate_opens'),
+        crate_count=Count('crate_opens', distinct=True),
         best_rarity=Min('inventory__item__rarity'),
         rarity_achieved=Min('inventory__obtained_at'),
         last_crate=Max('crate_opens__opened_at'),
