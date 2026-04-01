@@ -1,6 +1,6 @@
 import random
-from django.db import transaction
-from .models import LootboxInventoryEntry, LootboxEntry, InventoryEntry, CrateOpen, Lootbox
+from django.db import transaction, models
+from .models import CanBetUser, LootboxInventoryEntry, LootboxEntry, InventoryEntry, CrateOpen, Lootbox
 
 def open_loot_box(user, loot_box):
     with transaction.atomic():
@@ -20,8 +20,10 @@ def open_loot_box(user, loot_box):
         weights = [e.weight for e in pool]
         won_entry = random.choices(pool, weights=weights, k=1)[0]
         won_item = won_entry.item
-
-        inv, _ = InventoryEntry.objects.get_or_create(user=user, item=won_item)
+        inv, _ = InventoryEntry.objects.get_or_create(
+            user=user, item=won_item,
+            defaults={'quantity': 0}
+        )
         inv.quantity += 1
         inv.save()
 
@@ -31,6 +33,12 @@ def open_loot_box(user, loot_box):
             item_won=won_item,
             bits_spent=loot_box.cost_bits,
         )
+
+        CanBetUser.objects.filter(pk=user.pk).update(
+            crates_opened=models.F('crates_opened') + 1
+        )
+        user.crates_opened += 1  # keep in-memory object consistent
+
         return won_item
 
 
