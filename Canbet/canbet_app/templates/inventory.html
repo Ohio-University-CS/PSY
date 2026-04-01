@@ -10,6 +10,16 @@
       rel="stylesheet">
     <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+    .qty-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    font-size: 0.45rem;
+    color: #fff;
+    background: var(--border);
+    padding: 2px 5px;
+    pointer-events: none;
+    }
   
   :root {
     --bg: #c8c8c8;
@@ -169,15 +179,20 @@
 
           <div class="inv-grid">
             {% for entry in entries %}
-            <div class="inv-slot"
-              data-name="{{ entry.item.name }}"
-              data-rarity="{{ entry.item.rarity }}"
-              data-color="{% if entry.item.rarity == 'LEGENDARY' %}#c8943a{% elif entry.item.rarity == 'EPIC' %}#a855f7{% elif entry.item.rarity == 'RARE' %}#5b8db8{% else %}#2e8a56{% endif %}"
-              data-img="{% static entry.item.sprite_path %}"
-              onclick="sel(this)">
-              <img src="{% static entry.item.sprite_path %}"
-                alt="{{ entry.item.name }}">
-            </div>
+              
+          <div class="inv-slot"
+            data-name="{{ entry.item.name }}"
+            data-rarity="{{ entry.item.rarity }}"
+            data-color="{% if entry.item.rarity == 'LEGENDARY' %}#c8943a{% elif entry.item.rarity == 'EPIC' %}#a855f7{% elif entry.item.rarity == 'RARE' %}#5b8db8{% else %}#2e8a56{% endif %}"
+            data-img="{% static entry.item.sprite_path %}"
+            data-quantity="{{ entry.quantity }}"
+            onclick="sel(this)">
+            <img src="{% static entry.item.sprite_path %}" alt="{{ entry.item.name }}">
+            {% if entry.quantity > 1 %}
+              <span class="qty-badge">x{{ entry.quantity }}</span>
+            {% endif %}
+          </div>
+            
             {% endfor %}
 
             {% with total=entries|length %}
@@ -204,16 +219,18 @@
 function sel(el) {
   document.querySelectorAll('.inv-slot').forEach(s => s.classList.remove('selected'));
   el.classList.add('selected');
-  
-  const name   = el.dataset.name;
-  const rarity = el.dataset.rarity;
-  const color  = el.dataset.color;
-  const img    = el.dataset.img;
-  
+
+  const name     = el.dataset.name;
+  const rarity   = el.dataset.rarity;
+  const color    = el.dataset.color;
+  const img      = el.dataset.img;
+  const quantity = el.dataset.quantity;
+
   document.getElementById('selContent').innerHTML = `
     <div class="sel-icon"><img src="${img}" alt="${name}"></div>
     <div class="sel-name">${name}</div>
     <div class="sel-rarity" style="color:${color}; border-color:${color};">${rarity}</div>
+    ${quantity > 1 ? `<div class="sel-qty">x${quantity} owned</div>` : ''}
   `;
 }
 </script>
