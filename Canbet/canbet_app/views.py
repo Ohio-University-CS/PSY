@@ -4,16 +4,22 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum, Count, Min, Max
 from .models import CanBetUser, InventoryEntry, CrateOpen
-
+from django.db.models import Sum
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
 import random
-from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase
+from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, Lootbox, LootboxInventoryEntry, CanvasSubmission
+from .services import open_loot_box
 from rest_framework.permissions import IsAuthenticated, AllowAny
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  PAGE VIEWS
@@ -77,7 +83,7 @@ def leaderboard(request):
     per_page = 10
 
     qs = CanBetUser.objects.annotate(
-        crate_count=Count('crate_opens'),
+        crate_count=Count('crate_opens', distinct=True),
         best_rarity=Min('inventory__item__rarity'),
         rarity_achieved=Min('inventory__obtained_at'),
         last_crate=Max('crate_opens__opened_at'),
@@ -140,6 +146,14 @@ def shop(request):
 def crate(request):
     return render(request, 'crate.html')
 
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete()
+        return redirect('home') 
+    return redirect('settings')
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  REST API
@@ -154,38 +168,41 @@ def api_me(request):
     })
 
 
-CRATE_COSTS = {'SPOOKY': 200, 'SPACE': 300, 'FANTASY': 300, 'WEATHER': 300}
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_open_crate(request):
     crate_type = request.data.get('crate_type', '').upper()
-    cost = CRATE_COSTS.get(crate_type)
-    if not cost:
-        return Response({'error': 'Unknown crate type.'}, status=status.HTTP_400_BAD_REQUEST)
     user = request.user
-    if user.bit_balance < cost:
-        return Response({'error': 'Not enough Bits.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
-    pool = list(Item.objects.filter(collection=crate_type))
-    if not pool:
-        return Response({'error': 'Crate pool is empty — add items via the admin panel.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-    weights = [i.crate_weight for i in pool]
-    [won]   = random.choices(pool, weights=weights, k=1)
-    with transaction.atomic():
-        user.bit_balance   -= cost
-        user.crates_opened += 1
-        user.save(update_fields=['bit_balance', 'crates_opened'])
-        entry, created = InventoryEntry.objects.get_or_create(user=user, item=won)
-        if not created:
-            entry.quantity += 1
-            entry.save(update_fields=['quantity'])
-        CrateOpen.objects.create(user=user, crate_type=crate_type, item_won=won, bits_spent=cost)
-    return Response({'item': {'name': won.name, 'rarity': won.rarity, 'sprite_path': won.sprite_path}, 'new_balance': user.bit_balance})
+
+    try:
+        lootbox = Lootbox.objects.get(crate_type=crate_type, is_active=True)
+    except Lootbox.DoesNotExist:
+        return Response({'error': 'Crate type not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        won_item = open_loot_box(user, lootbox)
+    except LootboxInventoryEntry.DoesNotExist:
+        return Response({'error': "You don't have this crate."}, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    user.refresh_from_db()
+
+    return Response({
+        'item': {
+            'name': won_item.name,
+            'rarity': won_item.rarity,
+            'sprite_path': won_item.sprite_path,
+        },
+        'new_balance': user.bit_balance,
+        'crates_opened': user.crates_opened,
+    })
 
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_buy_item(request):
+def api_canvas_sync(request):
     item = get_object_or_404(Item, pk=request.data.get('item_id'))
     user = request.user
     if item.shop_price <= 0:
@@ -224,9 +241,10 @@ def api_leaderboard(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_recent_opens(request):
-    opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:20]
+    opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:50]
     return Response([
         {
+            'id':          o.id,
             'username':    o.user.username,
             'item':        o.item_won.name if o.item_won else '?',
             'rarity':      o.item_won.rarity if o.item_won else '?',
@@ -235,6 +253,55 @@ def api_recent_opens(request):
         }
         for o in opens
     ])
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_buy_lootbox(request):
+    lootbox_id = request.data.get('lootbox_id')
+    lootbox = get_object_or_404(Lootbox, pk=lootbox_id)
+    user = request.user
+    
+    if not lootbox.is_active:
+        return Response({'error': 'This lootbox is not available.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if user.bit_balance < lootbox.cost_bits:
+        return Response({'error': 'Not enough Bits.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
+    
+    with transaction.atomic():
+        user.bit_balance -= lootbox.cost_bits
+        user.save(update_fields=['bit_balance'])
+        
+        entry, _ = LootboxInventoryEntry.objects.get_or_create(
+            user=user, loot_box=lootbox,
+            defaults={'quantity': 0}
+        )
+        entry.quantity += 1
+        entry.save(update_fields=['quantity'])
+    
+    return Response({
+        'message': f'Successfully purchased {lootbox.name}!',
+        'new_balance': user.bit_balance,
+        'lootbox_name': lootbox.name,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_lootboxes(request):
+    lootboxes = Lootbox.objects.filter(is_active=True).values(
+        'id', 'name', 'crate_type', 'cost_bits', 'sprite_path'
+    )
+    user_inventory = request.user.loot_box_inventory.values_list('loot_box_id', 'quantity')
+    user_inventory_map = {lb_id: qty for lb_id, qty in user_inventory}
+    
+    return Response([
+        {
+            **lb,
+            'quantity': user_inventory_map.get(lb['id'], 0)
+        }
+        for lb in lootboxes
+    ])
+
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -254,3 +321,84 @@ def register_view(request):
         login(request, user)
         return redirect('main')
     return render(request, 'register.html')
+
+from .services import open_loot_box, award_loot_box
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  EXTENSION SYNC API
+
+BITS_PER_SUBMISSION = 50
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_canvas_sync(request):
+    canvas_user_id = str(request.data.get('canvas_user_id', '')).strip()
+    submissions    = request.data.get('submissions', [])
+
+    if not canvas_user_id:
+        return Response({'error': 'canvas_user_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not isinstance(submissions, list) or len(submissions) == 0:
+        return Response({'error': 'submissions must be a non-empty list.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = request.user
+
+    # Bind canvas_user_id to this account on first sync (if not already set)
+    if not user.canvas_user_id:
+        if CanBetUser.objects.filter(canvas_user_id=canvas_user_id).exclude(pk=user.pk).exists():
+            return Response(
+                {'error': 'That Canvas account is already linked to another canBet user.'},
+                status=status.HTTP_409_CONFLICT
+            )
+        user.canvas_user_id = canvas_user_id
+        user.save(update_fields=['canvas_user_id'])
+    elif user.canvas_user_id != canvas_user_id:
+        return Response(
+            {'error': 'canvas_user_id does not match the linked Canvas account for this user.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    created_count = 0
+    bits_awarded  = 0
+
+    for sub in submissions:
+        course_id        = str(sub.get('course_id', '')).strip()
+        course_name      = str(sub.get('course_name', course_id)).strip()
+        assignment_id    = str(sub.get('assignment_id', '')).strip()
+        submitted_at_raw = sub.get('submitted_at')
+        score            = sub.get('score')
+
+        if not course_id or not assignment_id or not submitted_at_raw:
+            continue  # skip malformed entries silently
+
+        submitted_at = parse_datetime(submitted_at_raw)
+        if submitted_at is None:
+            continue  # skip unparseable timestamps
+
+        _, created = CanvasSubmission.objects.update_or_create(
+            user=user,
+            course_id=course_id,
+            assignment_id=assignment_id,
+            defaults={
+                'course_name':  course_name,
+                'submitted_at': submitted_at,
+                'score':        score if score is not None else None,
+                'fetched_at':   timezone.now(),
+            }
+        )
+
+        if created:
+            created_count += 1
+            bits_awarded  += BITS_PER_SUBMISSION
+
+    if bits_awarded:
+        with transaction.atomic():
+            fresh = CanBetUser.objects.filter(pk=user.pk).values_list('bit_balance', flat=True)[0]
+            CanBetUser.objects.filter(pk=user.pk).update(bit_balance=fresh + bits_awarded)
+            user.bit_balance = fresh + bits_awarded
+
+    return Response({
+        'created':      created_count,
+        'bits_awarded': bits_awarded,
+        'new_balance':  user.bit_balance,
+    })

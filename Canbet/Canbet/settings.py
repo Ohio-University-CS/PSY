@@ -105,7 +105,13 @@ REST_FRAMEWORK = {
 }
 
 # ── CORS (dev only) ─────────────────────────────────────────────────────────────
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https://canbet\.live$',
+    r'^https://www\.canbet\.live$',
+    r'^moz-extension://.*$',
+    r'^chrome-extension://.*$',
+]
+CORS_ALLOW_CREDENTIALS = True
 
 # ── Canvas API ──────────────────────────────────────────────────────────────────
 CANVAS_DOMAIN = os.getenv('CANVAS_DOMAIN', 'https://ohio.instructure.com')

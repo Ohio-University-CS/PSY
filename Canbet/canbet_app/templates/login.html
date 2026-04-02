@@ -9,81 +9,208 @@
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet">
     <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  width: 100vw; height: 100vh; overflow: hidden;
-  font-family: 'Press Start 2P', monospace;
-  background-color: #c8c8c8;
-  background-image: url("{% static 'images/loginbg.png' %}");
-  background-position: center; background-repeat: no-repeat; background-size: cover;
-  image-rendering: pixelated; display: flex; flex-direction: column; position: relative;
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: #c8c8c8;
+    display: flex;
+    flex-direction: column;
+    color: #1a1a1a;
+  }
+
+  /* --- UNIFIED NAVIGATION --- */
 .topnav {
-  width: 100%; display: flex; justify-content: flex-start; align-items: center;
-  padding: 12px 24px; background: rgba(255,255,255,0.6);
-  border-bottom: 1px solid #ccc; position: relative; z-index: 10;
+  width: 100%; 
+  height: 80px; /* Fixed height for consistency */
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  padding: 0 40px; 
+  background: rgba(255, 255, 255, 0.15); 
+  backdrop-filter: blur(4px);
+  position: sticky; 
+  top: 0; 
+  z-index: 100; 
+  border-bottom: 4px solid var(--border);
 }
-.page-content {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: rgba(208,208,208,0.85); padding: 2rem; gap: 2rem; backdrop-filter: blur(4px);
+
+.nav-left { 
+  display: flex; 
+  align-items: center; 
+  gap: 18px; 
+  height: 100%;
 }
-.form-group {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0.6rem; width: 100%; max-width: 360px;
+
+.logo { 
+  height: 44px; /* Standardized logo height */
+  width: auto; 
 }
-.form-label { font-size: 0.75rem; color: #333; letter-spacing: 1px; align-self: flex-start; }
-.form-input {
-  width: 100%; height: 36px; background: #888; border: none; outline: none;
-  padding: 4px 10px; font-family: 'Press Start 2P', monospace; font-size: 0.6rem; color: #eee;
+
+.brand-text { 
+  font-size: 1rem; 
+  letter-spacing: 2px; 
 }
-.form-input:focus { background: #999; }
-.login-btn {
-  cursor: pointer; background: #4a8a60; color: #fff; transition: background 0.2s;
-  width: 100%; height: 36px; border: none; font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem; letter-spacing: 1px;
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
-.login-btn:hover { background: #3a7a50; }
-.error-msg {
-  font-size: 0.55rem; color: #b84040; letter-spacing: 1px; text-align: center;
-  background: rgba(184,64,64,0.1); padding: 8px 16px; border: 1px solid #d47070;
+
+.nav-back {
+  font-size: 0.8rem; 
+  color: #000; 
+  text-decoration: none;
+  padding: 10px 20px; 
+  border: 4px solid #000; 
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.4); 
+  transition: 0.1s;
 }
-.bottom-links { display: flex; gap: 20px; align-items: center; }
+
+.nav-back:hover { 
+  background: #000; 
+  color: #fff; 
+}
+
+/* Standardized Balance Display for Shop/Main */
+.nav-bal { 
+  font-size: 0.8rem; 
+  color: var(--green); 
+  background: #fff; 
+  padding: 10px 16px; 
+  border: 4px solid var(--border); 
+}
+
+  /* --- LOGIN BOX --- */
+  .container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 500px;
+    background: #f2f3f5;
+    border: 6px solid #1a1a1a;
+    padding: 40px;
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.2);
+  }
+
+  .auth-title {
+    font-size: 1.4rem;
+    margin-bottom: 30px;
+    text-align: center;
+    text-transform: uppercase;
+    border-bottom: 4px solid #1a1a1a;
+    padding-bottom: 15px;
+  }
+
+  .form-group { margin-bottom: 25px; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.6rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 15px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    border: 4px solid #1a1a1a;
+    background: #fff;
+    outline: none;
+  }
+
+  .error-msg {
+    background: #ffdbdb;
+    color: #d32f2f;
+    border: 3px solid #d32f2f;
+    padding: 15px;
+    font-size: 0.55rem;
+    margin-bottom: 25px;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 20px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    background: #4a8a60; /* The green you liked */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #2a5a30;
+    transition: all 0.1s;
+  }
+
+  .btn-submit:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #2a5a30;
+  }
+
+  .auth-footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 0.55rem;
+    line-height: 2;
+  }
+
+  .auth-footer a { color: #5b8db8; text-decoration: none; }
 </style>
   </head>
   <body>
+
     <nav class="topnav">
-      <a href="/"><img src="{% static 'images/canBet symbol sym..png' %}"
-          class="logo" alt="Logo"></a>
-    </nav>
-    <div class="page-content">
-      <form method="POST" action="/login/" style="display:contents;">
-        {% csrf_token %}
-        {% if error %}
-        <div class="error-msg">{{ error }}</div>
-        {% endif %}
-        <div class="form-group">
-          <label class="form-label" for="email-input">Email</label>
-          <input id="email-input" name="email" type="email" class="form-input"
-            placeholder="yourname@school.edu" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="password-input">Password</label>
-          <input id="password-input" name="password" type="password"
-            class="form-input" placeholder="************" required>
-        </div>
-        <div class="form-group">
-          <button type="submit" class="login-btn">Login</button>
-        </div>
-      </form>
-      <div class="bottom-links">
-        <span style="font-size:0.55rem;color:#555;letter-spacing:1px;">
-          No account? <a href="/register/"
-            style="color:#4a8a60;text-decoration:none;">Register</a>
-        </span>
-        <span style="font-size:0.55rem;color:#888;">|</span>
-        <a href="/privacy/"
-          style="font-size:0.55rem;color:#555;letter-spacing:1px;text-decoration:none;">Privacy</a>
+      <div class="nav-left">
+        <a href="{% url 'home' %}"><img
+            src="{% static 'images/canBet symbol sym..png' %}" class="logo"
+            alt="Logo"></a>
+        <span class="brand-text">canBet</span>
       </div>
-    </div>
+    </nav>
+
+    <main class="container">
+      <div class="auth-card">
+        <h1 class="auth-title">Login</h1>
+
+        {% if error %}
+        <div class="error-msg">!! {{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'login' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" required
+              placeholder="name@school.edu">
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required
+              placeholder="********">
+          </div>
+
+          <button type="submit" class="btn-submit">ENTER</button>
+        </form>
+
+        <div class="auth-footer">
+          New user? <a href="/register/"
+            style="color:#4a8a60;text-decoration:none;">Register</a><br>
+          <a href="{% url 'privacy' %}">Privacy Policy</a>
+        </div>
+      </div>
+    </main>
+
   </body>
 </html>

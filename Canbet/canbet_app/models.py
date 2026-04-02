@@ -74,6 +74,60 @@ class InventoryEntry(models.Model):
 
     def __str__(self):
         return f"{self.user.username} → {self.item.name} x{self.quantity}"
+    
+
+# ── Lootbox definitions ───────────────────────────────────────────────────────
+class Lootbox(models.Model):
+    CRATE_CHOICES = [
+        ('SPOOKY',  'Spooky Crate'),
+        ('SPACE',   'Space Crate'),
+        ('FANTASY', 'Fantasy Crate'),
+        ('WEATHER', 'Weather Crate'),
+    ]
+
+    name        = models.CharField(max_length=128, unique=True)
+    crate_type  = models.CharField(max_length=16, choices=CRATE_CHOICES)
+    cost_bits   = models.IntegerField(default=100)
+    sprite_path = models.CharField(max_length=256, blank=True)
+    is_active   = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+# ── Per-item drop probabilities inside a Lootbox ──────────────────────────────
+class LootboxEntry(models.Model):
+    loot_box   = models.ForeignKey(Lootbox, on_delete=models.CASCADE, related_name='entries')
+    item       = models.ForeignKey(Item, on_delete=models.CASCADE)
+    weight     = models.PositiveIntegerField(default=10)  # relative weight, not a %
+
+    class Meta:
+        unique_together = ('loot_box', 'item')
+
+    @property
+    def drop_chance(self):
+        """Returns this entry's probability as a float between 0 and 1."""
+        total = self.loot_box.entries.aggregate(
+            total=models.Sum('weight')
+        )['total'] or 1
+        return self.weight / total
+
+    def __str__(self):
+        return f"{self.loot_box.name} → {self.item.name} ({self.weight}w)"
+
+
+# ── Lootboxes in a user's inventory ──────────────────────────────────────────
+class LootboxInventoryEntry(models.Model):
+    user      = models.ForeignKey(CanBetUser, on_delete=models.CASCADE, related_name='loot_box_inventory')
+    loot_box  = models.ForeignKey(Lootbox, on_delete=models.CASCADE)
+    quantity  = models.PositiveIntegerField(default=1)
+    obtained_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ('user', 'loot_box')
+
+    def __str__(self):
+        return f"{self.user.username} → {self.loot_box.name} x{self.quantity}"
 
 
 # ── Crate opens (activity log) ─────────────────────────────────────────────────
@@ -128,3 +182,4 @@ class CanvasSubmission(models.Model):
 
     def __str__(self):
         return f"{self.user.username} — {self.course_name}"
+

@@ -1,141 +1,480 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — Crates</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --bg:#d0d3d7; --panel:#f2f3f5; --panel2:#e8eaed;
-  --border:#b4bac2; --border-dark:#8a9199;
-  --accent:#2e3c4e; --accent2:#5b8db8;
-  --text:#18222e; --text-dim:#7a8694;
-  --green:#2e8a56; --shadow:rgba(30,45,60,0.13); --shine:rgba(255,255,255,0.7);
-}
-html { scroll-behavior:smooth; }
-body { width:100vw; min-height:100vh; font-family:'Press Start 2P',monospace; background:var(--bg); background-image:radial-gradient(ellipse at 15% 10%,#e8ecf0 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,#c4c9cf 0%,transparent 55%); overflow-x:hidden; }
-::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:3px}
-.topnav { position:sticky; top:0; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 32px; background:rgba(242,243,245,0.92); border-bottom:1px solid var(--border); box-shadow:0 2px 16px var(--shadow); backdrop-filter:blur(12px); z-index:100; }
-.nav-back { font-size:0.32rem; color:var(--text-dim); letter-spacing:1.5px; text-decoration:none; transition:color 0.2s; }
-.nav-back:hover { color:var(--accent2); }
-.page { max-width:760px; margin:0 auto; padding:48px 24px 60px; display:flex; flex-direction:column; gap:40px; }
-.section-label { font-size:0.3rem; color:var(--text-dim); letter-spacing:3px; margin-bottom:14px; padding-left:10px; border-left:2px solid var(--accent2); }
-.crates-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
-.crate-card { background:var(--panel); border:1px solid var(--border); box-shadow:0 2px 12px var(--shadow),inset 0 1px 0 var(--shine); padding:28px 20px 20px; display:flex; flex-direction:column; align-items:center; gap:14px; cursor:pointer; position:relative; transition:border-color 0.2s,transform 0.15s,box-shadow 0.2s; }
-.crate-card:hover:not(.locked) { border-color:var(--accent2); transform:translateY(-3px); box-shadow:0 8px 24px rgba(30,45,60,0.18),inset 0 1px 0 var(--shine); }
-.crate-card.locked { cursor:not-allowed; opacity:0.55; }
-.crate-img { width:80px; height:80px; image-rendering:pixelated; object-fit:contain; }
-.crate-emoji { font-size:3.2rem; line-height:1; }
-.crate-name { font-size:0.38rem; color:var(--text); letter-spacing:1px; text-align:center; line-height:2; }
-.crate-desc { font-size:0.26rem; color:var(--text-dim); letter-spacing:1px; text-align:center; line-height:2; }
-.crate-price { font-size:0.32rem; color:var(--green); letter-spacing:1px; padding:6px 14px; border:1px solid var(--border); background:var(--panel2); }
-.crate-price.locked-price { color:var(--text-dim); }
-.crate-badge { position:absolute; top:8px; right:8px; font-size:0.24rem; letter-spacing:1px; padding:4px 8px; color:white; }
-.badge-soon { background:var(--border-dark); }
-.badge-new  { background:var(--accent2); }
-.result-feed { border:1px solid var(--border); box-shadow:0 2px 10px var(--shadow); overflow:hidden; }
-.result-row { display:flex; align-items:center; gap:14px; padding:12px 20px; background:var(--panel); border-bottom:1px solid var(--border); transition:background 0.15s; }
-.result-row:last-child { border-bottom:none; }
-.result-rarity { font-size:0.28rem; letter-spacing:1px; width:90px; flex-shrink:0; }
-.result-item { font-size:0.3rem; color:var(--text); letter-spacing:0.8px; flex:1; line-height:1.8; display:flex; align-items:center; gap:8px; }
-.result-time { font-size:0.25rem; color:var(--text-dim); letter-spacing:1px; }
-.overlay { position:fixed; inset:0; background:rgba(24,34,46,0.6); display:none; align-items:center; justify-content:center; z-index:200; backdrop-filter:blur(4px); }
-.overlay.show { display:flex; }
-.popup { background:var(--panel); border:1px solid var(--border); box-shadow:0 16px 48px rgba(30,45,60,0.3),inset 0 1px 0 var(--shine); padding:40px 48px; text-align:center; display:flex; flex-direction:column; gap:16px; min-width:300px; }
-.popup-icon { display:flex; align-items:center; justify-content:center; height:96px; }
-.popup-icon img { width:96px; height:96px; image-rendering:pixelated; object-fit:contain; }
-.popup-rarity { font-size:0.5rem; letter-spacing:2px; }
-.popup-name { font-size:0.38rem; color:var(--text); letter-spacing:1px; line-height:2; }
-.popup-btn { font-family:'Press Start 2P',monospace; font-size:0.38rem; background:var(--accent); color:white; border:none; padding:14px 28px; cursor:pointer; letter-spacing:1px; margin-top:8px; transition:background 0.2s; }
-.popup-btn:hover { background:var(--accent2); }
-.item-sprite { width:40px; height:40px; image-rendering:pixelated; object-fit:contain; flex-shrink:0; }
-.page-footer { position:fixed; bottom:0; left:0; right:0; height:28px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; background:rgba(242,243,245,0.92); border-top:1px solid var(--border); backdrop-filter:blur(8px); z-index:100; }
-.footer-text { font-size:0.26rem; color:var(--text-dim); letter-spacing:1.5px; }
-.status-right { display:flex; align-items:center; gap:7px; }
-.status-dot { width:5px; height:5px; border-radius:50%; background:var(--green); box-shadow:0 0 5px var(--green); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet — Crates</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet">
+    <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .result-time { font-size: 0.6rem; color: #777; }
+  .result-user { color: var(--accent-blue); }
+  
+  :root {
+    --bg: #c8c8c8;
+    --panel: #f2f3f5;
+    --panel2: #e8eaed;
+    --border: #1a1a1a;
+    --accent-blue: #5b8db8;
+    --green: #2e8a56;
+    --text: #1a1a1a;
+    --rarity-common: #2e8a56;
+    --rarity-rare: #5b8db8;
+    --rarity-epic: #a855f7;
+    --rarity-legendary: #c8943a;
+  }
+
+  body {
+    width: 100%; min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  /* --- UNIFIED NAVIGATION (FIXED) --- */
+  .topnav {
+    width: 100%; height: 80px; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 40px; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+    position: sticky; top: 0; z-index: 100; border-bottom: 4px solid var(--border);
+  }
+  .nav-left { display: flex; align-items: center; gap: 18px; height: 100%; }
+  .logo { height: 44px; width: auto; }
+  .brand-text { font-size: 1rem; letter-spacing: 2px;}
+  
+  .nav-right { display: flex; align-items: center; gap: 24px; }
+  
+  .nav-bal { 
+    font-size: 0.8rem; color: var(--green); background: #fff; 
+    padding: 10px 16px; border: 4px solid var(--border); 
+  }
+  
+  .nav-back {
+    font-size: 0.8rem; color: #000; text-decoration: none;
+    padding: 10px 20px; border: 4px solid #000; border-radius: 8px;
+    background: rgba(255,255,255,0.4); transition: 0.1s;
+  }
+  .nav-back:hover { background: #000; color: #fff; }
+
+  /* --- LAYOUT --- */
+  .page {
+    max-width: 1000px; margin: 0 auto; padding: 80px 24px 80px; /* Adjusted bottom padding */
+    display: flex; flex-direction: column; gap: 60px;
+  }
+  .section-label {
+    font-size: 1rem; margin-bottom: 30px; padding-left: 16px;
+    border-left: 10px solid var(--accent-blue); text-transform: uppercase;
+  }
+
+  /* --- CRATE CARDS --- */
+  .crates-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 24px; 
+  }
+
+  .crate-card {
+    background: var(--panel); border: 8px solid var(--border);
+    padding: 40px 30px; display: flex; flex-direction: column; align-items: center;
+    gap: 20px; cursor: pointer; position: relative;
+    box-shadow: 16px 16px 0px rgba(0,0,0,0.15); transition: 0.1s;
+  }
+  .crate-card:hover:not(.locked) {
+    transform: translateY(-8px);
+    box-shadow: 24px 24px 0px var(--accent-blue);
+    background: #fff;
+  }
+  .crate-card.locked { cursor: not-allowed; opacity: 0.6; filter: grayscale(1); }
+
+  .crate-emoji { font-size: 4rem; margin-bottom: 10px; }
+  .crate-name { font-size: 1.1rem; text-align: center; border-bottom: 4px solid #ddd; padding-bottom: 10px; width: 100%; }
+  .crate-desc { font-size: 0.65rem; color: #555; text-align: center; height: 3rem; }
+  .crate-price { 
+    font-size: 0.8rem; color: var(--green); padding: 12px 20px; 
+    border: 4px solid var(--border); background: #fff; 
+  }
+  .crate-price.locked-price { color: #888; background: var(--panel2); }
+
+  .crate-badge {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 0.55rem; padding: 6px 10px; color: white; border: 3px solid var(--border);
+  }
+  .badge-soon { background: #8a9199; }
+  .badge-new { background: var(--accent-blue); }
+
+  /* --- RECENT FEED --- */
+  .result-feed { 
+    background: var(--panel); border: 8px solid var(--border);
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 400px;
+  }
+  .result-row {
+    display: flex; align-items: center; gap: 20px; padding: 20px 30px;
+    border-bottom: 4px solid #ddd; transition: 0.1s;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-rarity { font-size: 0.7rem; width: 130px; flex-shrink: 0; text-transform: uppercase; }
+  .result-item { font-size: 0.75rem; flex: 1; display: flex; align-items: center; gap: 15px; }
+  .item-sprite { width: 50px; height: 50px; image-rendering: pixelated; object-fit: contain; }
+  .result-time { font-size: 0.6rem; color: #777; }
+
+  /* --- POPUP OVERLAY --- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: none; align-items: center; justify-content: center;
+    z-index: 200; backdrop-filter: blur(8px);
+  }
+  .overlay.show { display: flex; }
+  .popup {
+    background: #fff; border: 10px solid var(--border);
+    padding: 60px; text-align: center; display: flex;
+    flex-direction: column; gap: 25px; min-width: 450px;
+    box-shadow: 30px 30px 0px var(--accent-blue);
+  }
+  .popup-icon img { width: 180px; height: 180px; image-rendering: pixelated; }
+  .popup-rarity { font-size: 1.2rem; letter-spacing: 4px; }
+  .popup-name { font-size: 1rem; border-top: 4px solid #eee; padding-top: 20px; }
+  .popup-btn {
+    font-family: 'Press Start 2P', monospace; font-size: 1rem;
+    background: var(--accent-blue); color: white; border: 5px solid var(--border);
+    padding: 20px; cursor: pointer; transition: 0.1s;
+  }
+  .popup-btn:hover { transform: translate(-4px, -4px); box-shadow: 6px 6px 0px var(--border); }
+
+  /* --- PURCHASE POPUP --- */
+  .purchase-emoji { font-size: 4rem; line-height: 1; }
+  .purchase-title { 
+    font-family: 'Press Start 2P', monospace; font-size: 1.5rem;
+    color: var(--accent-blue); letter-spacing: 2px;
+  }
+  .insufficient-bits-emoji { font-size: 5rem; line-height: 1; margin: 10px 0; }
+  .insufficient-bits-title {
+    font-family: 'Press Start 2P', monospace; font-size: 1.5rem;
+    color: var(--accent-blue); letter-spacing: 2px;
+  }
+  .purchase-name { font-size: 1.1rem; font-weight: bold; margin-top: 10px; }
+  .purchase-cost { font-size: 0.8rem; color: #888; margin-top: 5px; }
+  .purchase-balance { 
+    font-size: 0.9rem; margin-top: 15px; padding-top: 15px; 
+    border-top: 4px solid #eee; color: var(--accent-blue); font-weight: bold;
+  }
+
+  .empty-message { grid-column: 1/-1; padding: 20px; text-align: center; color: #888; font-size: 0.8rem; }
+
+  @media (max-width: 850px) {
+    .crates-grid { grid-template-columns: 1fr; }
+    .brand-text { display: none; }
+  }
 </style>
-</head>
-<body>
-<nav class="topnav">
-  <a href="/main/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-  <a href="/main/" class="nav-back">◀ Menu</a>
-</nav>
-<div class="page">
-  <section>
-    <div class="section-label">Open Crates</div>
-    <div class="crates-grid">
+  </head>
+  <body>
 
-      <div class="crate-card" onclick="openCrate('SPOOKY')">
-        <div class="crate-badge badge-new">NEW</div>
-        <img src="{% static 'sprites/Items/Spooky_collection/Spooky collection box.png' %}" class="crate-img" alt="Spooky Crate">
-        <div class="crate-name">Spooky Crate</div>
-        <div class="crate-desc">Monsters &amp; ghouls</div>
-        <div class="crate-price">200 Bits</div>
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="{% url 'main' %}"><img
+            src="{% static 'images/canBet symbol sym..png' %}" class="logo"
+            alt="Logo"></a>
+        <span class="brand-text">canBet</span>
       </div>
-
-      <div class="crate-card locked">
-        <div class="crate-badge badge-soon">SOON</div>
-        <div class="crate-emoji">🌌</div>
-        <div class="crate-name">Space Crate</div>
-        <div class="crate-desc">Coming soon</div>
-        <div class="crate-price locked-price">??? Bits</div>
+      <div class="nav-right">
+        <div class="nav-bal">
+          {{ user.bit_balance|default:"0" }} BITS
+        </div>
+        <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
       </div>
+    </nav>
 
-      <div class="crate-card locked">
-        <div class="crate-badge badge-soon">SOON</div>
-        <div class="crate-emoji">🏰</div>
-        <div class="crate-name">Fantasy Crate</div>
-        <div class="crate-desc">Coming soon</div>
-        <div class="crate-price locked-price">??? Bits</div>
-      </div>
+    <div class="page">
+      <section>
+        <div class="section-label">Available Crates</div>
+        <div class="crates-grid" id="cratesToBuy">
+          <div class="crate-card" data-crate-type="SPOOKY" onclick="buyCrateByType('SPOOKY', 'Spooky Crate')">
+            <div class="crate-badge badge-new">NEW</div>
+            <img src="{% static 'sprites/Items/SpookyCollection/Spooky collection box.png' %}" class="crate-emoji" style="width: 120px; height: auto; image-rendering: pixelated;">
+            <div class="crate-name">Spooky Crate</div>
+            <div class="crate-desc">Monsters & ghouls from the deep web.</div>
+            <div class="crate-price" data-price-type="buy">Loading...</div>
+          </div>
 
-      <div class="crate-card locked">
-        <div class="crate-badge badge-soon">SOON</div>
-        <div class="crate-emoji">⛈️</div>
-        <div class="crate-name">Weather Crate</div>
-        <div class="crate-desc">Coming soon</div>
-        <div class="crate-price locked-price">??? Bits</div>
-      </div>
+          <div class="crate-card" data-crate-type="SPACE" onclick="buyCrateByType('SPACE', 'Space Crate')">
+            <div class="crate-badge badge-new">NEW</div>
+            <div class="crate-emoji">🌌</div>
+            <div class="crate-name">Space Crate</div>
+            <div class="crate-desc">Rare data from the void.</div>
+            <div class="crate-price" data-price-type="buy">Loading...</div>
+          </div>
 
+          <div class="crate-card locked" data-crate-type="FANTASY">
+            <div class="crate-badge badge-soon">SOON</div>
+            <div class="crate-emoji">🏰</div>
+            <div class="crate-name">Fantasy Crate</div>
+            <div class="crate-desc">Legendary encrypted artifacts.</div>
+            <div class="crate-price locked-price" data-price-type="buy">??? Bits</div>
+          </div>
+
+          <div class="crate-card locked" data-crate-type="WEATHER">
+            <div class="crate-badge badge-soon">SOON</div>
+            <div class="crate-emoji">⛈️</div>
+            <div class="crate-name">Weather Crate</div>
+            <div class="crate-desc">Coming soon to the network.</div>
+            <div class="crate-price locked-price" data-price-type="buy">??? Bits</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Your Crates</div>
+        <div class="crates-grid" id="cratesToOpen"></div>
+      </section>
+
+      <section>
+        <div class="section-label">Loot Feed</div>
+        <div class="result-feed" id="feed">
+          <div class="result-row" style="justify-content: center; opacity: 0.5;">
+            <span class="result-item">No data packets decrypted yet.</span>
+          </div>
+        </div>
+      </section>
     </div>
-  </section>
 
-  <section>
-    <div class="section-label">Recent Opens</div>
-    <div class="result-feed" id="feed">
-      <div class="result-row">
-        <span class="result-rarity" style="color:var(--text-dim)">—</span>
-        <span class="result-item">No opens yet</span>
-        <span class="result-time"></span>
+    <div class="overlay" id="overlay">
+      <div class="popup">
+        <div class="popup-icon"><img id="pIcon" src="" alt=""></div>
+        <div class="popup-rarity" id="pRarity"></div>
+        <div class="popup-name" id="pName"></div>
+        <button class="popup-btn" onclick="closePopup()">COLLECT ITEM</button>
       </div>
     </div>
-  </section>
-</div>
 
-<div class="overlay" id="overlay">
-  <div class="popup">
-    <div class="popup-icon"><img id="pIcon" src="" alt=""></div>
-    <div class="popup-rarity" id="pRarity"></div>
-    <div class="popup-name" id="pName"></div>
-    <button class="popup-btn" onclick="closePopup()">Collect</button>
-  </div>
-</div>
+    <div class="overlay" id="purchaseOverlay">
+      <div class="popup">
+        <div class="purchase-title">PURCHASED!</div>
+        <div class="purchase-emoji" id="purchaseEmoji"></div>
+        <div class="purchase-name" id="purchaseName"></div>
+        <div class="purchase-cost" id="purchaseCost"></div>
+        <div class="purchase-balance" id="purchaseBalance"></div>
+        <button class="popup-btn" onclick="closePurchasePopup()">OK</button>
+      </div>
+    </div>
 
-<footer class="page-footer">
-  <span class="footer-text">CANBET v1.0 — CRATES</span>
-  <div class="status-right"><span class="footer-text">ONLINE</span><div class="status-dot"></div></div>
-</footer>
-
+    <div class="overlay" id="insufficientBitsOverlay">
+      <div class="popup">
+        <div class="insufficient-bits-title">INSUFFICIENT BITS</div>
+        <div class="insufficient-bits-emoji" id="insufficientBitsEmoji"></div>
+        <div class="purchase-name" id="insufficientBitsName"></div>
+        <div class="purchase-cost" id="insufficientBitsRequired"></div>
+        <div class="purchase-balance" id="insufficientBitsBalance"></div>
+        <button class="popup-btn" onclick="closeInsufficientBitsPopup()">OK</button>
+      </div>
+    </div>
+<script>const CURRENT_USERNAME = "{{ user.username }}";</script>
 <script>
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
+
 
 const RARITY_COLORS = {
   COMMON: '#2e8a56', RARE: '#5b8db8', EPIC: '#a855f7', LEGENDARY: '#c8943a'
 };
+
+const CRATE_EMOJIS = {
+  SPOOKY: '<img src="/static/sprites/Items/SpookyCollection/Spooky collection box.png" style="width:80px;height:auto;image-rendering:pixelated;">',
+  SPACE: '🌌',
+  FANTASY: '🏰',
+  WEATHER: '⛈️',
+};
+
+// Store current balance for use in popups
+let currentUserBalance = parseInt(document.querySelector('.nav-bal').textContent.split(' ')[0]) || 0;
+
+function updateBalance(newBalance) {
+  currentUserBalance = newBalance;
+  const navBal = document.querySelector('.nav-bal');
+  if (navBal) {
+    navBal.textContent = `${newBalance} BITS`;
+  }
+}
+
+// Load crate prices from API and update buy grid
+async function loadCratePrices() {
+  try {
+    const resp = await fetch('/api/lootboxes/');
+    const lootboxes = await resp.json();
+    
+    lootboxes.forEach(lb => {
+      const card = document.querySelector(`[data-crate-type="${lb.crate_type}"]`);
+      if (card) {
+        const priceEl = card.querySelector('[data-price-type="buy"]');
+        if (priceEl && !priceEl.classList.contains('locked-price')) {
+          priceEl.textContent = `${lb.cost_bits} Bits`;
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Failed to load crate prices:', err);
+  }
+}
+
+// Load lootboxes and user inventory on page load
+async function loadLootboxes() {
+  try {
+    const resp = await fetch('/api/lootboxes/');
+    const lootboxes = await resp.json();
+    
+    // Also fetch user balance
+    const meResp = await fetch('/api/me/');
+    const userData = await meResp.json();
+    updateBalance(userData.bit_balance);
+    
+    const openGrid = document.getElementById('cratesToOpen');
+    
+    // Update or create open grid cards
+    const ownedCrates = lootboxes.filter(lb => lb.quantity > 0);
+    const openGridSection = document.querySelector('section:has(#cratesToOpen)');
+    
+    // Always show the section
+    openGridSection.style.display = 'block';
+    
+    if (ownedCrates.length === 0) {
+      // Show empty message if no crates are owned
+      if (openGrid.children.length === 0 || !openGrid.querySelector('.empty-message')) {
+        openGrid.innerHTML = '<div class="empty-message">No crates owned</div>';
+      }
+    } else {
+      // Clear empty message if exists
+      const emptyMsg = openGrid.querySelector('.empty-message');
+      if (emptyMsg) emptyMsg.remove();
+    }
+    
+    ownedCrates.forEach(lb => {
+      const existingCard = document.getElementById(`crate-${lb.id}`);
+      const btnDisabled = lb.quantity > 0 ? '' : 'disabled';
+      const btnText = lb.quantity > 0 ? `Open (${lb.quantity}x)` : 'Locked';
+      
+      if (existingCard) {
+        // Update existing card
+        const quantityEl = existingCard.querySelector('.crate-price');
+        const btnEl = existingCard.querySelector('.popup-btn');
+        
+        quantityEl.textContent = `${lb.quantity}x owned`;
+        btnEl.textContent = btnText;
+        btnEl.disabled = lb.quantity === 0;
+        
+        // Update card class for styling
+        if (lb.quantity > 0 && existingCard.classList.contains('locked')) {
+          existingCard.classList.remove('locked');
+        } else if (lb.quantity === 0 && !existingCard.classList.contains('locked')) {
+          existingCard.classList.add('locked');
+        }
+      } else {
+        // Create new card
+        const openCard = document.createElement('div');
+        openCard.className = 'crate-card' + (lb.quantity === 0 ? ' locked' : '');
+        openCard.id = `crate-${lb.id}`;
+        openCard.innerHTML = `
+          <div class="crate-emoji">${CRATE_EMOJIS[lb.crate_type] || '📦'}</div>
+          <div class="crate-name">${lb.name}</div>
+          <div class="crate-desc">Mysterious encrypted items await.</div>
+          <div class="crate-price">${lb.quantity}x owned</div>
+          <button class="popup-btn" style="width:100%;padding: 10px; font-size: 0.7rem;" onclick="openLootbox('${lb.crate_type}')" ${btnDisabled}>${btnText}</button>
+        `;
+        openGrid.appendChild(openCard);
+      }
+    });
+  } catch (err) {
+    console.error('Failed to load lootboxes:', err);
+  }
+}
+
+async function buyLootbox(lootboxId, lootboxName, crateType) {
+  // First fetch the lootbox to get its cost
+  const lbResp = await fetch('/api/lootboxes/');
+  const lootboxes = await lbResp.json();
+  const lootbox = lootboxes.find(lb => lb.id === lootboxId);
+  const crateCost = lootbox ? lootbox.cost_bits : 0;
+  
+  const resp = await fetch('/api/lootbox/buy/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ lootbox_id: lootboxId })
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    if (resp.status === 402) {
+      // Payment required - show custom insufficient bits popup
+      showInsufficientBitsPopup(lootboxName, crateCost, crateType);
+    } else {
+      alert(data.error || 'Could not purchase crate.');
+    }
+    return;
+  }
+  
+  // Refresh inventory first, then show popup
+  await loadLootboxes();
+  
+  // Small delay to ensure balance is updated
+  setTimeout(() => {
+    showPurchasePopup(lootboxName, crateType);
+  }, 100);
+}
+
+async function buyCrateByType(crateType, crateName) {
+  try {
+    const resp = await fetch('/api/lootboxes/');
+    const lootboxes = await resp.json();
+    const lootbox = lootboxes.find(lb => lb.crate_type === crateType);
+    
+    if (!lootbox) {
+      alert('Crate not found.');
+      return;
+    }
+    
+    await buyLootbox(lootbox.id, crateName, crateType);
+  } catch (err) {
+    console.error('Error buying crate:', err);
+    alert('Could not purchase crate.');
+  }
+}
+
+async function openLootbox(crateType) {
+  const resp = await fetch('/api/crate/open/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ crate_type: crateType })
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    alert(data.error || 'Insufficient Bits.');
+    return;
+  }
+  const item = data.item;
+  const color = RARITY_COLORS[item.rarity] || '#999';
+
+  const icon = document.getElementById('pIcon');
+  icon.src = '/static/' + item.sprite_path;
+  document.getElementById('pRarity').textContent = item.rarity;
+  document.getElementById('pRarity').style.color = color;
+  document.getElementById('pName').textContent = item.name;
+  document.getElementById('overlay').classList.add('show');
+  request.user.crates_opened += 1
+  request.user.save(update_fields=['crates_opened'])
+
+  // Refresh crates after opening completes
+  const collectBtn = document.querySelector('.popup-btn');
+  if (collectBtn) {
+    collectBtn.addEventListener('click', loadLootboxes, { once: true });
+  }
+  const feed = document.getElementById('feed');
+  if (feed.innerText.includes('No data packets')) feed.innerHTML = '';
+  appendFeedRow(item.rarity, item.name, item.sprite_path, 'JUST NOW', CURRENT_USERNAME);
+}
+
+// Track the latest open ID we've added to prevent duplicates
+let lastSeenOpenId = null;
 
 // Load recent opens from API on page load
 fetch('/api/recent-opens/')
@@ -144,53 +483,97 @@ fetch('/api/recent-opens/')
     if (!opens.length) return;
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
-    opens.forEach(o => appendFeedRow(o.rarity, o.item, o.sprite_path, 'recent'));
+    opens.forEach(o => appendFeedRow(o.rarity, o.item, o.sprite_path, new Date(o.opened_at).toLocaleTimeString(), o.username));    if (opens.length > 0) {
+      lastSeenOpenId = opens[0].id;
+    }
   });
 
-async function openCrate(type) {
-  const resp = await fetch('/api/crate/open/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-    body: JSON.stringify({ crate_type: type })
-  });
-  const data = await resp.json();
-  if (!resp.ok) {
-    alert(data.error || 'Could not open crate.');
-    return;
-  }
-  const item = data.item;
-  const color = RARITY_COLORS[item.rarity] || '#999';
-
-  // Show popup
-  const icon = document.getElementById('pIcon');
-  icon.src = '/static/' + item.sprite_path;
-  icon.alt = item.name;
-  document.getElementById('pRarity').textContent = item.rarity;
-  document.getElementById('pRarity').style.color = color;
-  document.getElementById('pName').textContent = item.name;
-  document.getElementById('overlay').classList.add('show');
-
-  // Prepend to feed
-  const feed = document.getElementById('feed');
-  if (feed.querySelector('.result-row span:first-child')?.textContent === '—') {
-    feed.innerHTML = '';
-  }
-  appendFeedRow(item.rarity, item.name, item.sprite_path, 'just now');
-}
-
-function appendFeedRow(rarity, name, spritePath, time) {
+function appendFeedRow(rarity, name, spritePath, time, username) {
   const color = RARITY_COLORS[rarity] || '#999';
   const row = document.createElement('div');
   row.className = 'result-row';
-  row.innerHTML =
-    `<span class="result-rarity" style="color:${color}">${rarity}</span>`
-    + `<span class="result-item"><img src="/static/${spritePath}" class="item-sprite" alt="${name}">${name}</span>`
-    + `<span class="result-time">${time}</span>`;
+  row.innerHTML = `
+    <span class="result-rarity" style="color:${color}">${rarity}</span>
+    <span class="result-item"><img src="/static/${spritePath}" class="item-sprite" alt="${name}">${name}</span>
+    <span class="result-time">${username ? `<span class="result-user">${username}</span> · ` : ''}${time}</span>
+  `;
   const feed = document.getElementById('feed');
-  feed.insertBefore(row, feed.firstChild);
+  feed.appendChild(row);
 }
 
 function closePopup() { document.getElementById('overlay').classList.remove('show'); }
+
+function showInsufficientBitsPopup(crateName, requiredBits, crateType) {
+  const bitsNeeded = requiredBits - currentUserBalance;
+  const emoji = CRATE_EMOJIS[crateType] || '❓';
+  
+  
+  document.getElementById('insufficientBitsName').textContent = crateName;
+  document.getElementById('insufficientBitsEmoji').innerHTML = emoji;
+  document.getElementById('insufficientBitsRequired').textContent = `You need ${bitsNeeded} more Bits`;
+  document.getElementById('insufficientBitsBalance').textContent = `Your Balance: ${currentUserBalance} BITS`;
+  
+  document.getElementById('insufficientBitsOverlay').classList.add('show');
+}
+
+function closeInsufficientBitsPopup() {
+  document.getElementById('insufficientBitsOverlay').classList.remove('show');
+}
+
+function showPurchasePopup(crateName, crateType) {
+  const emoji = CRATE_EMOJIS[crateType] || '❓';
+  
+  document.getElementById('purchaseEmoji').innerHTML = emoji;
+  document.getElementById('purchaseName').textContent = crateName;
+  document.getElementById('purchaseCost').textContent = '✓ Purchase confirmed';
+  document.getElementById('purchaseBalance').textContent = `New Balance: ${currentUserBalance} BITS`;
+  document.getElementById('purchaseOverlay').classList.add('show');
+}
+
+function closePurchasePopup() { 
+  document.getElementById('purchaseOverlay').classList.remove('show');
+}
+
+// Load on page load
+loadCratePrices();
+loadLootboxes();
+
+// Poll for updates every 1 seconds
+setInterval(loadLootboxes, 1000);
+
+// Load prices on page load and whenever lootboxes update
+setInterval(loadCratePrices, 2000);
+
+// Poll for recent opens every 3 seconds - only add truly new opens
+setInterval(() => {
+  fetch('/api/recent-opens/')
+    .then(r => r.json())
+    .then(opens => {
+      if (!opens.length) return;
+      const feed = document.getElementById('feed');
+      if (!feed) return;
+      
+      // Process opens from newest to oldest, stopping when we find one we've already shown
+      let addedAny = false;
+      for (let i = 0; i < opens.length; i++) {
+        const o = opens[i];
+        // If this is the last one we saw, stop - everything else is old
+        if (lastSeenOpenId !== null && o.id === lastSeenOpenId) {
+          break;
+        }
+        // This is a new open we haven't shown yet
+        if (!addedAny) {
+          lastSeenOpenId = o.id;
+          addedAny = true;
+        }
+          appendFeedRow(o.rarity, o.item, o.sprite_path, new Date(o.opened_at).toLocaleTimeString(), o.username);      }
+      
+      // Keep only the most recent 50 rows to prevent feed from growing too large
+      while (feed.children.length > 50) {
+        feed.removeChild(feed.firstChild);
+      }
+    });
+}, 3000);
 </script>
-</body>
+  </body>
 </html>
