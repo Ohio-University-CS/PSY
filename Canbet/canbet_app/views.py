@@ -83,7 +83,7 @@ def leaderboard(request):
     per_page = 10
 
     qs = CanBetUser.objects.annotate(
-        crate_count=Count('crate_opens'),
+        crate_count=Count('crate_opens', distinct=True),
         best_rarity=Min('inventory__item__rarity'),
         rarity_achieved=Min('inventory__obtained_at'),
         last_crate=Max('crate_opens__opened_at'),
@@ -173,27 +173,29 @@ def api_me(request):
 def api_open_crate(request):
     crate_type = request.data.get('crate_type', '').upper()
     user = request.user
-    
-    # Find lootbox by crate_type
+
     try:
         lootbox = Lootbox.objects.get(crate_type=crate_type, is_active=True)
     except Lootbox.DoesNotExist:
         return Response({'error': 'Crate type not found.'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     try:
         won_item = open_loot_box(user, lootbox)
     except LootboxInventoryEntry.DoesNotExist:
-        return Response({'error': 'You don\'t have this crate.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': "You don't have this crate."}, status=status.HTTP_400_BAD_REQUEST)
     except ValueError as e:
         return Response({'error': str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-    
+
+    user.refresh_from_db()
+
     return Response({
         'item': {
             'name': won_item.name,
             'rarity': won_item.rarity,
-            'sprite_path': won_item.sprite_path
+            'sprite_path': won_item.sprite_path,
         },
-        'new_balance': user.bit_balance
+        'new_balance': user.bit_balance,
+        'crates_opened': user.crates_opened,
     })
 
 
