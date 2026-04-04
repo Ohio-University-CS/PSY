@@ -110,7 +110,7 @@ REST_FRAMEWORK = {
 # ── CORS (dev only) ─────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
     "https://canvas.instructure.com",
-    "https://*.instructure.com/",  # covers school-specific Canvas domains
+    "https://*.instructure.com",  # covers school-specific Canvas domains
 ]
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r'^https://canbet\.live$',
