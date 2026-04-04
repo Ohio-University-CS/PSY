@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'canbet_app',
     'django.contrib.humanize'          # your main app
+    ''
 ]
 
 MIDDLEWARE = [
@@ -105,6 +106,10 @@ REST_FRAMEWORK = {
 }
 
 # ── CORS (dev only) ─────────────────────────────────────────────────────────────
+CORS_ALLOWED_ORIGINS = [
+    "https://canvas.instructure.com",
+    "https://*.instructure.com/",  # covers school-specific Canvas domains
+]
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r'^https://canbet\.live$',
     r'^https://www\.canbet\.live$',
