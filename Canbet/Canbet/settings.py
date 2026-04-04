@@ -15,6 +15,8 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-me-in-produc
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
+APPEND_SLASH = False
+
 ALLOWED_HOSTS = os.getenv(
     'ALLOWED_HOSTS',
     '127.0.0.1,localhost,canbet.onrender.com,canbet.live,www.canbet.live'
@@ -108,7 +110,7 @@ REST_FRAMEWORK = {
 # ── CORS (dev only) ─────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
     "https://canvas.instructure.com",
-    "https://*.instructure.com/",  # covers school-specific Canvas domains
+    "https://*.instructure.com",  # covers school-specific Canvas domains
 ]
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r'^https://canbet\.live$',
