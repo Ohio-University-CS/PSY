@@ -1,22 +1,14 @@
 const BACKEND_URL = 'https://www.canbet.live/api/canvas/sync/';
 
-browser.runtime.onMessage.addListener((message) => {
-  if (message.type === 'CANBET_TOKEN') {
-    browser.storage.local.set({ authToken: message.token });
-    console.log('[canBet] Auth token saved.');
-    return;
-  }
+let pendingPayload = null;
 
-  if (message.type !== 'CANVAS_ASSIGNMENTS') return;
-
-  const { user_data, courses } = message.payload;
-
+function doSync(user_data, courses) {
   const submissions = [];
   courses.forEach(({ COURSE_ID, courseName, data }) => {
     if (!Array.isArray(data)) return;
     data.forEach(sub => {
       if (!sub.submitted_at) return;
-      submissions.push({
+      submissions.push({it
         course_id:     String(COURSE_ID),
         course_name:   courseName,
         assignment_id: String(sub.assignment_id),
@@ -30,9 +22,12 @@ browser.runtime.onMessage.addListener((message) => {
 
   browser.storage.local.get('authToken').then(({ authToken }) => {
     if (!authToken) {
-      console.warn('[canBet] No auth token found. Please log in at canbet.live first.');
+      console.warn('[canBet] No auth token yet — sync queued, will retry on login.');
+      pendingPayload = { user_data, courses };
       return;
     }
+
+    pendingPayload = null;
 
     fetch(BACKEND_URL, {
       method: 'POST',
@@ -55,4 +50,24 @@ browser.runtime.onMessage.addListener((message) => {
       })
       .catch(err => console.error('[canBet] Sync error:', err));
   });
+}
+
+browser.runtime.onMessage.addListener((message) => {
+  if (message.type === 'CANBET_TOKEN') {
+    browser.storage.local.set({ authToken: message.token }).then(() => {
+      console.log('[canBet] Auth token saved.');
+
+      if (pendingPayload) {
+        console.log('[canBet] Retrying queued sync with new token...');
+        const { user_data, courses } = pendingPayload;
+        doSync(user_data, courses);
+      }
+    });
+    return;
+  }
+
+  if (message.type !== 'CANVAS_ASSIGNMENTS') return;
+
+  const { user_data, courses } = message.payload;
+  doSync(user_data, courses);
 });
