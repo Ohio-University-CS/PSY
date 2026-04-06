@@ -213,7 +213,6 @@
 
     <script>
       document.getElementById('loginForm').addEventListener('submit', async function (e) {
-        // Don't block the normal form submission — let it proceed in parallel
         const email    = document.getElementById('emailInput').value;
         const password = document.getElementById('passwordInput').value;
         const csrf     = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
@@ -221,42 +220,14 @@
         try {
           const res = await fetch('/api/token-login/', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': csrf,
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
             body: JSON.stringify({ username: email, password }),
           });
-
           if (res.ok) {
             const { token } = await res.json();
-
-            // Send token to the extension if it's installed (Firefox)
-            if (typeof browser !== 'undefined' && browser.runtime) {
-              try {
-                // Find the extension by its ID and send the token
-                browser.runtime.sendMessage(
-                  'canbet@extension',
-                  { type: 'CANBET_TOKEN', token }
-                );
-              } catch (_) {
-                // Extension not installed — silently ignore
-              }
-            }
-
-            // Chrome
-            if (typeof chrome !== 'undefined' && chrome.runtime) {
-              try {
-                chrome.runtime.sendMessage(
-                  { type: 'CANBET_TOKEN', token }
-                );
-              } catch (_) {
-                // Extension not installed — silently ignore
-              }
-            }
+            window.postMessage({ type: 'CANBET_TOKEN', token }, window.location.origin);
           }
         } catch (_) {
-          // Token fetch failed — normal login still proceeds, ignore silently
         }
       });
     </script>
