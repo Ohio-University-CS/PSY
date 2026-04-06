@@ -6,7 +6,11 @@
   "permissions": [
     "storage",
     "activeTab",
-    "*://*.instructure.com/*"
+    "*://*.instructure.com/*",
+    "https://canbet.live/*"
+  ],
+  "host_permissions": [
+    "https://canbet.live/*"
   ],
   "content_scripts": [
     {
