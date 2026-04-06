@@ -19,6 +19,14 @@ browser.runtime.onMessage.addListener((message) => {
       });
     });
   });
+  browser.runtime.onMessage.addListener(async (message) => {
+    if (message.type === "fetchCanvas") {
+      const response = await fetch("https://canbet.live/api/canvas/sync/");
+      const data = await response.json();
+      return data;
+    }
+  });
+  
 
   if (submissions.length === 0) return;
 
