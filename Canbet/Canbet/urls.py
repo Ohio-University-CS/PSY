@@ -35,6 +35,7 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('delete-account/', views.delete_account, name='delete_account'),
     path('api/canvas/sync/', views.api_canvas_sync, name='api_canvas_sync'),
+    path('api/shop/buy/', views.api_buy_item, name='api_buy_item'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
