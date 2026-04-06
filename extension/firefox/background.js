@@ -8,7 +8,7 @@ function doSync(user_data, courses) {
     if (!Array.isArray(data)) return;
     data.forEach(sub => {
       if (!sub.submitted_at) return;
-      submissions.push({it
+      submissions.push({
         course_id:     String(COURSE_ID),
         course_name:   courseName,
         assignment_id: String(sub.assignment_id),
