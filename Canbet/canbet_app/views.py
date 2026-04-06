@@ -8,11 +8,12 @@ from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 
 import random
 from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, Lootbox, LootboxInventoryEntry, CanvasSubmission
@@ -326,6 +327,7 @@ def api_lootboxes(request):
 
 @csrf_exempt
 @api_view(['POST'])
+
 @permission_classes([AllowAny])
 def api_token_login(request):
     if request.user and request.user.is_authenticated:
@@ -359,6 +361,7 @@ BITS_PER_SUBMISSION = 50
 
 @csrf_exempt
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def api_canvas_sync(request):
     canvas_user_id = str(request.data.get('canvas_user_id', '')).strip()
