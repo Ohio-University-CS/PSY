@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 
 import random
 from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, Lootbox, LootboxInventoryEntry, CanvasSubmission
@@ -318,6 +319,38 @@ def api_lootboxes(request):
         }
         for lb in lootboxes
     ])
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  EXTENSION AUTH API
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_token_login(request):
+    """
+    Accepts username/password, returns a DRF token for use by the extension.
+    The extension stores this token and sends it as:
+        Authorization: Token <token>
+    """
+    username = request.data.get('username', '').strip()
+    password = request.data.get('password', '')
+
+    user = authenticate(request, username=username, password=password)
+
+    # Also allow login by email
+    if user is None and username:
+        try:
+            matched = CanBetUser.objects.get(email=username)
+            user = authenticate(request, username=matched.username, password=password)
+        except CanBetUser.DoesNotExist:
+            pass
+
+    if user is None:
+        return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({'token': token.key, 'username': user.username})
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
