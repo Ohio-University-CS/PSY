@@ -30,7 +30,7 @@
   /* --- UNIFIED NAVIGATION --- */
 .topnav {
   width: 100%; 
-  height: 80px; /* Fixed height for consistency */
+  height: 80px;
   display: flex; 
   justify-content: space-between; 
   align-items: center;
@@ -51,7 +51,7 @@
 }
 
 .logo { 
-  height: 44px; /* Standardized logo height */
+  height: 44px;
   width: auto; 
 }
 
@@ -82,7 +82,6 @@
   color: #fff; 
 }
 
-/* Standardized Balance Display for Shop/Main */
 .nav-bal { 
   font-size: 0.8rem; 
   color: var(--green); 
@@ -288,7 +287,47 @@
   </section>
 </div>
 
+<script>
+  // Silently refresh the extension's auth token every time the user lands on main.
+  // This handles the case where the login page was skipped due to an active session.
+  (async function syncExtensionToken() {
+    const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
 
+    try {
+      // We already have a session so we can hit /api/me/ to get our token
+      // via token-login without needing credentials again — just use the session.
+      const res = await fetch('/api/token-login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrf,
+        },
+        // No credentials needed — Django session auth will identify the user
+        body: JSON.stringify({ session: true }),
+      });
+
+      if (res.ok) {
+        const { token } = await res.json();
+
+        // Firefox
+        if (typeof browser !== 'undefined' && browser.runtime) {
+          try {
+            browser.runtime.sendMessage('canbet@extension', { type: 'CANBET_TOKEN', token });
+          } catch (_) {}
+        }
+
+        // Chrome
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+          try {
+            chrome.runtime.sendMessage({ type: 'CANBET_TOKEN', token });
+          } catch (_) {}
+        }
+      }
+    } catch (_) {
+      // Silently ignore — token refresh is best-effort
+    }
+  })();
+</script>
 
 </body>
 </html>
