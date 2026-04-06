@@ -7,11 +7,15 @@
     "storage",
     "activeTab",
     "*://*.instructure.com/*",
-    "https://canbet.live/*"
+    "https://canbet.live/*",
+    "https://www.canbet.live/*"
   ],
-  "host_permissions": [
-    "https://canbet.live/*"
-  ],
+  "externally_connectable": {
+    "matches": [
+      "https://canbet.live/*",
+      "https://www.canbet.live/*"
+    ]
+  },
   "content_scripts": [
     {
       "matches": ["*://*.instructure.com/*"],

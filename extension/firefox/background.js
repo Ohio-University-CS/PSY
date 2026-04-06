@@ -1,5 +1,12 @@
 const BACKEND_URL = 'https://www.canbet.live/api/canvas/sync/';
 
+browser.runtime.onMessageExternal.addListener((message, sender) => {
+  if (message.type === 'CANBET_TOKEN') {
+    browser.storage.local.set({ authToken: message.token });
+    console.log('[canBet] Auth token saved from external page.');
+  }
+});
+
 browser.runtime.onMessage.addListener((message) => {
   if (message.type !== 'CANVAS_ASSIGNMENTS') return;
 
@@ -22,6 +29,7 @@ browser.runtime.onMessage.addListener((message) => {
 
   if (submissions.length === 0) return;
 
+  // Retrieve stored auth token then POST
   browser.storage.local.get('authToken').then(({ authToken }) => {
     if (!authToken) {
       console.warn('[canBet] No auth token found. Please log in at canbet.live first.');
@@ -49,11 +57,4 @@ browser.runtime.onMessage.addListener((message) => {
       })
       .catch(err => console.error('[canBet] Sync error:', err));
   });
-});
-
-browser.runtime.onMessage.addListener((message) => {
-  if (message.type === 'CANBET_TOKEN') {
-    browser.storage.local.set({ authToken: message.token });
-    console.log('[canBet] Auth token saved.');
-  }
 });
