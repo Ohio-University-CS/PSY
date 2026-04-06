@@ -10,15 +10,13 @@
     "https://canbet.live/*",
     "https://www.canbet.live/*"
   ],
-  "externally_connectable": {
-    "matches": [
-      "https://canbet.live/*",
-      "https://www.canbet.live/*"
-    ]
-  },
   "content_scripts": [
     {
-      "matches": ["*://*.instructure.com/*"],
+      "matches": [
+        "*://*.instructure.com/*",
+        "https://canbet.live/*",
+        "https://www.canbet.live/*"
+      ],
       "js": ["content_script.js"],
       "run_at": "document_start"
     }
