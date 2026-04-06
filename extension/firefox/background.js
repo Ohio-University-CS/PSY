@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://canbet.live/api/canvas/sync/';
+const BACKEND_URL = 'https://www.canbet.live/api/canvas/sync/';
 
 browser.runtime.onMessage.addListener((message) => {
   if (message.type !== 'CANVAS_ASSIGNMENTS') return;
@@ -9,7 +9,7 @@ browser.runtime.onMessage.addListener((message) => {
   courses.forEach(({ COURSE_ID, courseName, data }) => {
     if (!Array.isArray(data)) return;
     data.forEach(sub => {
-      if (!sub.submitted_at) return; 
+      if (!sub.submitted_at) return;
       submissions.push({
         course_id:     String(COURSE_ID),
         course_name:   courseName,
@@ -19,33 +19,41 @@ browser.runtime.onMessage.addListener((message) => {
       });
     });
   });
-  browser.runtime.onMessage.addListener(async (message) => {
-    if (message.type === "fetchCanvas") {
-      const response = await fetch("https://canbet.live/api/canvas/sync/");
-      const data = await response.json();
-      return data;
-    }
-  });
-  
 
   if (submissions.length === 0) return;
 
-  fetch(BACKEND_URL, {
-    method: 'POST',
-    credentials: 'include',    
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      canvas_user_id: String(user_data.id),
-      submissions,
-    }),
-  })
-    .then(async res => {
-      const data = await res.json();
-      if (!res.ok) {
-        console.error('[canBet] Sync failed:', data);
-      } else {
-        console.log(`[canBet] Synced ${data.created} new submission(s). Bits awarded: ${data.bits_awarded}`);
-      }
+  browser.storage.local.get('authToken').then(({ authToken }) => {
+    if (!authToken) {
+      console.warn('[canBet] No auth token found. Please log in at canbet.live first.');
+      return;
+    }
+
+    fetch(BACKEND_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${authToken}`,
+      },
+      body: JSON.stringify({
+        canvas_user_id: String(user_data.id),
+        submissions,
+      }),
     })
-    .catch(err => console.error('[canBet] Sync error:', err));
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+          console.error('[canBet] Sync failed:', data);
+        } else {
+          console.log(`[canBet] Synced ${data.created} new submission(s). Bits awarded: ${data.bits_awarded}`);
+        }
+      })
+      .catch(err => console.error('[canBet] Sync error:', err));
+  });
+});
+
+browser.runtime.onMessage.addListener((message) => {
+  if (message.type === 'CANBET_TOKEN') {
+    browser.storage.local.set({ authToken: message.token });
+    console.log('[canBet] Auth token saved.');
+  }
 });

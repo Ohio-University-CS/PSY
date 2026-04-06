@@ -22,7 +22,10 @@ ALLOWED_HOSTS = os.getenv(
     '127.0.0.1,localhost,canbet.onrender.com,canbet.live,www.canbet.live'
 ).split(',')
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if os.getenv('CSRF_TRUSTED_ORIGINS') else []
+CSRF_TRUSTED_ORIGINS = [
+    'https://canbet.live',
+    'https://www.canbet.live',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -32,10 +35,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',   # token authentication
     'corsheaders',
     'canbet_app',
-    'django.contrib.humanize'          # your main app
-    ''
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -53,7 +56,6 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'Canbet.urls'
 
 # ── Templates ──────────────────────────────────────────────────────────────────
-# Django will look for your HTML files inside canbet_app/templates/
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -78,8 +80,9 @@ DATABASES = {
         default=f"postgresql://{os.getenv('DB_USER', 'SQLTeam')}:{os.getenv('DB_PASSWORD', '')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '5432')}/{os.getenv('DB_NAME', 'CanbetBackend')}"
     )
 }
+
 # ── Auth ────────────────────────────────────────────────────────────────────────
-AUTH_USER_MODEL = 'canbet_app.CanBetUser'   # custom user model
+AUTH_USER_MODEL = 'canbet_app.CanBetUser'
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -90,7 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ── Static / Media ──────────────────────────────────────────────────────────────
 STATIC_URL  = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']   # put images/, sprites/ here
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -101,16 +104,17 @@ MEDIA_ROOT = BASE_DIR / 'media'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',  # token auth for extension
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
-# ── CORS (dev only) ─────────────────────────────────────────────────────────────
+# ── CORS ───────────────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
     "https://canvas.instructure.com",
-    "https://*.instructure.com",  # covers school-specific Canvas domains
+    "https://*.instructure.com",
 ]
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r'^https://canbet\.live$',
