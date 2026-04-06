@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/me/', views.api_me, name='api_me'),
     path('api/crate/open/', views.api_open_crate, name='api_open_crate'),
     path('api/inventory/', views.api_inventory, name='api_inventory'),
+    path('api/token-login/', views.api_token_login, name='api_token_login'),
     path('api/leaderboard/', views.api_leaderboard, name='api_leaderboard'),
     path('api/recent-opens/', views.api_recent_opens, name='api_recent_opens'),
     path('api/lootboxes/', views.api_lootboxes, name='api_lootboxes'),
