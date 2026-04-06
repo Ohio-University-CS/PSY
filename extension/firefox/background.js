@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://canbet.live/api/canvas/sync/';
+const BACKEND_URL = 'https://www.canbet.live/api/canvas/sync/';
 
 browser.runtime.onMessage.addListener((message) => {
   if (message.type !== 'CANVAS_ASSIGNMENTS') return;
