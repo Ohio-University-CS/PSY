@@ -328,11 +328,10 @@ def api_lootboxes(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def api_token_login(request):
-    """
-    Accepts username/password, returns a DRF token for use by the extension.
-    The extension stores this token and sends it as:
-        Authorization: Token <token>
-    """
+    if request.user and request.user.is_authenticated:
+        token, _ = Token.objects.get_or_create(user=request.user)
+        return Response({'token': token.key, 'username': request.user.username})
+
     username = request.data.get('username', '').strip()
     password = request.data.get('password', '')
 
