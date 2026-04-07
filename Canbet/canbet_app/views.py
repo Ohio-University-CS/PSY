@@ -3,8 +3,6 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum, Count, Min, Max
-from .models import CanBetUser, InventoryEntry, CrateOpen
-from django.db.models import Sum
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
@@ -14,11 +12,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 
 import random
 from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, Lootbox, LootboxInventoryEntry, CanvasSubmission
 from .services import open_loot_box
-from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -151,8 +149,28 @@ def delete_account(request):
     if request.method == 'POST':
         user = request.user
         user.delete()
-        return redirect('home') 
+        return redirect('home')
     return redirect('settings')
+
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('main')
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email    = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        confirm  = request.POST.get('confirm', '')
+        if password != confirm:
+            return render(request, 'register.html', {'error': 'Passwords do not match.', 'username': username, 'email': email})
+        if CanBetUser.objects.filter(username=username).exists():
+            return render(request, 'register.html', {'error': 'Username already taken.', 'email': email})
+        if CanBetUser.objects.filter(email=email).exists():
+            return render(request, 'register.html', {'error': 'Email already registered.', 'username': username})
+        user = CanBetUser.objects.create_user(username=username, email=email, password=password)
+        login(request, user)
+        return redirect('main')
+    return render(request, 'register.html')
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -199,10 +217,9 @@ def api_open_crate(request):
     })
 
 
-@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_canvas_sync(request):
+def api_buy_item(request):
     item = get_object_or_404(Item, pk=request.data.get('item_id'))
     user = request.user
     if item.shop_price <= 0:
@@ -254,30 +271,31 @@ def api_recent_opens(request):
         for o in opens
     ])
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_buy_lootbox(request):
     lootbox_id = request.data.get('lootbox_id')
     lootbox = get_object_or_404(Lootbox, pk=lootbox_id)
     user = request.user
-    
+
     if not lootbox.is_active:
         return Response({'error': 'This lootbox is not available.'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     if user.bit_balance < lootbox.cost_bits:
         return Response({'error': 'Not enough Bits.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
-    
+
     with transaction.atomic():
         user.bit_balance -= lootbox.cost_bits
         user.save(update_fields=['bit_balance'])
-        
+
         entry, _ = LootboxInventoryEntry.objects.get_or_create(
             user=user, loot_box=lootbox,
             defaults={'quantity': 0}
         )
         entry.quantity += 1
         entry.save(update_fields=['quantity'])
-    
+
     return Response({
         'message': f'Successfully purchased {lootbox.name}!',
         'new_balance': user.bit_balance,
@@ -293,7 +311,7 @@ def api_lootboxes(request):
     )
     user_inventory = request.user.loot_box_inventory.values_list('loot_box_id', 'quantity')
     user_inventory_map = {lb_id: qty for lb_id, qty in user_inventory}
-    
+
     return Response([
         {
             **lb,
@@ -303,32 +321,43 @@ def api_lootboxes(request):
     ])
 
 
-def register_view(request):
-    if request.user.is_authenticated:
-        return redirect('main')
-    if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        email    = request.POST.get('email', '').strip()
-        password = request.POST.get('password', '')
-        confirm  = request.POST.get('confirm', '')
-        if password != confirm:
-            return render(request, 'register.html', {'error': 'Passwords do not match.', 'username': username, 'email': email})
-        if CanBetUser.objects.filter(username=username).exists():
-            return render(request, 'register.html', {'error': 'Username already taken.', 'email': email})
-        if CanBetUser.objects.filter(email=email).exists():
-            return render(request, 'register.html', {'error': 'Email already registered.', 'username': username})
-        user = CanBetUser.objects.create_user(username=username, email=email, password=password)
-        login(request, user)
-        return redirect('main')
-    return render(request, 'register.html')
+# ═══════════════════════════════════════════════════════════════════════════════
+#  EXTENSION AUTH API
 
-from .services import open_loot_box, award_loot_box
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_token_login(request):
+    if request.user and request.user.is_authenticated:
+        token, _ = Token.objects.get_or_create(user=request.user)
+        return Response({'token': token.key, 'username': request.user.username})
+
+    username = request.data.get('username', '').strip()
+    password = request.data.get('password', '')
+
+    user = authenticate(request, username=username, password=password)
+
+    # Also allow login by email
+    if user is None and username:
+        try:
+            matched = CanBetUser.objects.get(email=username)
+            user = authenticate(request, username=matched.username, password=password)
+        except CanBetUser.DoesNotExist:
+            pass
+
+    if user is None:
+        return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({'token': token.key, 'username': user.username})
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  EXTENSION SYNC API
 
 BITS_PER_SUBMISSION = 50
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_canvas_sync(request):
@@ -401,4 +430,4 @@ def api_canvas_sync(request):
         'created':      created_count,
         'bits_awarded': bits_awarded,
         'new_balance':  user.bit_balance,
-    })
+    }) # barbaque chicken check
