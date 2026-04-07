@@ -1,11 +1,11 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+{% load static %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>canBet • Main Interface</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   
@@ -172,6 +172,12 @@
 
   .list-row:last-child { border-bottom: none; }
   .dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .dot-won { background-color: var(--green); }
+  .dot-bought { background-color: var(--accent-blue); }
+  .list-row-you {
+    background: rgba(91,141,184,0.1);
+    border-left: 8px solid var(--accent-blue);
+  }
   
   .lb-rank { width: 50px; font-size: 0.8rem; }
   .gold { color: #c8943a; }
@@ -204,7 +210,7 @@
 
 <nav class="topnav">
   <div class="nav-left">
-    <a href="{% url 'main' %}"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
+    <a href="{% url 'main' %}"><img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo" alt="Logo"></a>
     <span class="brand-text">canBet</span>
   </div>
   <div class="nav-right">
@@ -254,8 +260,7 @@
     <div class="list-block">
       {% for activity in recent_activity %}
         <div class="list-row">
-          <div class="dot {% if activity.item_won %}green{% else %}blue{% endif %}" 
-               style="background-color: {% if activity.item_won %}var(--green){% else %}var(--accent-blue){% endif %};"></div>
+          <div class="dot {% if activity.item_won %}dot-won{% else %}dot-bought{% endif %}"></div>
           <div style="flex: 1;">
             {% if activity.item_won %}
               GOT: {{ activity.item_won.rarity }} - {{ activity.item_won.name }}
@@ -275,7 +280,7 @@
     <div class="section-label">Top Competitors</div>
     <div class="list-block">
       {% for player in top5 %}
-      <div class="list-row" {% if player == user %}style="background:rgba(91,141,184,0.1); border-left: 8px solid var(--accent-blue);"{% endif %}>
+      <div class="list-row{% if player == user %} list-row-you{% endif %}">
         <span class="lb-rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
           #{{ forloop.counter }}
         </span>

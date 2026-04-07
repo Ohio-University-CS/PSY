@@ -1,12 +1,12 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
+{% load static %}
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>canBet • Home</title>
         <link
-            href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
             rel="stylesheet">
         <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -143,7 +143,7 @@
             <!-- LEFT: LOGO + TEXT -->
             <div class="nav-left">
                 <a href="/"><img
-                        src="{% static 'images/canBet symbol sym..png' %}"
+                        src="{% get_static_prefix %}images/canBet%20symbol%20sym..png"
                         class="logo" alt="Logo"></a>
                 <span class="brand-text">canBet</span>
             </div>

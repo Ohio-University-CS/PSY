@@ -1,0 +1,5 @@
+char-encoding: utf8
+quiet: yes
+show-warnings: no
+show-info: no
+wrap: 0

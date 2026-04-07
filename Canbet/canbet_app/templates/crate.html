@@ -1,12 +1,12 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
+{% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>canBet • Crates</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
       rel="stylesheet">
     <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -235,7 +235,7 @@
   <nav class="topnav">
     <div class="nav-left">
       <a href="{% url 'main' %}"><img
-          src="{% static 'images/canBet symbol sym..png' %}" class="logo"
+          src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo"
           alt="Logo"></a>
       <span class="brand-text">canBet</span>
     </div>
@@ -317,7 +317,7 @@
 
   <div class="overlay" id="overlay">
     <div class="popup">
-      <div class="popup-icon"><img id="pIcon" src="" alt=""></div>
+      <div class="popup-icon"><img id="pIcon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt=""></div>
       <div class="popup-rarity" id="pRarity"></div>
       <div class="popup-name" id="pName"></div>
       <button class="popup-btn" onclick="closePopup()">COLLECT ITEM</button>

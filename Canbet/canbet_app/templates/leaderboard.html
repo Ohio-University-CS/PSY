@@ -1,13 +1,13 @@
-{% load static %}
-{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
+{% load static %}
+{% load humanize %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>canBet • Leaderboard</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
       rel="stylesheet">
     <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -105,10 +105,10 @@
   .rank-num.silver { color: var(--silver); }
   .rank-num.bronze { color: var(--bronze); }
 
-  .user-name { color: var(--text); }
-  .user-name.you { color: var(--accent-blue); }
+  .user-name, .lb-name { color: var(--text); }
+  .user-name.you, .lb-name.you { color: var(--accent-blue); }
   
-  .bit-score { color: var(--green); }
+  .bit-score, .lb-score { color: var(--green); }
   .crate-count { color: #666; font-size: 0.7rem; }
 
   /* --- PAGINATION --- */
@@ -130,16 +130,16 @@
 </head>
 <body>
 <nav class="topnav">
-  <a href="/main/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
+  <a href="/main/"><img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo" alt="Logo"></a>
   <a href="/main/" class="nav-back">◀ Menu</a>
 </nav>
 <div class="page">
   <section>
     <div class="section-label">Leaderboard</div>
       <div style="display:flex; gap:6px; margin-bottom:12px;">
-      <a href="?sort=bits&page=1"><button class="page-btn {% if sort == 'bits' %}active{% endif %}">Bits</button></a>
-      <a href="?sort=rarity&page=1"><button class="page-btn {% if sort == 'rarity' %}active{% endif %}">Rarest item</button></a>
-      <a href="?sort=crates&page=1"><button class="page-btn {% if sort == 'crates' %}active{% endif %}">Crates</button></a>
+      <a href="?sort=bits&amp;page=1"><button class="page-btn {% if sort == 'bits' %}active{% endif %}">Bits</button></a>
+      <a href="?sort=rarity&amp;page=1"><button class="page-btn {% if sort == 'rarity' %}active{% endif %}">Rarest item</button></a>
+      <a href="?sort=crates&amp;page=1"><button class="page-btn {% if sort == 'crates' %}active{% endif %}">Crates</button></a>
     </div>
     <div class="lb-header">
       <div class="lb-th">#</div>
@@ -150,29 +150,23 @@
     <div class="lb-list">
       {% for entry in entries %}
       <div class="lb-row {% if entry.is_you %}you{% endif %}">
-      <span class="lb-rank
-        {% if entry.rank == 1 %}gold
-        {% elif entry.rank == 2 %}silver
-        {% elif entry.rank == 3 %}bronze
-        {% endif %}
-        {% if entry.is_you %}" style="color:var(--accent2){% endif %}">
-        #{{ entry.rank }}
-      </span>
-      <span class="lb-name {% if entry.is_you %}you{% endif %}">
-        {{ entry.username }}{% if entry.is_you %} (you){% endif %}
-      </span>
-      <span class="lb-score">{{ entry.bits|intcomma }}</span>
-      <span class="lb-crates">{{ entry.crates }}</span>
+        <span class="rank-num {% if entry.rank == 1 %}gold{% elif entry.rank == 2 %}silver{% elif entry.rank == 3 %}bronze{% endif %}">#{{ entry.rank }}</span>
+        <span class="lb-name {% if entry.is_you %}you{% endif %}">
+          {{ entry.username }}{% if entry.is_you %} (you){% endif %}
+        </span>
+        <span class="lb-score">{{ entry.bits|intcomma }}</span>
+        <span class="lb-crates">{{ entry.crates }}</span>
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
     </section>
   <div class="pagination">
     {% if page > 1 %}
-    <a href="?sort={{ sort }}&page={{ page|add:'-1' }}"><button class="page-btn">◀</button></a>
+    <a href="?sort={{ sort }}&amp;page={{ page|add:'-1' }}"><button class="page-btn">◀</button></a>
     {% endif %}
 
     {% for p in total_pages|ljust:total_pages %}
-      <a href="?sort={{ sort }}&page={{ forloop.counter }}">
+      <a href="?sort={{ sort }}&amp;page={{ forloop.counter }}">
         <button class="page-btn {% if forloop.counter == page %}active{% endif %}">
           {{ forloop.counter }}
         </button>
@@ -180,7 +174,7 @@
     {% endfor %}
 
     {% if page < total_pages %}
-      <a href="?sort={{ sort }}&page={{ page|add:'1' }}"><button class="page-btn">▶</button></a>
+      <a href="?sort={{ sort }}&amp;page={{ page|add:'1' }}"><button class="page-btn">▶</button></a>
     {% endif %}
   </div>
 </div>
