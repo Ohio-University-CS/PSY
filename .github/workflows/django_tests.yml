@@ -1,0 +1,52 @@
+name: Django Unit Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    # 1. This spins up the actual database
+    services:
+      db:
+        image: postgres:15
+        env:
+          POSTGRES_DB: canbet_db
+          POSTGRES_USER: SQLTeam
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        # This ensures the database is ready before the tests start
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r Canbet/requirements.txt
+          pip install psycopg2-binary dj-database-url  # Ensure these are present
+
+      - name: Run Tests
+        env:
+          # 2. These variables tell your settings.py how to connect
+          DJANGO_SECRET_KEY: "e5kaC&pptJ@Xn354"
+          DEBUG: "True"
+          DB_NAME: "canbet_db"
+          DB_USER: "SQLTeam"
+          DB_PASSWORD: "password"
+          DB_HOST: "localhost"
+          DB_PORT: "5432"
+          # Optional: Force dj_database_url to use this specific URL directly
+          DATABASE_URL: "postgres://SQLTeam:password@localhost:5432/canbet_db"
+        run: |
+          python Canbet/manage.py test canbet_app.tests
