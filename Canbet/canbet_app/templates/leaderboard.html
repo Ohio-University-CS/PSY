@@ -117,8 +117,9 @@
     font-family: 'Press Start 2P', monospace; font-size: 0.8rem;
     background: #fff; border: 4px solid var(--border);
     padding: 12px 18px; cursor: pointer; transition: 0.1s;
+    text-decoration: none; color: var(--text); display: inline-block;
   }
-  .page-btn:hover:not(.active) { background: var(--panel2); transform: translateY(-2px); }
+  .page-btn:hover { background: var(--panel2); transform: translateY(-2px); }
   .page-btn.active { background: var(--accent-blue); color: white; border-color: var(--border); }
 
   @media (max-width: 768px) {
@@ -137,9 +138,9 @@
   <section>
     <div class="section-label">Leaderboard</div>
       <div style="display:flex; gap:6px; margin-bottom:12px;">
-      <a href="?sort=bits&amp;page=1"><button class="page-btn {% if sort == 'bits' %}active{% endif %}">Bits</button></a>
-      <a href="?sort=rarity&amp;page=1"><button class="page-btn {% if sort == 'rarity' %}active{% endif %}">Rarest item</button></a>
-      <a href="?sort=crates&amp;page=1"><button class="page-btn {% if sort == 'crates' %}active{% endif %}">Crates</button></a>
+      <a href="?sort=bits&amp;page=1" class="page-btn {% if sort == 'bits' %}active{% endif %}">Bits</a>
+      <a href="?sort=rarity&amp;page=1" class="page-btn {% if sort == 'rarity' %}active{% endif %}">Rarest item</a>
+      <a href="?sort=crates&amp;page=1" class="page-btn {% if sort == 'crates' %}active{% endif %}">Crates</a>
     </div>
     <div class="lb-header">
       <div class="lb-th">#</div>
@@ -162,19 +163,17 @@
     </section>
   <div class="pagination">
     {% if page > 1 %}
-    <a href="?sort={{ sort }}&amp;page={{ page|add:'-1' }}"><button class="page-btn">◀</button></a>
+    <a href="?sort={{ sort }}&amp;page={{ page|add:'-1' }}" class="page-btn">◀</a>
     {% endif %}
 
     {% for p in total_pages|ljust:total_pages %}
-      <a href="?sort={{ sort }}&amp;page={{ forloop.counter }}">
-        <button class="page-btn {% if forloop.counter == page %}active{% endif %}">
-          {{ forloop.counter }}
-        </button>
+      <a href="?sort={{ sort }}&amp;page={{ forloop.counter }}" class="page-btn {% if forloop.counter == page %}active{% endif %}">
+        {{ forloop.counter }}
       </a>
     {% endfor %}
 
     {% if page < total_pages %}
-      <a href="?sort={{ sort }}&amp;page={{ page|add:'1' }}"><button class="page-btn">▶</button></a>
+      <a href="?sort={{ sort }}&amp;page={{ page|add:'1' }}" class="page-btn">▶</a>
     {% endif %}
   </div>
 </div>
