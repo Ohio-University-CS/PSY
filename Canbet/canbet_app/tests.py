@@ -5,11 +5,12 @@ Run with  : python manage.py test canbet_app.tests --verbosity=2
 What do we aim to test with these?
   Models      : CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, CanvasSubmission
   API views   : /api/me/, /api/crate/open/, /api/shop/buy/,
-                /api/inventory/, /api/leaderboard/, /api/recent-opens/
+                /api/inventory/, /api/leaderboard/, /api/recent-opens/,
+                /api/canvas/sync/
   Page views  : home, about, login, logout, register, main, inventory,
                 leaderboard, profile, settings, shop, crate
   Business    : bit deduction, rank calculation, loot-table weighting,
-                duplicate-purchase guard, Canvas sync helpers
+                duplicate-purchase guard, Canvas sync via browser extension
 """
 
 from django.test import TestCase, Client
@@ -919,94 +920,170 @@ class TestLeaderboardView(TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  25. CANVAS SYNC — management command logic
+#  25. CANVAS SYNC — POST /api/canvas/sync/ (data pushed by browser extension)
 #  Author: Zane
-class TestCanvasSyncLogic(TestCase):
-    """
-    Tests the Canvas sync logic without hitting the real Canvas API.
-    We mock requests.get so tests are fast and offline-safe.
-    """
+#
+#  The browser extension collects submission data directly from Canvas using the
+#  student's own session cookies, then POSTs it to /api/canvas/sync/ with a
+#  canBet auth token.  The backend never calls Canvas itself, so there is no
+#  API key or requests.get to mock — we just POST pre-formed payloads and
+#  assert on the side-effects (bits awarded, CanvasSubmission rows created).
+# ═══════════════════════════════════════════════════════════════════════════════
+class TestCanvasSyncEndpoint(TestCase):
 
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    SYNC_URL = '/api/canvas/sync/'
+
+    def _make_payload(self, canvas_user_id='99999', submissions=None):
+        """Build the JSON body the extension sends to /api/canvas/sync/."""
+        return {
+            'canvas_user_id': canvas_user_id,
+            'submissions': submissions or [],
+        }
+
+    def _one_submission(self, assignment_id='42', course_id='1',
+                        course_name='CS101', submitted_at='2025-09-01T10:00:00Z',
+                        score=90.0):
+        return {
+            'course_id':     course_id,
+            'course_name':   course_name,
+            'assignment_id': assignment_id,
+            'submitted_at':  submitted_at,
+            'score':         score,
+        }
+
+    # ------------------------------------------------------------------
+    # setUp
+    # ------------------------------------------------------------------
     def setUp(self):
+        self.client = APIClient()
         self.user = make_user()
         self.user.canvas_user_id = '99999'
         self.user.save()
+        self.client.force_authenticate(user=self.user)
 
-    @override_settings(CANVAS_TOKEN='fake-token')
-    @patch('requests.get')
-    def test_sync_awards_bits_for_new_submission(self, mock_get):
-        # Normal case: a new on-time submission awards 50 bits.# 
-        # Mock course list
-        courses_resp = MagicMock()
-        courses_resp.status_code = 200
-        courses_resp.json.return_value = [{'id': 1, 'name': 'CS101'}]
-
-        # Mock submission list with one on-time submission
-        subs_resp = MagicMock()
-        subs_resp.status_code = 200
-        subs_resp.json.return_value = [{
-            'assignment_id': 42,
-            'submitted_at':  '2025-09-01T10:00:00Z',
-            'score':         90.0
-        }]
-
-        mock_get.side_effect = [courses_resp, subs_resp]
-
-        from django.core.management import call_command
-        from io import StringIO
-        call_command('sync_canvas', '--user', self.user.username, stdout=StringIO())
-
+    # ------------------------------------------------------------------
+    # Normal cases
+    # ------------------------------------------------------------------
+    def test_sync_awards_bits_for_new_submission(self):
+        # Normal case: a single new on-time submission awards 50 bits.
+        payload = self._make_payload(submissions=[self._one_submission()])
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
         self.assertEqual(self.user.bit_balance, 1050)  # 1000 default + 50
 
-    @override_settings(CANVAS_TOKEN='fake-token')
-    @patch('requests.get')
-    def test_sync_no_bits_for_duplicate_submission(self, mock_get):
-        # Edge case: re-syncing same submission doesn't award bits twice.# 
-        # Pre-create the submission so it already exists
+    def test_sync_response_reports_created_count_and_bits(self):
+        # Normal case: response body includes 'created' and 'bits_awarded' fields.
+        payload = self._make_payload(submissions=[self._one_submission()])
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertIn('created', response.data)
+        self.assertIn('bits_awarded', response.data)
+        self.assertEqual(response.data['created'], 1)
+        self.assertEqual(response.data['bits_awarded'], 50)
+
+    def test_sync_creates_canvas_submission_record(self):
+        # Normal case: a CanvasSubmission row is created for the new submission.
+        payload = self._make_payload(submissions=[self._one_submission()])
+        self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(
+            CanvasSubmission.objects.filter(user=self.user, assignment_id='42').count(), 1
+        )
+
+    def test_sync_multiple_new_submissions_all_awarded(self):
+        # Normal case: two new submissions each award 50 bits (100 total).
+        payload = self._make_payload(submissions=[
+            self._one_submission(assignment_id='1'),
+            self._one_submission(assignment_id='2'),
+        ])
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.bit_balance, 1100)  # 1000 + 50 + 50
+
+    # ------------------------------------------------------------------
+    # Edge cases
+    # ------------------------------------------------------------------
+    def test_sync_no_bits_for_duplicate_submission(self):
+        # Edge case: re-syncing the same submission does not award bits twice.
         CanvasSubmission.objects.create(
             user=self.user, course_name='CS101', course_id='1',
             assignment_id='42', submitted_at=timezone.now(), score=90.0
         )
-
-        courses_resp = MagicMock()
-        courses_resp.status_code = 200
-        courses_resp.json.return_value = [{'id': 1, 'name': 'CS101'}]
-
-        subs_resp = MagicMock()
-        subs_resp.status_code = 200
-        subs_resp.json.return_value = [{
-            'assignment_id': 42,
-            'submitted_at':  '2025-09-01T10:00:00Z',
-            'score':         90.0
-        }]
-
-        mock_get.side_effect = [courses_resp, subs_resp]
-
-        from django.core.management import call_command
-        from io import StringIO
-        call_command('sync_canvas', '--user', self.user.username, stdout=StringIO())
-
+        payload = self._make_payload(submissions=[self._one_submission()])
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.bit_balance, 1000)  # no change
+        self.assertEqual(self.user.bit_balance, 1000)  # unchanged
+        self.assertEqual(response.data['created'], 0)
+        self.assertEqual(response.data['bits_awarded'], 0)
 
-    @override_settings(CANVAS_TOKEN='fake-token')
-    @patch('requests.get')
-    def test_sync_no_bits_for_missing_submission_date(self, mock_get):
-        # Edge case: submission with no submitted_at date earns no bits.# 
-        courses_resp = MagicMock()
-        courses_resp.status_code = 200
-        courses_resp.json.return_value = [{'id': 1, 'name': 'CS101'}]
-
-        subs_resp = MagicMock()
-        subs_resp.status_code = 200
-        subs_resp.json.return_value = [{'assignment_id': 99, 'submitted_at': None, 'score': None}]
-
-        mock_get.side_effect = [courses_resp, subs_resp]
-
-        from django.core.management import call_command
-        from io import StringIO
-        call_command('sync_canvas', '--user', self.user.username, stdout=StringIO())
-
+    def test_sync_no_bits_for_missing_submitted_at(self):
+        # Edge case: extension filters out unsubmitted rows (submitted_at=None)
+        # before sending, so the backend never sees them.  If a null slips
+        # through, no CanvasSubmission should be created and no bits awarded.
+        payload = self._make_payload(submissions=[
+            self._one_submission(submitted_at=None)
+        ])
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.bit_balance, 1000)  # no change
+        self.assertEqual(self.user.bit_balance, 1000)  # unchanged
+        self.assertEqual(CanvasSubmission.objects.filter(user=self.user).count(), 0)
+
+    def test_sync_empty_submissions_list_is_no_op(self):
+        # Edge case: posting an empty submissions array returns 200 with zero counts.
+        payload = self._make_payload(submissions=[])
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['created'], 0)
+        self.assertEqual(response.data['bits_awarded'], 0)
+
+    def test_sync_null_score_is_stored_correctly(self):
+        # Edge case: a submission with score=null (ungraded) is still recorded.
+        payload = self._make_payload(submissions=[
+            self._one_submission(score=None)
+        ])
+        self.client.post(self.SYNC_URL, payload, format='json')
+        sub = CanvasSubmission.objects.get(user=self.user, assignment_id='42')
+        self.assertIsNone(sub.score)
+
+    def test_sync_mixed_new_and_duplicate_submissions(self):
+        # Edge case: only new submissions earn bits; duplicates are skipped.
+        CanvasSubmission.objects.create(
+            user=self.user, course_name='CS101', course_id='1',
+            assignment_id='42', submitted_at=timezone.now(), score=90.0
+        )
+        payload = self._make_payload(submissions=[
+            self._one_submission(assignment_id='42'),   # duplicate — no bits
+            self._one_submission(assignment_id='99'),   # new — 50 bits
+        ])
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.data['created'], 1)
+        self.assertEqual(response.data['bits_awarded'], 50)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.bit_balance, 1050)
+
+    # ------------------------------------------------------------------
+    # Error cases
+    # ------------------------------------------------------------------
+    def test_sync_unauthenticated_returns_403(self):
+        # Error case: request without a valid auth token is rejected.
+        unauthed_client = APIClient()
+        payload = self._make_payload(submissions=[self._one_submission()])
+        response = unauthed_client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.status_code, 403)
+
+    def test_sync_missing_canvas_user_id_returns_400(self):
+        # Error case: payload without canvas_user_id is rejected.
+        payload = {'submissions': [self._one_submission()]}
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_sync_missing_submissions_field_returns_400(self):
+        # Error case: payload without the submissions list is rejected.
+        payload = {'canvas_user_id': '99999'}
+        response = self.client.post(self.SYNC_URL, payload, format='json')
+        self.assertEqual(response.status_code, 400)

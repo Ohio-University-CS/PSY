@@ -263,7 +263,7 @@
               BOUGHT: {{ activity.item.name }}
             {% endif %}
           </div>
-          <div style="opacity: 0.6; font-size: 0.5rem;">{{ activity.opened_at|timesince }}{{ activity.purchased_at|timesince }} AGO</div>
+          <div style="opacity: 0.6; font-size: 0.5rem;">{{ activity.opened_at|timesince }}{{ activity.purchased_at|timesince }} ago</div>
         </div>
       {% empty %}
         <div class="list-row" style="opacity: 0.5;">No system logs found. Go open a crate!</div>
