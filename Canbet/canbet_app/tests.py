@@ -23,7 +23,8 @@ from django.test import override_settings
 import json
 
 from canbet_app.models import (
-    CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, CanvasSubmission
+    CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, CanvasSubmission,
+    Lootbox, LootboxEntry, LootboxInventoryEntry,
 )
 
 
@@ -114,15 +115,15 @@ class TestItemModel(TestCase):
 
     def test_normal_item_creation(self):
         # Normal case: item saves correctly with all fields.
-        item = make_item(name='Vampire', rarity='RARE', shop_price=120, crate_weight=20)
-        self.assertEqual(item.name, 'Vampire')
+        item = make_item(name='TestRareVampire_01', rarity='RARE', shop_price=120, crate_weight=20)
+        self.assertEqual(item.name, 'TestRareVampire_01')
         self.assertEqual(item.rarity, 'RARE')
         self.assertEqual(item.shop_price, 120)
 
     def test_item_str_representation(self):
         #Normal case: __str__ returns name and rarity.
-        item = make_item(name='Cthulhu', rarity='EPIC')
-        self.assertIn('Cthulhu', str(item))
+        item = make_item(name='TestEpicCthulhu_01', rarity='EPIC')
+        self.assertIn('TestEpicCthulhu_01', str(item))
         self.assertIn('EPIC', str(item))
 
     def test_duplicate_item_name_raises(self):
@@ -495,18 +496,27 @@ class TestApiOpenCrate(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = make_user(bits=1000)
-        # Populate SPOOKY pool
-        make_item(name='CrateCommon', rarity='COMMON', collection='SPOOKY',
-                  shop_price=0, crate_weight=100)
         self.client.force_authenticate(user=self.user)
 
+        self.lootbox = Lootbox.objects.create(
+            name='Spooky Test Crate',
+            crate_type='SPOOKY',
+            cost_bits=200,
+            is_active=True,
+        )
+        self.item = make_item(name='CrateCommon', rarity='COMMON', collection='SPOOKY',
+                              shop_price=0, crate_weight=100)
+        LootboxEntry.objects.create(loot_box=self.lootbox, item=self.item, weight=100)
+        LootboxInventoryEntry.objects.create(user=self.user, loot_box=self.lootbox, quantity=1)
+
     def test_open_crate_success(self):
-        # Normal case: opening a valid crate returns item and deducts 200 bits.
+        # Normal case: opening an owned active crate returns an item and keeps bit balance unchanged.
         response = self.client.post('/api/crate/open/', {'crate_type': 'SPOOKY'}, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertIn('item', response.data)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.bit_balance, 800)
+        self.assertEqual(self.user.bit_balance, 1000)
+        self.assertEqual(response.data['item']['name'], self.item.name)
 
     def test_open_crate_increments_crates_opened(self):
         # Normal case: crates_opened counter increments by 1.
@@ -519,12 +529,12 @@ class TestApiOpenCrate(TestCase):
         self.client.post('/api/crate/open/', {'crate_type': 'SPOOKY'}, format='json')
         self.assertEqual(CrateOpen.objects.filter(user=self.user).count(), 1)
 
-    def test_open_crate_insufficient_bits(self):
-        # Error case: user with fewer than 200 bits gets 402.
+    def test_open_crate_without_owned_crate_returns_400(self):
+        # Error case: users must own the crate before they can open it.
         broke = make_user('broke', bits=50)
         self.client.force_authenticate(user=broke)
         response = self.client.post('/api/crate/open/', {'crate_type': 'SPOOKY'}, format='json')
-        self.assertEqual(response.status_code, 402)
+        self.assertEqual(response.status_code, 400)
 
     def test_open_crate_unknown_type(self):
         # Error case: invalid crate_type returns 400.
@@ -532,7 +542,14 @@ class TestApiOpenCrate(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_open_crate_empty_pool(self):
-        # Edge case: crate with no items in DB returns 503.
+        # Edge case: an owned active crate with no configured items returns 503.
+        empty_lootbox = Lootbox.objects.create(
+            name='Space Empty Crate',
+            crate_type='SPACE',
+            cost_bits=200,
+            is_active=True,
+        )
+        LootboxInventoryEntry.objects.create(user=self.user, loot_box=empty_lootbox, quantity=1)
         response = self.client.post('/api/crate/open/', {'crate_type': 'SPACE'}, format='json')
         self.assertEqual(response.status_code, 503)
 
@@ -640,13 +657,13 @@ class TestApiRecentOpens(TestCase):
         times = [r['opened_at'] for r in response.data]
         self.assertEqual(times, sorted(times, reverse=True))
 
-    def test_recent_opens_capped_at_20(self):
-        # Edge case: never returns more than 20 records.
+    def test_recent_opens_capped_at_50(self):
+        # Edge case: never returns more than 50 records.
         for _ in range(25):
             CrateOpen.objects.create(user=self.user, crate_type='SPOOKY',
                                      item_won=self.item, bits_spent=200)
         response = self.client.get('/api/recent-opens/')
-        self.assertLessEqual(len(response.data), 20)
+        self.assertLessEqual(len(response.data), 50)
 
     def test_recent_opens_handles_null_item(self):
         # Edge case: open with null item_won returns '?' without crashing.
@@ -898,25 +915,25 @@ class TestLeaderboardView(TestCase):
         self.client.force_login(self.user)
 
     def test_leaderboard_sorted_descending(self):
-        # Normal case: players shown highest bits first.
+        # Normal case: entries shown highest bits first by default.
         make_user('low',  bits=100)
         make_user('high', bits=9999)
         response = self.client.get('/leaderboard/')
-        players  = list(response.context['players'])
-        balances = [p.bit_balance for p in players]
+        entries = list(response.context['entries'])
+        balances = [entry['bits'] for entry in entries]
         self.assertEqual(balances, sorted(balances, reverse=True))
 
     def test_leaderboard_includes_current_user(self):
         # Normal case: the logged-in user appears somewhere in the list.
         response = self.client.get('/leaderboard/')
-        usernames = [p.username for p in response.context['players']]
+        usernames = [entry['username'] for entry in response.context['entries']]
         self.assertIn('viewer', usernames)
 
     def test_leaderboard_empty_state(self):
         # Edge case: works correctly with only one user (the viewer).
         response = self.client.get('/leaderboard/')
         self.assertEqual(response.status_code, 200)
-        self.assertGreaterEqual(len(response.context['players']), 1)
+        self.assertGreaterEqual(len(response.context['entries']), 1)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1034,12 +1051,10 @@ class TestCanvasSyncEndpoint(TestCase):
         self.assertEqual(CanvasSubmission.objects.filter(user=self.user).count(), 0)
 
     def test_sync_empty_submissions_list_is_no_op(self):
-        # Edge case: posting an empty submissions array returns 200 with zero counts.
+        # Edge case: posting an empty submissions array is rejected with 400.
         payload = self._make_payload(submissions=[])
         response = self.client.post(self.SYNC_URL, payload, format='json')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['created'], 0)
-        self.assertEqual(response.data['bits_awarded'], 0)
+        self.assertEqual(response.status_code, 400)
 
     def test_sync_null_score_is_stored_correctly(self):
         # Edge case: a submission with score=null (ungraded) is still recorded.
@@ -1069,12 +1084,12 @@ class TestCanvasSyncEndpoint(TestCase):
     # ------------------------------------------------------------------
     # Error cases
     # ------------------------------------------------------------------
-    def test_sync_unauthenticated_returns_403(self):
+    def test_sync_unauthenticated_returns_401(self):
         # Error case: request without a valid auth token is rejected.
         unauthed_client = APIClient()
         payload = self._make_payload(submissions=[self._one_submission()])
         response = unauthed_client.post(self.SYNC_URL, payload, format='json')
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_sync_missing_canvas_user_id_returns_400(self):
         # Error case: payload without canvas_user_id is rejected.
