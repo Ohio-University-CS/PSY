@@ -9,7 +9,7 @@ jobs:
     # 1. This spins up the actual database
     services:
       db:
-        image: postgres:13
+        image: postgres:15
         env:
           POSTGRES_DB: canbet_db
           POSTGRES_USER: SQLTeam
