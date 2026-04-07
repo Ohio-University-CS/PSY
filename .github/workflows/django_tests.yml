@@ -25,4 +25,4 @@ jobs:
           pip install -r Canbet/requirements.txt
       - name: Run Tests
         run: |
-          python manage.py test canbet_app.tests
+          python Canbet/manage.py test canbet_app.tests
