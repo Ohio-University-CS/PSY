@@ -33,7 +33,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r Canbet/requirements.txt
           pip install psycopg2-binary dj-database-url  # Ensure these are present
 
       - name: Run Tests
