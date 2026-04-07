@@ -110,6 +110,32 @@
     font-size: 1rem; margin-bottom: 30px; padding-left: 16px;
     border-left: 10px solid var(--accent-blue); text-transform: uppercase;
   }
+  .inv-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+    align-items: flex-start;
+  }
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .filter-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.6rem;
+    padding: 10px 12px;
+    border: 4px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+  }
+  .filter-btn.active {
+    background: var(--accent-blue);
+    color: #fff;
+  }
+  .item-subfilters.hidden { display: none; }
   .inv-container { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
 
   /* --- THE GRID (SOLID STYLE) --- */
@@ -151,6 +177,7 @@
   .sel-rarity { font-size: 0.8rem; padding: 16px; border: 5px solid; background: #fff; text-transform: uppercase; }
   .sel-empty { font-size: 0.8rem; opacity: 0.5; padding: 60px 0; line-height: 2.5; }
   .sel-qty { font-size: 0.7rem; margin-top: 16px; color: #555; }
+  .sel-qty-crate { margin-bottom: 10px; }
 
   /* --- FOOTER --- */
   .page-footer {
@@ -159,6 +186,69 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 40px; font-size: 0.7rem; z-index: 100;
   }
+  .popup-btn {
+    font-family: 'Press Start 2P', monospace; font-size: 0.7rem;
+    background: var(--accent-blue); color: white; border: 5px solid var(--border);
+    padding: 12px; cursor: pointer; transition: 0.1s;
+  }
+  .popup-btn:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0px var(--border); }
+  .popup-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+  .crate-icon { width: 84px; height: 84px; object-fit: contain; image-rendering: pixelated; }
+  .crate-emoji { font-size: 3rem; line-height: 1; }
+  .open-result {
+    font-size: 0.65rem;
+    min-height: 20px;
+    color: var(--green);
+  }
+  .roll-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    z-index: 190; flex-direction: column; gap: 30px;
+    backdrop-filter: blur(8px);
+  }
+  .roll-overlay.show { display: flex; }
+  .roll-track-wrap {
+    width: 700px; max-width: 95vw; overflow: hidden;
+    border: 8px solid var(--border); background: var(--panel);
+    position: relative;
+  }
+  .roll-track-wrap::before, .roll-track-wrap::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; pointer-events: none;
+  }
+  .roll-track-wrap::before { left: 0; background: linear-gradient(to right, var(--panel), transparent); }
+  .roll-track-wrap::after  { right: 0; background: linear-gradient(to left,  var(--panel), transparent); }
+  .roll-indicator {
+    position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 6px; background: var(--accent-blue); z-index: 3;
+  }
+  .roll-track {
+    display: flex; gap: 10px; padding: 20px 10px;
+    transition: transform 4s cubic-bezier(0.05, 0.9, 0.3, 1);
+    will-change: transform;
+  }
+  .roll-item {
+    flex-shrink: 0; width: 110px; height: 110px;
+    background: #fff; border: 4px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .roll-item img { width: 80%; height: 80%; image-rendering: pixelated; object-fit: contain; }
+  .roll-item.winner { border-color: var(--accent-blue); background: #e8f0ff; }
+  .roll-label { font-size: 0.8rem; color: #fff; letter-spacing: 2px; }
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: none; align-items: center; justify-content: center;
+    z-index: 200; backdrop-filter: blur(8px);
+  }
+  .overlay.show { display: flex; }
+  .popup {
+    background: #fff; border: 10px solid var(--border);
+    padding: 46px; text-align: center; display: flex;
+    flex-direction: column; gap: 20px; min-width: 420px;
+    box-shadow: 20px 20px 0px var(--accent-blue);
+  }
+  .popup-icon img { width: 160px; height: 160px; image-rendering: pixelated; }
+  .popup-rarity { font-size: 1rem; letter-spacing: 3px; }
+  .popup-name { font-size: 0.85rem; border-top: 4px solid #eee; padding-top: 15px; }
 </style>
   </head>
   <body>
@@ -176,14 +266,31 @@
     <div class="page">
       <section>
         <div class="section-label">Inventory Viewer</div>
+        <div class="inv-tools">
+          <div class="filter-row">
+            <button class="filter-btn active" data-primary-filter="ALL" onclick="setPrimaryFilter('ALL')">ALL</button>
+            <button class="filter-btn" data-primary-filter="ITEM" onclick="setPrimaryFilter('ITEM')">ITEMS</button>
+            <button class="filter-btn" data-primary-filter="CRATE" onclick="setPrimaryFilter('CRATE')">CRATES</button>
+          </div>
+          <div class="filter-row item-subfilters" id="itemSubfilters">
+            <button class="filter-btn active" data-item-filter="ALL" onclick="setItemFilter('ALL')">ALL ITEMS</button>
+            <button class="filter-btn" data-item-filter="SPOOKY" onclick="setItemFilter('SPOOKY')">SPOOKY</button>
+            <button class="filter-btn" data-item-filter="SPACE" onclick="setItemFilter('SPACE')">SPACE</button>
+            <button class="filter-btn" data-item-filter="FANTASY" onclick="setItemFilter('FANTASY')">FANTASY</button>
+            <button class="filter-btn" data-item-filter="WEATHER" onclick="setItemFilter('WEATHER')">WEATHER</button>
+          </div>
+        </div>
         <div class="inv-container">
 
-          <div class="inv-grid">
+          <div class="inv-grid" id="invGrid">
             {% for entry in entries %}
               
           <div class="inv-slot"
+            data-entry-type="item"
             data-name="{{ entry.item.name }}"
             data-rarity="{{ entry.item.rarity }}"
+            data-collection="{{ entry.item.collection }}"
+            data-sprite-path="{{ entry.item.sprite_path }}"
             data-color="{% if entry.item.rarity == 'LEGENDARY' %}#c8943a{% elif entry.item.rarity == 'EPIC' %}#a855f7{% elif entry.item.rarity == 'RARE' %}#5b8db8{% else %}#2e8a56{% endif %}"
             data-img="{% static entry.item.sprite_path %}"
             data-quantity="{{ entry.quantity }}"
@@ -206,9 +313,9 @@
           </div>
 
           <div class="inv-sidebar">
-            <div class="sidebar-title">Selected Item</div>
+            <div class="sidebar-title">Selected Entry</div>
             <div id="selContent">
-              <div class="sel-empty">SELECT AN ITEM<br>FOR ANALYSIS</div>
+              <div class="sel-empty">SELECT AN ITEM OR CRATE<br>FOR ANALYSIS</div>
             </div>
           </div>
 
@@ -217,24 +324,281 @@
     </div>
 
     <script>
+const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
+const RARITY_COLORS = {
+  COMMON: '#2e8a56', RARE: '#5b8db8', EPIC: '#a855f7', LEGENDARY: '#c8943a'
+};
+const CRATE_ICON_PATHS = {
+  SPOOKY: '/static/sprites/Items/SpookyCollection/Spooky collection box.png',
+};
+const CRATE_EMOJIS = { SPOOKY: '👻', SPACE: '🌌', FANTASY: '🏰', WEATHER: '⛈️' };
+let activePrimaryFilter = 'ALL';
+let activeItemFilter = 'ALL';
+let shouldRefreshAfterReward = false;
+
 function sel(el) {
   document.querySelectorAll('.inv-slot').forEach(s => s.classList.remove('selected'));
   el.classList.add('selected');
 
+  const entryType = el.dataset.entryType || 'item';
   const name     = el.dataset.name;
   const rarity   = el.dataset.rarity;
   const color    = el.dataset.color;
   const img      = el.dataset.img;
   const quantity = el.dataset.quantity;
+  const crateType = el.dataset.crateType;
+  const collection = el.dataset.collection;
+  const spritePath = el.dataset.spritePath;
+
+  if (entryType === 'crate') {
+    const qtyNum = parseInt(quantity || '0', 10);
+    document.getElementById('selContent').innerHTML = `
+      <div class="sel-icon">${crateIconHtml(crateType)}</div>
+      <div class="sel-name">${name}</div>
+      <div class="sel-rarity" style="color:#5b8db8; border-color:#5b8db8;">CRATE</div>
+      <div class="sel-qty sel-qty-crate">x${qtyNum} owned</div>
+      <button class="popup-btn" onclick="openSelectedCrate('${crateType}')" ${qtyNum < 1 ? 'disabled' : ''}>OPEN CRATE</button>
+      <div class="sel-qty" id="openResult"></div>
+    `;
+    return;
+  }
 
   document.getElementById('selContent').innerHTML = `
     <div class="sel-icon"><img src="${img}" alt="${name}"></div>
     <div class="sel-name">${name}</div>
     <div class="sel-rarity" style="color:${color}; border-color:${color};">${rarity}</div>
     ${quantity > 1 ? `<div class="sel-qty">x${quantity} owned</div>` : ''}
+    <div class="sel-qty" id="selOdds">Calculating drop odds...</div>
   `;
+  renderSelectedItemOdds(collection, spritePath);
 }
+
+function crateIconHtml(crateType, spritePath) {
+  if (crateType === 'SPACE') return `<span class="crate-emoji">${CRATE_EMOJIS.SPACE}</span>`;
+  if (spritePath) return `<img class="crate-icon" src="/static/${spritePath}" alt="${crateType} crate">`;
+  if (CRATE_ICON_PATHS[crateType]) return `<img class="crate-icon" src="${CRATE_ICON_PATHS[crateType]}" alt="${crateType} crate">`;
+  return `<span class="crate-emoji">${CRATE_EMOJIS[crateType] || '📦'}</span>`;
+}
+
+function applyFilters() {
+  document.querySelectorAll('.inv-slot:not(.empty)').forEach(slot => {
+    const isCrate = slot.dataset.entryType === 'crate';
+    const collection = slot.dataset.collection;
+    let show = false;
+    if (activePrimaryFilter === 'ALL') {
+      // In BOTH mode, keep crates visible and filter items by the item sub-filter.
+      show = isCrate || (activeItemFilter === 'ALL' || collection === activeItemFilter);
+    } else if (activePrimaryFilter === 'CRATE') {
+      show = isCrate;
+    } else {
+      show = !isCrate && (activeItemFilter === 'ALL' || collection === activeItemFilter);
+    }
+    slot.style.display = show ? 'flex' : 'none';
+  });
+}
+
+function setPrimaryFilter(filter) {
+  activePrimaryFilter = filter;
+  document.querySelectorAll('.filter-btn[data-primary-filter]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.primaryFilter === filter);
+  });
+  // Show item subfilters only in ITEMS mode.
+  document.getElementById('itemSubfilters').classList.toggle('hidden', filter !== 'ITEM');
+  applyFilters();
+}
+
+function setItemFilter(filter) {
+  activeItemFilter = filter;
+  document.querySelectorAll('.filter-btn[data-item-filter]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.itemFilter === filter);
+  });
+  applyFilters();
+}
+
+async function fetchLootboxes() {
+  const resp = await fetch('/api/lootboxes/');
+  if (!resp.ok) throw new Error('Could not load crates.');
+  return resp.json();
+}
+
+async function renderSelectedItemOdds(collection, spritePath) {
+  const oddsEl = document.getElementById('selOdds');
+  if (!oddsEl) return;
+  if (!collection || !spritePath) {
+    oddsEl.textContent = 'Drop Odds: Unknown';
+    return;
+  }
+  try {
+    const resp = await fetch(`/api/crate-pool/${collection}/`);
+    if (!resp.ok) {
+      oddsEl.textContent = 'Drop Odds: Unknown';
+      return;
+    }
+    const pool = await resp.json();
+    const totalWeight = pool.reduce((sum, p) => sum + (Number(p.weight) || 0), 0);
+    const entry = pool.find(p => p.sprite_path === spritePath);
+    if (!entry || totalWeight <= 0) {
+      oddsEl.textContent = 'Drop Odds: Unknown';
+      return;
+    }
+    const weight = Number(entry.weight);
+    if (weight <= 0) {
+      oddsEl.textContent = 'Drop Odds: Unknown';
+      return;
+    }
+    const odds = ((weight / totalWeight) * 100).toFixed(2);
+    const oneIn = (totalWeight / weight).toFixed(2);
+    oddsEl.innerHTML = `
+      <div>Drop Odds: ${odds}%</div>
+      <div>(1 in ${oneIn})</div>
+    `;
+  } catch (err) {
+    oddsEl.textContent = 'Drop Odds: Unknown';
+  }
+}
+
+function normalizeGridPadding() {
+  const grid = document.getElementById('invGrid');
+  Array.from(grid.querySelectorAll('.inv-slot.empty')).forEach(el => el.remove());
+  const realCount = grid.querySelectorAll('.inv-slot:not(.empty)').length;
+  const minSlots = 16;
+  const needed = Math.max(0, minSlots - realCount);
+  for (let i = 0; i < needed; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'inv-slot empty';
+    grid.appendChild(empty);
+  }
+}
+
+function buildCrateSlot(lb) {
+  const slot = document.createElement('div');
+  slot.className = 'inv-slot';
+  slot.setAttribute('data-entry-type', 'crate');
+  slot.setAttribute('data-collection', lb.crate_type);
+  slot.setAttribute('data-name', lb.name);
+  slot.setAttribute('data-rarity', 'CRATE');
+  slot.setAttribute('data-color', '#5b8db8');
+  slot.setAttribute('data-quantity', String(lb.quantity || 0));
+  slot.setAttribute('data-crate-type', lb.crate_type);
+  slot.onclick = function () { sel(slot); };
+  slot.innerHTML = `${crateIconHtml(lb.crate_type, lb.sprite_path)}${lb.quantity > 1 ? `<span class="qty-badge">x${lb.quantity}</span>` : ''}`;
+  return slot;
+}
+
+async function renderCratesInGrid() {
+  const grid = document.getElementById('invGrid');
+  Array.from(grid.querySelectorAll('.inv-slot[data-entry-type="crate"]')).forEach(el => el.remove());
+  try {
+    const lootboxes = await fetchLootboxes();
+    lootboxes.filter(lb => lb.quantity > 0).forEach(lb => {
+      grid.appendChild(buildCrateSlot(lb));
+    });
+  } catch (err) {
+    console.error('Failed to render crates in inventory grid', err);
+  }
+  normalizeGridPadding();
+  applyFilters();
+}
+
+async function playRollAnimation(crateType, wonItem) {
+  const track = document.getElementById('rollTrack');
+  const overlay = document.getElementById('rollOverlay');
+  let pool = [];
+  try {
+    const resp = await fetch(`/api/crate-pool/${crateType}/`);
+    pool = await resp.json();
+  } catch (e) {}
+  if (!pool.length) pool = [wonItem];
+
+  const WINNER_POS = 33;
+  const TOTAL = 40;
+  const ITEM_W = 120;
+
+  track.innerHTML = '';
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0)';
+
+  for (let i = 0; i < TOTAL; i++) {
+    const isWinner = i === WINNER_POS;
+    const poolItem = isWinner ? wonItem : pool[Math.floor(Math.random() * pool.length)];
+    const div = document.createElement('div');
+    div.className = 'roll-item' + (isWinner ? ' winner' : '');
+    const img = document.createElement('img');
+    img.src = `/static/${poolItem.sprite_path}`;
+    img.alt = poolItem.name;
+    div.appendChild(img);
+    track.appendChild(div);
+  }
+
+  overlay.classList.add('show');
+  const offset = WINNER_POS * ITEM_W - (350 - ITEM_W / 2);
+  track.getBoundingClientRect();
+  track.style.transition = 'transform 4s cubic-bezier(0.05, 0.9, 0.3, 1)';
+  track.style.transform = `translateX(-${offset}px)`;
+  return new Promise(resolve => setTimeout(resolve, 4200));
+}
+
+function closeRewardPopup() {
+  document.getElementById('rewardOverlay').classList.remove('show');
+  if (shouldRefreshAfterReward) {
+    shouldRefreshAfterReward = false;
+    window.location.reload();
+  }
+}
+
+async function openSelectedCrate(crateType) {
+  const result = document.getElementById('openResult');
+  try {
+    const resp = await fetch('/api/crate/open/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ crate_type: crateType })
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      result.textContent = data.error || 'Could not open crate.';
+      result.style.color = '#a00000';
+      return;
+    }
+    const item = data.item;
+    const color = RARITY_COLORS[item.rarity] || '#999';
+    await playRollAnimation(crateType, item);
+    document.getElementById('rollOverlay').classList.remove('show');
+    document.getElementById('pIcon').src = '/static/' + item.sprite_path;
+    document.getElementById('pRarity').textContent = item.rarity;
+    document.getElementById('pRarity').style.color = color;
+    document.getElementById('pName').textContent = item.name;
+    shouldRefreshAfterReward = true;
+    document.getElementById('rewardOverlay').classList.add('show');
+    result.textContent = `${item.name} (${item.rarity})`;
+    result.style.color = '#2e8a56';
+  } catch (err) {
+    result.textContent = 'Could not open crate.';
+    result.style.color = '#a00000';
+  }
+}
+
+// Initialize filter UI/state first, then load crates into grid.
+setPrimaryFilter(activePrimaryFilter);
+renderCratesInGrid();
 </script>
+
+  <div class="roll-overlay" id="rollOverlay">
+    <div class="roll-label">ROLLING...</div>
+    <div class="roll-track-wrap">
+      <div class="roll-indicator"></div>
+      <div class="roll-track" id="rollTrack"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="rewardOverlay">
+    <div class="popup">
+      <div class="popup-icon"><img id="pIcon" src="" alt=""></div>
+      <div class="popup-rarity" id="pRarity"></div>
+      <div class="popup-name" id="pName"></div>
+      <button class="popup-btn" onclick="closeRewardPopup()">COLLECT ITEM</button>
+    </div>
+  </div>
 
   </body>
 </html>
