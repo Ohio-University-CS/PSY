@@ -354,6 +354,25 @@ def api_token_login(request):
     return Response({'token': token.key, 'username': user.username})
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_crate_pool(request, crate_type):
+    try:
+        lootbox = Lootbox.objects.get(crate_type=crate_type.upper(), is_active=True)
+    except Lootbox.DoesNotExist:
+        return Response({'error': 'Crate not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    entries = lootbox.entries.select_related('item').all()
+    return Response([
+        {
+            'name': e.item.name,
+            'rarity': e.item.rarity,
+            'sprite_path': e.item.sprite_path,
+            'weight': e.weight,
+        }
+        for e in entries
+    ])
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  EXTENSION SYNC API
 
