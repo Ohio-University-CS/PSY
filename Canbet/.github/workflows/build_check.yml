@@ -1,4 +1,6 @@
- on:
+name: Build Check
+ 
+on:
 
   push:
 
