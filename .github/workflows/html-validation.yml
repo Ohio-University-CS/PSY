@@ -20,7 +20,12 @@ jobs:
           ROOT="$(pwd)"
           fail=0
           while IFS= read -r -d '' f; do
-            if ! tidy -e -config "${ROOT}/.tidyrc" "$f" 2>"/tmp/tidy-$$.err"; then
+            tidy -e -config "${ROOT}/.tidyrc" "$f" 2>"/tmp/tidy-$$.err" || [ $? -eq 1 ] || {
+            echo "::group::tidy failed: $f"
+            cat "/tmp/tidy-$$.err" || true
+            echo "::endgroup::"
+            fail=1
+          }
               echo "::group::tidy failed: $f"
               cat "/tmp/tidy-$$.err" || true
               echo "::endgroup::"
