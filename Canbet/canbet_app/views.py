@@ -72,7 +72,7 @@ def main(request):
 
 @login_required
 def inventory(request):
-    entries = request.user.inventory.select_related('item').order_by('item__rarity', 'item__name')
+    entries = request.user.inventory.select_related('item').order_by('item__collection', 'item__rarity', 'item__name')
     return render(request, 'inventory.html', {'entries': entries})
 
 @login_required
