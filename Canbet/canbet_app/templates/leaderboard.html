@@ -5,7 +5,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>canBet — Leaderboard</title>
+    <title>canBet • Leaderboard</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet">
@@ -78,7 +78,7 @@
 
   .lb-header {
     display: grid;
-    grid-template-columns: 80px 1fr 180px 120px;
+    grid-template-columns: 60px 1fr 140px 200px 120px;;
     padding: 20px;
     background: var(--border);
     color: #fff;
@@ -88,7 +88,7 @@
 
   .lb-row {
     display: grid;
-    grid-template-columns: 80px 1fr 180px 120px;
+    grid-template-columns: 60px 1fr 140px 200px 120px;;
     padding: 20px;
     align-items: center;
     border-bottom: 4px solid #ddd;
@@ -122,10 +122,29 @@
   .page-btn.active { background: var(--accent-blue); color: white; border-color: var(--border); }
 
   @media (max-width: 768px) {
-    .lb-header, .lb-row { grid-template-columns: 60px 1fr 100px; }
-    .lb-th:nth-child(4), .crate-count { display: none; }
+    .lb-header, .lb-row { grid-template-columns: 60px 1fr 140px 160px 80px; }
+    .lb-th:nth-child(n+3), .lb-row span:nth-child(n+3) { display: none; }
+    .lb-th:nth-child(2), .lb-th:nth-child(3) { display: block; }
     .brand-text { display: none; }
   }
+
+  .lb-sort {
+    text-decoration: none;
+    color: rgba(255,255,255,0.7);
+    transition: color 0.1s;
+    cursor: pointer;
+  }
+  .lb-sort:hover { color: #fff; }
+  .lb-sort.sort-active { color: #fff; }
+
+  .rarity-badge {
+    font-size: 0.55rem;
+    padding: 4px 8px;
+    border: 2px solid currentColor;
+    display: inline-block;
+    max-width: 120px;
+  }
+
 </style>
 </head>
 <body>
@@ -135,17 +154,13 @@
 </nav>
 <div class="page">
   <section>
-    <div class="section-label">Leaderboard</div>
-      <div style="display:flex; gap:6px; margin-bottom:12px;">
-      <a href="?sort=bits&page=1"><button class="page-btn {% if sort == 'bits' %}active{% endif %}">Bits</button></a>
-      <a href="?sort=rarity&page=1"><button class="page-btn {% if sort == 'rarity' %}active{% endif %}">Rarest item</button></a>
-      <a href="?sort=crates&page=1"><button class="page-btn {% if sort == 'crates' %}active{% endif %}">Crates</button></a>
-    </div>
+    
     <div class="lb-header">
       <div class="lb-th">#</div>
       <div class="lb-th">Username</div>
-      <div class="lb-th">Bit Balance</div>
-      <div class="lb-th">Crates</div>
+      <a href="?sort=bits&page=1" class="lb-th lb-sort {% if sort == 'bits' %}sort-active{% endif %}">Bit Balance {% if sort == 'bits' %}▼{% endif %}</a>
+      <a href="?sort=rarity&page=1" class="lb-th lb-sort {% if sort == 'rarity' %}sort-active{% endif %}">Rarest Item {% if sort == 'rarity' %}▼{% endif %}</a>
+      <a href="?sort=crates&page=1" class="lb-th lb-sort {% if sort == 'crates' %}sort-active{% endif %}">Crates {% if sort == 'crates' %}▼{% endif %}</a>
     </div>
     <div class="lb-list">
       {% for entry in entries %}
@@ -162,6 +177,7 @@
         {{ entry.username }}{% if entry.is_you %} (you){% endif %}
       </span>
       <span class="lb-score">{{ entry.bits|intcomma }}</span>
+      <span class="rarity-badge" style="color: {{ entry.rarity_color }};">{{ entry.rarity_label }}</span>
       <span class="lb-crates">{{ entry.crates }}</span>
     </div>
     {% endfor %}
