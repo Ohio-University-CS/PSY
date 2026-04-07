@@ -497,6 +497,7 @@ class TestApiOpenCrate(TestCase):
         self.client = APIClient()
         self.user = make_user(bits=1000)
         self.client.force_authenticate(user=self.user)
+        Lootbox.objects.filter(crate_type='SPOOKY').delete()
 
         self.lootbox = Lootbox.objects.create(
             name='Spooky Test Crate',
@@ -504,10 +505,26 @@ class TestApiOpenCrate(TestCase):
             cost_bits=200,
             is_active=True,
         )
-        self.item = make_item(name='CrateCommon', rarity='COMMON', collection='SPOOKY',
-                              shop_price=0, crate_weight=100)
-        LootboxEntry.objects.create(loot_box=self.lootbox, item=self.item, weight=100)
-        LootboxInventoryEntry.objects.create(user=self.user, loot_box=self.lootbox, quantity=1)
+
+        self.item = make_item(
+            name='CrateCommon',
+            rarity='COMMON',
+            collection='SPOOKY',
+            shop_price=0,
+            crate_weight=100
+        )
+
+        LootboxEntry.objects.create(
+            loot_box=self.lootbox,
+            item=self.item,
+            weight=100
+        )
+
+        LootboxInventoryEntry.objects.create(
+            user=self.user,
+            loot_box=self.lootbox,
+            quantity=1
+        )
 
     def test_open_crate_success(self):
         # Normal case: opening an owned active crate returns an item and keeps bit balance unchanged.
@@ -543,15 +560,29 @@ class TestApiOpenCrate(TestCase):
 
     def test_open_crate_empty_pool(self):
         # Edge case: an owned active crate with no configured items returns 503.
-        empty_lootbox = Lootbox.objects.create(
-            name='Space Empty Crate',
-            crate_type='SPACE',
-            cost_bits=200,
-            is_active=True,
-        )
-        LootboxInventoryEntry.objects.create(user=self.user, loot_box=empty_lootbox, quantity=1)
-        response = self.client.post('/api/crate/open/', {'crate_type': 'SPACE'}, format='json')
-        self.assertEqual(response.status_code, 503)
+        def test_open_crate_empty_pool(self):
+            Lootbox.objects.filter(crate_type='SPACE').delete()
+
+            empty_lootbox = Lootbox.objects.create(
+                name='Space Empty Crate',
+                crate_type='SPACE',
+                cost_bits=200,
+                is_active=True,
+            )
+
+            LootboxInventoryEntry.objects.create(
+                user=self.user,
+                loot_box=empty_lootbox,
+                quantity=1
+            )
+
+            response = self.client.post(
+                '/api/crate/open/',
+                {'crate_type': 'SPACE'},
+                format='json'
+            )
+
+            self.assertEqual(response.status_code, 503)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
