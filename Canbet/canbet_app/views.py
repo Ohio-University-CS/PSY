@@ -357,7 +357,7 @@ def api_token_login(request):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  EXTENSION SYNC API
 
-BITS_PER_SUBMISSION = 50
+BITS_PER_SUBMISSION = 200
 
 @csrf_exempt
 @api_view(['POST'])
