@@ -489,47 +489,72 @@ def api_trade(request):
     }
 
     from_rarity = str(request.data.get('from', '')).upper()
-    item_ids = request.data.get('item_ids', [])
+    selections = request.data.get('selections', [])
     user = request.user
 
     if from_rarity not in rarity_map:
         return Response({'error': 'Invalid trade.'}, status=400)
 
-    if not isinstance(item_ids, list):
-        return Response({'error': 'item_ids must be a list.'}, status=400)
+    if not isinstance(selections, list) or not selections:
+        return Response({'error': 'No items selected.'}, status=400)
 
     to_rarity, required = rarity_map[from_rarity]
 
-    unique_ids = []
-    seen = set()
-    for item_id in item_ids:
+    cleaned = []
+    total_selected = 0
+    seen_ids = set()
+
+    for row in selections:
+        if not isinstance(row, dict):
+            continue
+
         try:
-            item_id = int(item_id)
+            item_id = int(row.get('item_id'))
+            amount = int(row.get('amount'))
         except (TypeError, ValueError):
             continue
-        if item_id not in seen:
-            seen.add(item_id)
-            unique_ids.append(item_id)
 
-    if len(unique_ids) != required:
-        return Response({'error': f'Select exactly {required} {from_rarity} items.'}, status=400)
+        if item_id in seen_ids or amount < 1:
+            continue
 
-    entries = list(
-        InventoryEntry.objects.select_for_update()
-        .select_related('item')
-        .filter(user=user, item_id__in=unique_ids, item__rarity=from_rarity, quantity__gte=1)
-    )
+        seen_ids.add(item_id)
+        cleaned.append({'item_id': item_id, 'amount': amount})
+        total_selected += amount
 
-    if len(entries) != required:
+    if total_selected != required:
+        return Response(
+            {'error': f'Select exactly {required} {from_rarity} item copies.'},
+            status=400
+        )
+
+    entries = {
+        e.item_id: e
+        for e in InventoryEntry.objects.select_for_update().select_related('item').filter(
+            user=user,
+            item_id__in=[x['item_id'] for x in cleaned],
+            item__rarity=from_rarity
+        )
+    }
+
+    if len(entries) != len(cleaned):
         return Response({'error': 'One or more selected items are invalid.'}, status=400)
+
+    for row in cleaned:
+        entry = entries[row['item_id']]
+        if entry.quantity < row['amount']:
+            return Response(
+                {'error': f'Not enough copies of {entry.item.name}.'},
+                status=400
+            )
 
     reward_item = Item.objects.filter(rarity=to_rarity).order_by('?').first()
     if not reward_item:
         return Response({'error': f'No {to_rarity} items available.'}, status=400)
 
     with transaction.atomic():
-        for entry in entries:
-            entry.quantity -= 1
+        for row in cleaned:
+            entry = entries[row['item_id']]
+            entry.quantity -= row['amount']
             if entry.quantity <= 0:
                 entry.delete()
             else:

@@ -685,13 +685,15 @@
     <nav class="topnav">
       <div class="nav-left">
         <a href="{% url 'main' %}">
-          <img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo" alt="Logo">
+          <img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png"
+            class="logo" alt="Logo">
         </a>
         <span class="brand-text">canBet</span>
       </div>
 
       <div class="nav-right">
-        <span id="balDisplay" class="nav-bal">{{ request.user.bit_balance }} BITS</span>
+        <span id="balDisplay" class="nav-bal">{{ request.user.bit_balance }}
+          BITS</span>
         <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
       </div>
     </nav>
@@ -700,9 +702,11 @@
       <section class="hero">
         <div class="hero-copy">
           <div class="hero-eyebrow">MARKETPLACE // DAILY ROTATION</div>
-          <div class="hero-title">Buy featured items or fuse duplicates into higher tiers.</div>
+          <div class="hero-title">Buy featured items or fuse duplicates into
+            higher tiers.</div>
           <div class="hero-sub">
-            The daily shop offers one random item from each rarity tier. Trade Up lets you pick
+            The daily shop offers one random item from each rarity tier. Trade
+            Up lets you pick
             the exact items you want to sacrifice.
           </div>
         </div>
@@ -718,47 +722,48 @@
 
         <div class="shop-grid">
           {% for rarity, item in daily_items.items %}
-            {% if item %}
-            <div class="shop-card">
-              <div class="shop-badge
+          {% if item %}
+          <div class="shop-card">
+            <div class="shop-badge
                 {% if rarity == 'LEGENDARY' %}badge-legendary
                 {% elif rarity == 'EPIC' %}badge-epic
                 {% elif rarity == 'RARE' %}badge-rare
                 {% else %}badge-common
                 {% endif %}">
-                {{ rarity }}
-              </div>
+              {{ rarity }}
+            </div>
 
-              <div class="item-sprite-wrap">
-                <img src="{% static item.sprite_path %}" class="item-sprite" alt="{{ item.name }}">
-              </div>
+            <div class="item-sprite-wrap">
+              <img src="{% static item.sprite_path %}" class="item-sprite"
+                alt="{{ item.name }}">
+            </div>
 
-              <div class="shop-name">{{ item.name }}</div>
+            <div class="shop-name">{{ item.name }}</div>
 
-              <div class="shop-rarity"
-                style="color:
+            <div class="shop-rarity"
+              style="color:
                 {% if rarity == 'LEGENDARY' %}var(--rarity-legendary)
                 {% elif rarity == 'EPIC' %}var(--rarity-epic)
                 {% elif rarity == 'RARE' %}var(--rarity-rare)
                 {% else %}var(--rarity-common)
                 {% endif %};">
-                {{ rarity }}
-              </div>
-
-              <div class="shop-price">
-                {% if rarity == 'COMMON' %}200
-                {% elif rarity == 'RARE' %}700
-                {% elif rarity == 'EPIC' %}2000
-                {% else %}6000
-                {% endif %} BITS
-              </div>
-
-              <button class="buy-btn"
-                onclick="buyDaily({{ item.id }}, '{{ item.name|escapejs }}')">
-                BUY NOW
-              </button>
+              {{ rarity }}
             </div>
-            {% endif %}
+
+            <div class="shop-price">
+              {% if rarity == 'COMMON' %}200
+              {% elif rarity == 'RARE' %}700
+              {% elif rarity == 'EPIC' %}2000
+              {% else %}6000
+              {% endif %} BITS
+            </div>
+
+            <button class="buy-btn"
+              onclick="buyDaily({{ item.id }}, '{{ item.name|escapejs }}')">
+              BUY NOW
+            </button>
+          </div>
+          {% endif %}
           {% endfor %}
         </div>
       </section>
@@ -770,28 +775,36 @@
           <div class="trade-sidebar">
             <div class="trade-title">Choose an upgrade path</div>
             <div class="trade-copy">
-              Select the exact items you want to burn. The reward is 1 random item from the next rarity tier.
+              Select the exact items you want to burn. The reward is 1 random
+              item from the next rarity tier.
             </div>
 
             <div class="tier-stack">
-              <button class="tier-btn active" data-tier="COMMON" onclick="setTier('COMMON')">
+              <button class="tier-btn active" data-tier="COMMON"
+                onclick="setTier('COMMON')">
                 4 COMMON → 1 RARE
               </button>
-              <button class="tier-btn" data-tier="RARE" onclick="setTier('RARE')">
+              <button class="tier-btn" data-tier="RARE"
+                onclick="setTier('RARE')">
                 3 RARE → 1 EPIC
               </button>
-              <button class="tier-btn" data-tier="EPIC" onclick="setTier('EPIC')">
+              <button class="tier-btn" data-tier="EPIC"
+                onclick="setTier('EPIC')">
                 3 EPIC → 1 LEGENDARY
               </button>
             </div>
 
             <div class="trade-summary">
-              <div class="summary-line" id="summaryNeed">Need: 4 COMMON items</div>
-              <div class="summary-line" id="summarySelected">Selected: 0 / 4</div>
-              <div class="summary-line" id="summaryReward">Reward: 1 RARE item</div>
+              <div class="summary-line" id="summaryNeed">Need: 4 COMMON
+                items</div>
+              <div class="summary-line" id="summarySelected">Selected: 0 /
+                4</div>
+              <div class="summary-line" id="summaryReward">Reward: 1 RARE
+                item</div>
             </div>
 
-            <button class="buy-btn trade-action-btn" id="tradeBtn" onclick="submitTrade()" disabled>
+            <button class="buy-btn trade-action-btn" id="tradeBtn"
+              onclick="submitTrade()" disabled>
               TRADE UP
             </button>
           </div>
@@ -799,8 +812,10 @@
           <div class="trade-main">
             <div class="trade-grid-header">
               <div>
-                <div class="trade-grid-title" id="tradeGridTitle">COMMON Inventory</div>
-                <div class="trade-grid-sub" id="tradeGridSub">Pick exactly 4 items to continue.</div>
+                <div class="trade-grid-title" id="tradeGridTitle">COMMON
+                  Inventory</div>
+                <div class="trade-grid-sub" id="tradeGridSub">Pick exactly 4
+                  items to continue.</div>
               </div>
             </div>
 
@@ -818,7 +833,7 @@
       const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
 
       let inventory = [];
-      let selected = new Set();
+      let selected = {};
       let tier = 'COMMON';
 
       const rules = {
@@ -855,7 +870,7 @@
 
       function setTier(t) {
         tier = t;
-        selected.clear();
+        selected = {};
 
         document.querySelectorAll('.tier-btn').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.tier === t);
@@ -864,17 +879,22 @@
         renderGrid();
       }
 
+      function selectedCount() {
+        return Object.values(selected).reduce((sum, n) => sum + n, 0);
+      }
+
       function renderGrid() {
         const grid = document.getElementById('tradeGrid');
         const items = inventory.filter(i => i.rarity === tier && i.quantity > 0);
         const rule = rules[tier];
+        const count = selectedCount();
 
-        document.getElementById('summaryNeed').textContent = `Need: ${rule.need} ${tier} item${rule.need > 1 ? 's' : ''}`;
-        document.getElementById('summarySelected').textContent = `Selected: ${selected.size} / ${rule.need}`;
+        document.getElementById('summaryNeed').textContent = `Need: ${rule.need} ${tier} item copies`;
+        document.getElementById('summarySelected').textContent = `Selected: ${count} / ${rule.need}`;
         document.getElementById('summaryReward').textContent = `Reward: 1 ${rule.reward} item`;
 
         document.getElementById('tradeGridTitle').textContent = `${tier} Inventory`;
-        document.getElementById('tradeGridSub').textContent = `Pick exactly ${rule.need} item${rule.need > 1 ? 's' : ''} to continue.`;
+        document.getElementById('tradeGridSub').textContent = `Pick exactly ${rule.need} total copies to continue.`;
 
         if (!items.length) {
           grid.innerHTML = `<div class="trade-empty">You do not own any ${tier} items.</div>`;
@@ -883,24 +903,63 @@
         }
 
         grid.innerHTML = items.map(i => {
-          const isSelected = selected.has(i.item_id);
-          const maxReached = selected.size >= rule.need;
-          const isDisabled = !isSelected && maxReached;
+          const picked = selected[i.item_id] || 0;
+          const remainingSlots = rule.need - count;
+          const canAddMore = picked < i.quantity && remainingSlots > 0;
 
           return `
-            <div class="trade-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
-                 onclick="${isDisabled ? '' : `toggle(${i.item_id})`}">
+            <div class="trade-item ${picked > 0 ? 'selected' : ''}">
               <div class="trade-item-sprite-wrap">
                 <img src="/static/${i.sprite_path}" alt="${i.name}">
               </div>
+
               <div class="trade-item-name">${i.name}</div>
               <div class="trade-item-rarity" style="color:${rarityColor(i.rarity)}">${i.rarity}</div>
-              <div class="trade-item-qty">x${i.quantity} owned</div>
+              <div class="trade-item-qty">Owned: x${i.quantity}</div>
+              <div class="trade-item-qty">Selected: x${picked}</div>
+
+              <div style="display:flex; gap:8px; width:100%; margin-top:6px;">
+                <button class="buy-btn" style="padding:10px; font-size:0.5rem;"
+                  onclick="event.stopPropagation(); adjustSelection(${i.item_id}, -1)"
+                  ${picked <= 0 ? 'disabled' : ''}>
+                  -
+                </button>
+
+                <button class="buy-btn" style="padding:10px; font-size:0.5rem;"
+                  onclick="event.stopPropagation(); adjustSelection(${i.item_id}, 1)"
+                  ${!canAddMore ? 'disabled' : ''}>
+                  +
+                </button>
+              </div>
             </div>
           `;
         }).join('');
 
-        document.getElementById('tradeBtn').disabled = selected.size !== rule.need;
+        document.getElementById('tradeBtn').disabled = count !== rule.need;
+      }
+
+      function adjustSelection(itemId, delta) {
+        const item = inventory.find(i => i.item_id === itemId && i.rarity === tier);
+        if (!item) return;
+
+        const rule = rules[tier];
+        const current = selected[itemId] || 0;
+        const total = selectedCount();
+
+        if (delta > 0) {
+          if (current >= item.quantity) return;
+          if (total >= rule.need) return;
+          selected[itemId] = current + 1;
+        } else {
+          if (current <= 0) return;
+          if (current === 1) {
+            delete selected[itemId];
+          } else {
+            selected[itemId] = current - 1;
+          }
+        }
+
+        renderGrid();
       }
 
       function toggle(id) {
@@ -916,6 +975,11 @@
       }
 
       async function submitTrade() {
+        const selections = Object.entries(selected).map(([item_id, amount]) => ({
+          item_id: Number(item_id),
+          amount: Number(amount)
+        }));
+
         const res = await fetch('/api/trade/', {
           method: 'POST',
           headers: {
@@ -924,16 +988,16 @@
           },
           body: JSON.stringify({
             from: tier,
-            item_ids: [...selected]
+            selections: selections
           })
         });
 
         const data = await res.json();
 
         if (res.ok) {
-          selected.clear();
+          selected = {};
           showToast(`TRADE SUCCESS: ${data.item}`);
-          loadInventory();
+          await loadInventory();
         } else {
           showToast(`ERROR: ${data.error || 'TRADE FAILED'}`);
         }
