@@ -611,9 +611,9 @@ def api_quicksell_item(request):
 
     quicksell_values = {
         'COMMON': 75,
-        'RARE': 300,
-        'EPIC': 800,
-        'LEGENDARY': 2000,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1500,
     }
 
     sell_value = quicksell_values.get(entry.item.rarity)
