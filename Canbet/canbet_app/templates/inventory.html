@@ -737,30 +737,30 @@ function closeRewardPopup() {
 
 async function openSelectedCrate(crateType) {
   const result = document.getElementById('openResult');
+
   try {
     const resp = await fetch('/api/crate/open/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
       body: JSON.stringify({ crate_type: crateType })
     });
+
     const data = await resp.json();
+
     if (!resp.ok) {
       result.textContent = data.error || 'Could not open crate.';
       result.style.color = '#a00000';
       return;
     }
+
     const item = data.item;
-    const color = RARITY_COLORS[item.rarity] || '#999';
-    await playRollAnimation(crateType, item);
-    document.getElementById('rollOverlay').classList.remove('show');
-    document.getElementById('pIcon').src = '/static/' + item.sprite_path;
-    document.getElementById('pRarity').textContent = item.rarity;
-    document.getElementById('pRarity').style.color = color;
-    document.getElementById('pName').textContent = item.name;
-    shouldRefreshAfterReward = true;
-    document.getElementById('rewardOverlay').classList.add('show');
-    result.textContent = `${item.name} (${item.rarity})`;
+    result.textContent = `Opened: ${item.name} (${item.rarity})`;
     result.style.color = '#2e8a56';
+    showToast(`OPENED ${item.name}`);
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 900);
   } catch (err) {
     result.textContent = 'Could not open crate.';
     result.style.color = '#a00000';
@@ -776,7 +776,7 @@ async function openAllCrates(crateType, total) {
   result.style.color = '#5b8db8';
 
   let opened = 0;
-  let rewards = {};
+  const rewards = {};
 
   for (let i = 0; i < total; i++) {
     try {
@@ -798,11 +798,8 @@ async function openAllCrates(crateType, total) {
       }
 
       const item = data.item;
-
-      // track rewards
       rewards[item.name] = (rewards[item.name] || 0) + 1;
       opened++;
-
     } catch (err) {
       result.textContent = 'Error opening crates.';
       result.style.color = '#a00000';
@@ -810,15 +807,14 @@ async function openAllCrates(crateType, total) {
     }
   }
 
-  // format output
   const summary = Object.entries(rewards)
     .map(([name, count]) => `${name} x${count}`)
     .join(', ');
 
   result.textContent = `Opened ${opened}: ${summary}`;
   result.style.color = '#2e8a56';
+  showToast(`OPENED ${opened} CRATES`);
 
-  // refresh inventory after short delay
   setTimeout(() => {
     window.location.reload();
   }, 1200);
