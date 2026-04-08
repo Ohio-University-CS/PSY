@@ -603,3 +603,59 @@ def api_trade(request):
         import traceback
         traceback.print_exc()
         return Response({'error': f'Server exception: {str(e)}'}, status=500)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_quicksell_item(request):
+    item_id = request.data.get('item_id')
+    amount = request.data.get('amount', 1)
+    user = request.user
+
+    try:
+        amount = int(amount)
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid amount.'}, status=400)
+
+    if amount < 1:
+        return Response({'error': 'Amount must be at least 1.'}, status=400)
+
+    entry = get_object_or_404(
+        InventoryEntry.objects.select_related('item'),
+        user=user,
+        item_id=item_id
+    )
+
+    if entry.quantity < amount:
+        return Response({'error': 'Not enough copies.'}, status=400)
+
+    quicksell_values = {
+        'COMMON': 100,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1000,
+    }
+
+    sell_value = quicksell_values.get(entry.item.rarity)
+    if sell_value is None:
+        return Response({'error': 'Item cannot be sold.'}, status=400)
+
+    total_earned = sell_value * amount
+
+    with transaction.atomic():
+        entry.quantity -= amount
+        if entry.quantity <= 0:
+            entry.delete()
+        else:
+            entry.save(update_fields=['quantity'])
+
+        user.bit_balance += total_earned
+        user.save(update_fields=['bit_balance'])
+
+    return Response({
+        'success': True,
+        'item_name': entry.item.name,
+        'amount_sold': amount,
+        'earned': total_earned,
+        'new_balance': user.bit_balance,
+        'remaining_quantity': max(0, entry.quantity),
+    })
