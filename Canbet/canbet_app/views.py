@@ -74,9 +74,9 @@ def main(request):
         reverse=True
     )[:5]
 
-    top5 = list(CanBetUser.objects.all())
+    players = list(CanBetUser.objects.all())
 
-    for player in top5:
+    for player in players:
         inventory_entries = player.inventory.select_related('item').all()
         inventory_value = sum(
             QUICKSELL_VALUES.get(entry.item.rarity, 0) * entry.quantity
@@ -84,20 +84,20 @@ def main(request):
         )
         player.account_value = player.bit_balance + inventory_value
 
-    top5.sort(key=lambda p: p.account_value, reverse=True)
-    top5 = top5[:5]
+    players.sort(key=lambda p: p.account_value, reverse=True)
+    top5 = players[:5]
 
-    rank = 1
-    for player in top5:
+    user_rank = None
+    for idx, player in enumerate(players, start=1):
         if player.pk == request.user.pk:
-            request.user.rank = rank
+            user_rank = idx
             break
-        rank += 1
 
     return render(request, 'main.html', {
         'user': request.user,
         'recent_activity': recent_activity,
         'top5': top5,
+        'rank': user_rank,
     })
 
 @login_required
