@@ -487,7 +487,6 @@ function sel(el) {
     <div class="sel-icon"><img src="${img}" alt="${name}"></div>
     <div class="sel-name">${name}</div>
     <div class="sel-rarity" style="color:${color}; border-color:${color};">${rarity}</div>
-    ${quantity > 0 ? `<div class="sel-qty">x${quantity} owned</div>` : ''}
     <div class="sel-value">
       Quick Sell: ${quicksellValue} Bits each<br>
       Sell All Value: ${sellAllValue} Bits
@@ -496,6 +495,7 @@ function sel(el) {
       <button class="popup-btn sell-btn" onclick="quickSell(${entryId}, 1)" ${quantity < 1 ? 'disabled' : ''}>SELL 1</button>
       <button class="popup-btn sell-btn" onclick="quickSell(${entryId}, ${quantity})" ${quantity < 1 ? 'disabled' : ''}>SELL ALL</button>
     </div>
+    ${quantity > 0 ? `<div class="sel-qty">x${quantity} owned</div>` : ''}
     <div class="sel-qty" id="selOdds">Calculating drop odds...</div>
   `;
   renderSelectedItemOdds(collection, spritePath);
