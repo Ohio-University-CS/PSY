@@ -231,17 +231,41 @@ def api_open_crate(request):
 def api_buy_item(request):
     item = get_object_or_404(Item, pk=request.data.get('item_id'))
     user = request.user
-    if item.shop_price <= 0:
+
+    daily_prices = {
+        'COMMON': 200,
+        'RARE': 700,
+        'EPIC': 2000,
+        'LEGENDARY': 6000,
+    }
+
+    price = item.shop_price if item.shop_price > 0 else None
+    if price is None:
+        daily_items = get_daily_shop_items()
+        featured_ids = {
+            featured_item.id
+            for featured_item in daily_items.values()
+            if featured_item is not None
+        }
+
+        if item.id in featured_ids:
+            price = daily_prices.get(item.rarity)
+
+    if price is None or price <= 0:
         return Response({'error': 'Item not for sale.'}, status=status.HTTP_400_BAD_REQUEST)
-    if user.bit_balance < item.shop_price:
+
+    if user.bit_balance < price:
         return Response({'error': 'Not enough Bits.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
+
     if InventoryEntry.objects.filter(user=user, item=item).exists():
         return Response({'error': 'Already owned.'}, status=status.HTTP_409_CONFLICT)
+
     with transaction.atomic():
-        user.bit_balance -= item.shop_price
+        user.bit_balance -= price
         user.save(update_fields=['bit_balance'])
         InventoryEntry.objects.create(user=user, item=item)
-        ShopPurchase.objects.create(user=user, item=item, bits_spent=item.shop_price)
+        ShopPurchase.objects.create(user=user, item=item, bits_spent=price)
+
     return Response({'new_balance': user.bit_balance})
 
 
