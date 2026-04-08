@@ -38,6 +38,7 @@ urlpatterns = [
     path('api/canvas/sync/', views.api_canvas_sync, name='api_canvas_sync'),
     path('api/shop/buy/', views.api_buy_item, name='api_buy_item'),
     path('api/crate-pool/<str:crate_type>/', views.api_crate_pool, name='api_crate_pool'),
+    path('api/trade/', views.api_trade, name='api_trade'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

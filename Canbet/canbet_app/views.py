@@ -15,6 +15,8 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 
+from datetime import date
+
 import random
 from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, Lootbox, LootboxInventoryEntry, CanvasSubmission
 from .services import open_loot_box
@@ -137,9 +139,10 @@ def settings_view(request):
 
 @login_required
 def shop(request):
-    items     = Item.objects.filter(shop_price__gt=0).order_by('collection', 'shop_price')
-    owned_ids = set(request.user.inventory.values_list('item_id', flat=True))
-    return render(request, 'shop.html', {'items': items, 'owned_ids': owned_ids})
+    daily_items = get_daily_shop_items()
+    return render(request, 'shop.html', {
+        'daily_items': daily_items
+    })
 
 @login_required
 def crate(request):
@@ -452,4 +455,71 @@ def api_canvas_sync(request):
         'created':      created_count,
         'bits_awarded': bits_awarded,
         'new_balance':  user.bit_balance,
+    })
+
+def get_daily_shop_items():
+    today = date.today()
+
+    def pick(rarity):
+        items = list(Item.objects.filter(rarity=rarity))
+        if not items:
+            return None
+        random.seed(f"{today}-{rarity}")
+        return random.choice(items)
+
+    return {
+        'COMMON': pick('COMMON'),
+        'RARE': pick('RARE'),
+        'EPIC': pick('EPIC'),
+        'LEGENDARY': pick('LEGENDARY'),
+    }
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_trade(request):
+    rarity_map = {
+        'COMMON': ('RARE', 4),
+        'RARE': ('EPIC', 3),
+        'EPIC': ('LEGENDARY', 3),
+    }
+
+    from_rarity = request.data.get('from')
+    user = request.user
+
+    if from_rarity not in rarity_map:
+        return Response({'error': 'Invalid trade'}, status=400)
+
+    to_rarity, required = rarity_map[from_rarity]
+
+    entries = InventoryEntry.objects.filter(user=user, item__rarity=from_rarity)
+
+    total = sum(e.quantity for e in entries)
+    if total < required:
+        return Response({'error': 'Not enough items'}, status=400)
+
+    with transaction.atomic():
+        remaining = required
+        for e in entries:
+            take = min(e.quantity, remaining)
+            e.quantity -= take
+            remaining -= take
+
+            if e.quantity == 0:
+                e.delete()
+            else:
+                e.save()
+
+            if remaining == 0:
+                break
+
+        # give random item of next rarity
+        item = Item.objects.filter(rarity=to_rarity).order_by('?').first()
+        inv, _ = InventoryEntry.objects.get_or_create(user=user, item=item, defaults={'quantity': 0})
+        inv.quantity += 1
+        inv.save()
+
+    return Response({
+        'success': True,
+        'item': item.name,
+        'rarity': item.rarity
     })
