@@ -995,10 +995,10 @@
         let data;
         try {
           data = await res.json();
-        } catch (e) {
+        } catch (err) {
           const text = await res.text();
-          console.error("Non-JSON response:", text);
-          showToast("SERVER ERROR (check logs)");
+          console.error('Non-JSON trade response:', text);
+          showToast('SERVER ERROR - CHECK RENDER LOGS');
           return;
         }
 
