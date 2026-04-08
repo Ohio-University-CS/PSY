@@ -297,6 +297,7 @@ def api_buy_item(request):
     return Response({'new_balance': user.bit_balance})
 
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_buy_daily_item(request):
