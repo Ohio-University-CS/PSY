@@ -1,284 +1,965 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet • Shop</title>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet • Shop</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
 
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --bg: #c8c8c8;
+        --panel: #f2f3f5;
+        --panel2: #e8eaed;
+        --panel3: #ffffff;
+        --border: #1a1a1a;
+        --accent-blue: #5b8db8;
+        --green: #2e8a56;
+        --text: #1a1a1a;
+        --muted: #666;
 
-:root {
-  --bg: #c8c8c8;
-  --panel: #f2f3f5;
-  --border: #1a1a1a;
-  --accent-blue: #5b8db8;
-  --green: #2e8a56;
+        --rarity-common: #2e8a56;
+        --rarity-rare: #5b8db8;
+        --rarity-epic: #a855f7;
+        --rarity-legendary: #c8943a;
+      }
 
-  --rarity-common: #2e8a56;
-  --rarity-rare: #5b8db8;
-  --rarity-epic: #a855f7;
-  --rarity-legendary: #c8943a;
-}
+      body {
+        width: 100%;
+        min-height: 100vh;
+        font-family: 'Press Start 2P', monospace;
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.4;
+        overflow-x: hidden;
+      }
 
-body {
-  width: 100%;
-  min-height: 100vh;
-  font-family: 'Press Start 2P', monospace;
-  background: var(--bg);
-}
+      /* --- NAV --- */
+      .topnav {
+        width: 100%;
+        height: 80px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 40px;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(4px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-bottom: 4px solid var(--border);
+      }
 
-/* NAV */
-.topnav {
-  width: 100%;
-  min-height: 80px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 40px;
-  border-bottom: 4px solid var(--border);
-  background: rgba(255,255,255,0.15);
-}
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        height: 100%;
+      }
 
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
+      .logo {
+        height: 44px;
+        width: auto;
+      }
 
-.logo { height: 44px; }
+      .brand-text {
+        font-size: 1rem;
+        letter-spacing: 2px;
+      }
 
-.brand-text { font-size: 1rem; }
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
 
-.nav-bal {
-  background: #fff;
-  border: 4px solid var(--border);
-  padding: 10px 16px;
-  color: var(--green);
-}
+      .nav-bal {
+        font-size: 0.8rem;
+        color: var(--green);
+        background: #fff;
+        padding: 10px 16px;
+        border: 4px solid var(--border);
+      }
 
-.nav-back {
-  padding: 10px 20px;
-  border: 4px solid black;
-  background: rgba(255,255,255,0.4);
-  text-decoration: none;
-}
+      .nav-back {
+        font-size: 0.8rem;
+        color: #000;
+        text-decoration: none;
+        padding: 10px 20px;
+        border: 4px solid #000;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.4);
+        transition: 0.1s;
+      }
 
-/* PAGE */
-.page {
-  max-width: 1100px;
-  margin: auto;
-  padding: 40px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
+      .nav-back:hover {
+        background: #000;
+        color: #fff;
+      }
 
-.section-label {
-  font-size: 1rem;
-  margin-bottom: 20px;
-  border-left: 10px solid var(--accent-blue);
-  padding-left: 12px;
-}
+      /* --- PAGE --- */
+      .page {
+        max-width: 1150px;
+        margin: 0 auto;
+        padding: 60px 24px 90px;
+        display: flex;
+        flex-direction: column;
+        gap: 56px;
+      }
 
-/* GRID */
-.shop-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-}
+      .hero {
+        background: var(--panel);
+        border: 8px solid var(--border);
+        padding: 30px;
+        box-shadow: 14px 14px 0 rgba(0,0,0,0.12);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+      }
 
-.shop-card {
-  background: var(--panel);
-  border: 6px solid var(--border);
-  padding: 20px;
-  text-align: center;
-  position: relative;
-}
+      .hero-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
 
-.item-sprite {
-  width: 90px;
-  height: 90px;
-  image-rendering: pixelated;
-}
+      .hero-eyebrow {
+        font-size: 0.55rem;
+        color: var(--muted);
+        letter-spacing: 2px;
+      }
 
-.shop-name {
-  font-size: 0.75rem;
-  margin: 10px 0;
-}
+      .hero-title {
+        font-size: 1.35rem;
+        line-height: 1.8;
+      }
 
-.shop-rarity {
-  font-size: 0.6rem;
-}
+      .hero-sub {
+        font-size: 0.62rem;
+        color: var(--muted);
+        line-height: 2;
+        max-width: 620px;
+      }
 
-.shop-price {
-  font-size: 0.8rem;
-  color: var(--green);
-  margin: 10px 0;
-}
+      .hero-reset {
+        background: #fff;
+        border: 6px solid var(--border);
+        padding: 18px 22px;
+        min-width: 220px;
+        text-align: center;
+        box-shadow: 8px 8px 0 rgba(0,0,0,0.08);
+      }
 
-.shop-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 0.5rem;
-  padding: 5px;
-  border: 3px solid var(--border);
-}
+      .hero-reset-label {
+        font-size: 0.5rem;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
 
-/* BUTTON */
-.buy-btn {
-  width: 100%;
-  padding: 12px;
-  font-size: 0.7rem;
-  background: black;
-  color: white;
-  border: 3px solid var(--border);
-  cursor: pointer;
-}
+      .hero-reset-time {
+        font-size: 0.72rem;
+        color: var(--accent-blue);
+        line-height: 1.8;
+      }
 
-.buy-btn:hover {
-  background: var(--accent-blue);
-}
+      .section-label {
+        font-size: 1rem;
+        margin-bottom: 26px;
+        padding-left: 16px;
+        border-left: 10px solid var(--accent-blue);
+        text-transform: uppercase;
+      }
 
-/* MOBILE */
-@media (max-width: 700px) {
-  .brand-text { display: none; }
-  .shop-grid { grid-template-columns: 1fr; }
-}
-</style>
-</head>
+      /* --- DAILY SHOP --- */
+      .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 22px;
+      }
 
-<body>
+      .shop-card {
+        background: var(--panel);
+        border: 8px solid var(--border);
+        padding: 28px 22px 22px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        position: relative;
+        box-shadow: 12px 12px 0 rgba(0,0,0,0.14);
+        transition: 0.12s;
+      }
 
-<nav class="topnav">
-  <div class="nav-left">
-    <a href="{% url 'main' %}">
-      <img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo">
-    </a>
-    <span class="brand-text">canBet</span>
-  </div>
+      .shop-card:hover {
+        transform: translateY(-5px);
+        background: var(--panel3);
+        box-shadow: 18px 18px 0 var(--accent-blue);
+      }
 
-  <div style="display:flex; gap:20px;">
-    <span id="balDisplay" class="nav-bal">{{ request.user.bit_balance }} BITS</span>
-    <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
-  </div>
-</nav>
+      .shop-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 0.48rem;
+        padding: 6px 8px;
+        color: #fff;
+        border: 3px solid var(--border);
+        line-height: 1.2;
+      }
 
-<div class="page">
+      .badge-common { background: var(--rarity-common); }
+      .badge-rare { background: var(--rarity-rare); }
+      .badge-epic { background: var(--rarity-epic); }
+      .badge-legendary { background: var(--rarity-legendary); }
 
-<!-- DAILY SHOP -->
-<section>
-  <div class="section-label">Daily Shop</div>
+      .item-sprite-wrap {
+        width: 118px;
+        height: 118px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: 4px solid var(--border);
+      }
 
-  <div class="shop-grid">
+      .item-sprite {
+        width: 86px;
+        height: 86px;
+        image-rendering: pixelated;
+        object-fit: contain;
+      }
 
-    {% for rarity, item in daily_items.items %}
-    {% if item %}
-    <div class="shop-card">
+      .shop-name {
+        font-size: 0.68rem;
+        text-align: center;
+        line-height: 1.9;
+        min-height: 3.8rem;
+      }
 
-      <div class="shop-badge">{{ rarity }}</div>
+      .shop-rarity {
+        font-size: 0.58rem;
+        text-transform: uppercase;
+      }
 
-      <img src="{% static item.sprite_path %}" class="item-sprite">
+      .shop-price {
+        font-size: 0.8rem;
+        color: var(--green);
+        background: #fff;
+        border: 4px solid var(--border);
+        padding: 10px 14px;
+      }
 
-      <div class="shop-name">{{ item.name }}</div>
+      /* --- TRADE PANEL --- */
+      .trade-panel {
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+        gap: 28px;
+        align-items: start;
+      }
 
-      <div class="shop-rarity" style="
-        color:
-        {% if rarity == 'LEGENDARY' %}var(--rarity-legendary)
-        {% elif rarity == 'EPIC' %}var(--rarity-epic)
-        {% elif rarity == 'RARE' %}var(--rarity-rare)
-        {% else %}var(--rarity-common)
-        {% endif %}
-      ">
-        {{ rarity }}
+      .trade-sidebar,
+      .trade-main {
+        background: var(--panel);
+        border: 8px solid var(--border);
+        box-shadow: 12px 12px 0 rgba(0,0,0,0.14);
+      }
+
+      .trade-sidebar {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+
+      .trade-main {
+        padding: 24px;
+      }
+
+      .trade-title {
+        font-size: 0.7rem;
+        line-height: 1.8;
+      }
+
+      .trade-copy {
+        font-size: 0.55rem;
+        line-height: 2;
+        color: var(--muted);
+      }
+
+      .tier-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .tier-btn {
+        width: 100%;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.56rem;
+        padding: 14px 12px;
+        border: 4px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        cursor: pointer;
+        line-height: 1.7;
+        transition: 0.1s;
+        text-align: left;
+      }
+
+      .tier-btn:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 4px 4px 0 var(--border);
+      }
+
+      .tier-btn.active {
+        background: var(--accent-blue);
+        color: #fff;
+      }
+
+      .trade-summary {
+        background: #fff;
+        border: 4px solid var(--border);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .summary-line {
+        font-size: 0.52rem;
+        line-height: 1.9;
+      }
+
+      .trade-grid-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+
+      .trade-grid-title {
+        font-size: 0.68rem;
+      }
+
+      .trade-grid-sub {
+        font-size: 0.5rem;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .trade-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .trade-item {
+        background: #fff;
+        border: 4px solid var(--border);
+        padding: 14px 12px;
+        text-align: center;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        transition: 0.1s;
+        min-height: 220px;
+      }
+
+      .trade-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 4px 4px 0 var(--border);
+      }
+
+      .trade-item.selected {
+        background: #e8f0ff;
+        border-color: var(--accent-blue);
+        box-shadow: inset 0 0 0 3px rgba(91,141,184,0.15);
+      }
+
+      .trade-item.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .trade-item.disabled:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .trade-item-sprite-wrap {
+        width: 84px;
+        height: 84px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid var(--border);
+        background: var(--panel2);
+      }
+
+      .trade-item img {
+        width: 58px;
+        height: 58px;
+        image-rendering: pixelated;
+        object-fit: contain;
+      }
+
+      .trade-item-name {
+        font-size: 0.48rem;
+        line-height: 1.7;
+        min-height: 3rem;
+      }
+
+      .trade-item-rarity {
+        font-size: 0.45rem;
+      }
+
+      .trade-item-qty {
+        font-size: 0.45rem;
+        color: var(--muted);
+      }
+
+      .trade-empty {
+        grid-column: 1 / -1;
+        font-size: 0.58rem;
+        color: var(--muted);
+        line-height: 2;
+        text-align: center;
+        background: #fff;
+        border: 4px dashed var(--border);
+        padding: 40px 20px;
+      }
+
+      /* --- BUTTONS --- */
+      .buy-btn {
+        width: 100%;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.7rem;
+        background: var(--text);
+        color: white;
+        border: 4px solid var(--border);
+        padding: 14px;
+        cursor: pointer;
+        transition: 0.1s;
+      }
+
+      .buy-btn:hover:not(:disabled) {
+        background: var(--accent-blue);
+        transform: translate(-2px, -2px);
+        box-shadow: 4px 4px 0 var(--border);
+      }
+
+      .buy-btn:disabled {
+        background: #bbb;
+        color: #777;
+        border-color: #999;
+        cursor: not-allowed;
+      }
+
+      .trade-action-btn {
+        margin-top: 4px;
+      }
+
+      /* --- TOAST --- */
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: var(--text);
+        color: #fff;
+        font-size: 0.7rem;
+        padding: 18px 28px;
+        border: 6px solid var(--accent-blue);
+        opacity: 0;
+        transition: 0.3s;
+        z-index: 300;
+        pointer-events: none;
+        text-align: center;
+        max-width: min(90vw, 700px);
+        line-height: 1.7;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* --- MOBILE --- */
+      @media (max-width: 1000px) {
+        .shop-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .trade-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .trade-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 700px) {
+        .topnav {
+          height: auto;
+          flex-wrap: wrap;
+          padding: 14px 16px;
+          gap: 12px;
+        }
+
+        .nav-right {
+          width: 100%;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
+        .brand-text {
+          display: none;
+        }
+
+        .nav-bal {
+          font-size: 0.6rem;
+          padding: 10px 12px;
+        }
+
+        .nav-back {
+          font-size: 0.62rem;
+          padding: 10px 14px;
+        }
+
+        .page {
+          padding: 28px 12px 44px;
+          gap: 32px;
+        }
+
+        .hero {
+          padding: 18px 14px;
+          border-width: 5px;
+          box-shadow: 8px 8px 0 rgba(0,0,0,0.12);
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .hero-title {
+          font-size: 0.92rem;
+        }
+
+        .hero-sub,
+        .hero-eyebrow {
+          font-size: 0.48rem;
+        }
+
+        .hero-reset {
+          min-width: 0;
+          border-width: 4px;
+          padding: 14px;
+        }
+
+        .hero-reset-label,
+        .hero-reset-time {
+          font-size: 0.48rem;
+        }
+
+        .section-label {
+          font-size: 0.72rem;
+          border-left-width: 6px;
+          padding-left: 10px;
+          margin-bottom: 18px;
+        }
+
+        .shop-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        .shop-card,
+        .trade-sidebar,
+        .trade-main {
+          border-width: 5px;
+          box-shadow: 8px 8px 0 rgba(0,0,0,0.14);
+        }
+
+        .shop-card {
+          padding: 22px 16px 16px;
+        }
+
+        .item-sprite-wrap {
+          width: 98px;
+          height: 98px;
+        }
+
+        .item-sprite {
+          width: 70px;
+          height: 70px;
+        }
+
+        .shop-name {
+          font-size: 0.56rem;
+          min-height: auto;
+        }
+
+        .shop-rarity,
+        .shop-badge {
+          font-size: 0.45rem;
+        }
+
+        .shop-price {
+          font-size: 0.65rem;
+          padding: 8px 10px;
+        }
+
+        .trade-sidebar,
+        .trade-main {
+          padding: 16px;
+        }
+
+        .trade-title {
+          font-size: 0.58rem;
+        }
+
+        .trade-copy,
+        .summary-line,
+        .trade-grid-sub {
+          font-size: 0.46rem;
+        }
+
+        .tier-btn {
+          font-size: 0.48rem;
+          padding: 12px 10px;
+        }
+
+        .trade-grid-title {
+          font-size: 0.58rem;
+        }
+
+        .trade-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .trade-item {
+          min-height: 180px;
+          padding: 10px 8px;
+        }
+
+        .trade-item-sprite-wrap {
+          width: 66px;
+          height: 66px;
+        }
+
+        .trade-item img {
+          width: 44px;
+          height: 44px;
+        }
+
+        .trade-item-name,
+        .trade-item-rarity,
+        .trade-item-qty {
+          font-size: 0.4rem;
+        }
+
+        .buy-btn {
+          font-size: 0.56rem;
+          padding: 12px;
+        }
+
+        .toast {
+          font-size: 0.52rem;
+          border-width: 4px;
+          padding: 14px 18px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="{% url 'main' %}">
+          <img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo" alt="Logo">
+        </a>
+        <span class="brand-text">canBet</span>
       </div>
 
-      <div class="shop-price">
-        {% if rarity == 'COMMON' %}200
-        {% elif rarity == 'RARE' %}700
-        {% elif rarity == 'EPIC' %}2000
-        {% elif rarity == 'LEGENDARY' %}6000
-        {% endif %} BITS
+      <div class="nav-right">
+        <span id="balDisplay" class="nav-bal">{{ request.user.bit_balance }} BITS</span>
+        <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
       </div>
+    </nav>
 
-      <button class="buy-btn"
-        onclick="buyDaily({{ item.id }}, '{{ item.name }}')">
-        BUY
-      </button>
+    <div class="page">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="hero-eyebrow">MARKETPLACE // DAILY ROTATION</div>
+          <div class="hero-title">Buy featured items or fuse duplicates into higher tiers.</div>
+          <div class="hero-sub">
+            The daily shop offers one random item from each rarity tier. Trade Up lets you pick
+            the exact items you want to sacrifice.
+          </div>
+        </div>
 
+        <div class="hero-reset">
+          <div class="hero-reset-label">NEXT SHOP RESET</div>
+          <div class="hero-reset-time">12:00 AM</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Daily Shop</div>
+
+        <div class="shop-grid">
+          {% for rarity, item in daily_items.items %}
+            {% if item %}
+            <div class="shop-card">
+              <div class="shop-badge
+                {% if rarity == 'LEGENDARY' %}badge-legendary
+                {% elif rarity == 'EPIC' %}badge-epic
+                {% elif rarity == 'RARE' %}badge-rare
+                {% else %}badge-common
+                {% endif %}">
+                {{ rarity }}
+              </div>
+
+              <div class="item-sprite-wrap">
+                <img src="{% static item.sprite_path %}" class="item-sprite" alt="{{ item.name }}">
+              </div>
+
+              <div class="shop-name">{{ item.name }}</div>
+
+              <div class="shop-rarity"
+                style="color:
+                {% if rarity == 'LEGENDARY' %}var(--rarity-legendary)
+                {% elif rarity == 'EPIC' %}var(--rarity-epic)
+                {% elif rarity == 'RARE' %}var(--rarity-rare)
+                {% else %}var(--rarity-common)
+                {% endif %};">
+                {{ rarity }}
+              </div>
+
+              <div class="shop-price">
+                {% if rarity == 'COMMON' %}200
+                {% elif rarity == 'RARE' %}700
+                {% elif rarity == 'EPIC' %}2000
+                {% else %}6000
+                {% endif %} BITS
+              </div>
+
+              <button class="buy-btn"
+                onclick="buyDaily({{ item.id }}, '{{ item.name|escapejs }}')">
+                BUY NOW
+              </button>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Trade Up</div>
+
+        <div class="trade-panel">
+          <div class="trade-sidebar">
+            <div class="trade-title">Choose an upgrade path</div>
+            <div class="trade-copy">
+              Select the exact items you want to burn. The reward is 1 random item from the next rarity tier.
+            </div>
+
+            <div class="tier-stack">
+              <button class="tier-btn active" data-tier="COMMON" onclick="setTier('COMMON')">
+                4 COMMON → 1 RARE
+              </button>
+              <button class="tier-btn" data-tier="RARE" onclick="setTier('RARE')">
+                3 RARE → 1 EPIC
+              </button>
+              <button class="tier-btn" data-tier="EPIC" onclick="setTier('EPIC')">
+                3 EPIC → 1 LEGENDARY
+              </button>
+            </div>
+
+            <div class="trade-summary">
+              <div class="summary-line" id="summaryNeed">Need: 4 COMMON items</div>
+              <div class="summary-line" id="summarySelected">Selected: 0 / 4</div>
+              <div class="summary-line" id="summaryReward">Reward: 1 RARE item</div>
+            </div>
+
+            <button class="buy-btn trade-action-btn" id="tradeBtn" onclick="submitTrade()" disabled>
+              TRADE UP
+            </button>
+          </div>
+
+          <div class="trade-main">
+            <div class="trade-grid-header">
+              <div>
+                <div class="trade-grid-title" id="tradeGridTitle">COMMON Inventory</div>
+                <div class="trade-grid-sub" id="tradeGridSub">Pick exactly 4 items to continue.</div>
+              </div>
+            </div>
+
+            <div class="trade-grid" id="tradeGrid">
+              <div class="trade-empty">Loading inventory...</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-    {% endif %}
-    {% endfor %}
 
-  </div>
-</section>
+    <div class="toast" id="toast"></div>
 
-<!-- TRADE -->
-<section>
-  <div class="section-label">Trade Up</div>
+    <script>
+      const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
 
-  <div class="shop-grid">
+      let inventory = [];
+      let selected = new Set();
+      let tier = 'COMMON';
 
-    <div class="shop-card">
-      <div class="shop-name">4 COMMON → 1 RARE</div>
-      <button class="buy-btn" onclick="trade('COMMON')">TRADE</button>
-    </div>
+      const rules = {
+        COMMON: { need: 4, reward: 'RARE' },
+        RARE: { need: 3, reward: 'EPIC' },
+        EPIC: { need: 3, reward: 'LEGENDARY' }
+      };
 
-    <div class="shop-card">
-      <div class="shop-name">3 RARE → 1 EPIC</div>
-      <button class="buy-btn" onclick="trade('RARE')">TRADE</button>
-    </div>
+      function rarityColor(rarity) {
+        if (rarity === 'LEGENDARY') return 'var(--rarity-legendary)';
+        if (rarity === 'EPIC') return 'var(--rarity-epic)';
+        if (rarity === 'RARE') return 'var(--rarity-rare)';
+        return 'var(--rarity-common)';
+      }
 
-    <div class="shop-card">
-      <div class="shop-name">3 EPIC → 1 LEGENDARY</div>
-      <button class="buy-btn" onclick="trade('EPIC')">TRADE</button>
-    </div>
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+      }
 
-  </div>
-</section>
+      async function loadInventory() {
+        try {
+          const res = await fetch('/api/inventory/');
+          inventory = await res.json();
+          renderGrid();
+        } catch (e) {
+          document.getElementById('tradeGrid').innerHTML = `
+            <div class="trade-empty">Could not load inventory.</div>
+          `;
+        }
+      }
 
-</div>
+      function setTier(t) {
+        tier = t;
+        selected.clear();
 
-<script>
-const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
+        document.querySelectorAll('.tier-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tier === t);
+        });
 
-async function buyDaily(id, name) {
-  const resp = await fetch('/api/shop/buy/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-    body: JSON.stringify({ item_id: id })
-  });
+        renderGrid();
+      }
 
-  const data = await resp.json();
+      function renderGrid() {
+        const grid = document.getElementById('tradeGrid');
+        const items = inventory.filter(i => i.rarity === tier && i.quantity > 0);
+        const rule = rules[tier];
 
-  if (resp.ok) {
-    document.getElementById('balDisplay').textContent = data.new_balance + ' BITS';
-    alert(name + ' purchased!');
-  } else {
-    alert(data.error);
-  }
-}
+        document.getElementById('summaryNeed').textContent = `Need: ${rule.need} ${tier} item${rule.need > 1 ? 's' : ''}`;
+        document.getElementById('summarySelected').textContent = `Selected: ${selected.size} / ${rule.need}`;
+        document.getElementById('summaryReward').textContent = `Reward: 1 ${rule.reward} item`;
 
-async function trade(rarity) {
-  const resp = await fetch('/api/trade/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-    body: JSON.stringify({ from: rarity })
-  });
+        document.getElementById('tradeGridTitle').textContent = `${tier} Inventory`;
+        document.getElementById('tradeGridSub').textContent = `Pick exactly ${rule.need} item${rule.need > 1 ? 's' : ''} to continue.`;
 
-  const data = await resp.json();
+        if (!items.length) {
+          grid.innerHTML = `<div class="trade-empty">You do not own any ${tier} items.</div>`;
+          document.getElementById('tradeBtn').disabled = true;
+          return;
+        }
 
-  if (resp.ok) {
-    alert('Received: ' + data.item);
-  } else {
-    alert(data.error);
-  }
-}
-</script>
+        grid.innerHTML = items.map(i => {
+          const isSelected = selected.has(i.item_id);
+          const maxReached = selected.size >= rule.need;
+          const isDisabled = !isSelected && maxReached;
 
-</body>
+          return `
+            <div class="trade-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+                 onclick="${isDisabled ? '' : `toggle(${i.item_id})`}">
+              <div class="trade-item-sprite-wrap">
+                <img src="/static/${i.sprite_path}" alt="${i.name}">
+              </div>
+              <div class="trade-item-name">${i.name}</div>
+              <div class="trade-item-rarity" style="color:${rarityColor(i.rarity)}">${i.rarity}</div>
+              <div class="trade-item-qty">x${i.quantity} owned</div>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('tradeBtn').disabled = selected.size !== rule.need;
+      }
+
+      function toggle(id) {
+        const rule = rules[tier];
+
+        if (selected.has(id)) {
+          selected.delete(id);
+        } else if (selected.size < rule.need) {
+          selected.add(id);
+        }
+
+        renderGrid();
+      }
+
+      async function submitTrade() {
+        const res = await fetch('/api/trade/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF
+          },
+          body: JSON.stringify({
+            from: tier,
+            item_ids: [...selected]
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          selected.clear();
+          showToast(`TRADE SUCCESS: ${data.item}`);
+          loadInventory();
+        } else {
+          showToast(`ERROR: ${data.error || 'TRADE FAILED'}`);
+        }
+      }
+
+      async function buyDaily(id, name) {
+        const res = await fetch('/api/shop/buy/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF
+          },
+          body: JSON.stringify({ item_id: id })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById('balDisplay').textContent = data.new_balance + ' BITS';
+          showToast(`${name} PURCHASED`);
+        } else {
+          showToast(`ERROR: ${data.error || 'PURCHASE FAILED'}`);
+        }
+      }
+
+      loadInventory();
+    </script>
+  </body>
 </html>

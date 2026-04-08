@@ -488,43 +488,63 @@ def api_trade(request):
         'EPIC': ('LEGENDARY', 3),
     }
 
-    from_rarity = request.data.get('from')
+    from_rarity = str(request.data.get('from', '')).upper()
+    item_ids = request.data.get('item_ids', [])
     user = request.user
 
     if from_rarity not in rarity_map:
-        return Response({'error': 'Invalid trade'}, status=400)
+        return Response({'error': 'Invalid trade.'}, status=400)
+
+    if not isinstance(item_ids, list):
+        return Response({'error': 'item_ids must be a list.'}, status=400)
 
     to_rarity, required = rarity_map[from_rarity]
 
-    entries = InventoryEntry.objects.filter(user=user, item__rarity=from_rarity)
+    unique_ids = []
+    seen = set()
+    for item_id in item_ids:
+        try:
+            item_id = int(item_id)
+        except (TypeError, ValueError):
+            continue
+        if item_id not in seen:
+            seen.add(item_id)
+            unique_ids.append(item_id)
 
-    total = sum(e.quantity for e in entries)
-    if total < required:
-        return Response({'error': 'Not enough items'}, status=400)
+    if len(unique_ids) != required:
+        return Response({'error': f'Select exactly {required} {from_rarity} items.'}, status=400)
+
+    entries = list(
+        InventoryEntry.objects.select_for_update()
+        .select_related('item')
+        .filter(user=user, item_id__in=unique_ids, item__rarity=from_rarity, quantity__gte=1)
+    )
+
+    if len(entries) != required:
+        return Response({'error': 'One or more selected items are invalid.'}, status=400)
+
+    reward_item = Item.objects.filter(rarity=to_rarity).order_by('?').first()
+    if not reward_item:
+        return Response({'error': f'No {to_rarity} items available.'}, status=400)
 
     with transaction.atomic():
-        remaining = required
-        for e in entries:
-            take = min(e.quantity, remaining)
-            e.quantity -= take
-            remaining -= take
-
-            if e.quantity == 0:
-                e.delete()
+        for entry in entries:
+            entry.quantity -= 1
+            if entry.quantity <= 0:
+                entry.delete()
             else:
-                e.save()
+                entry.save(update_fields=['quantity'])
 
-            if remaining == 0:
-                break
-
-        # give random item of next rarity
-        item = Item.objects.filter(rarity=to_rarity).order_by('?').first()
-        inv, _ = InventoryEntry.objects.get_or_create(user=user, item=item, defaults={'quantity': 0})
-        inv.quantity += 1
-        inv.save()
+        reward_entry, _ = InventoryEntry.objects.get_or_create(
+            user=user,
+            item=reward_item,
+            defaults={'quantity': 0}
+        )
+        reward_entry.quantity += 1
+        reward_entry.save(update_fields=['quantity'])
 
     return Response({
         'success': True,
-        'item': item.name,
-        'rarity': item.rarity
+        'item': reward_item.name,
+        'rarity': reward_item.rarity,
     })
