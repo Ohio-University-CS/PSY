@@ -79,9 +79,16 @@ def inventory(request):
 
 @login_required
 def leaderboard(request):
-    sort = request.GET.get('sort', 'bits')
+    sort = request.GET.get('sort', 'account_value')
     page = int(request.GET.get('page', 1))
     per_page = 10
+
+    quicksell_values = {
+        'COMMON': 75,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1500,
+    }
 
     qs = CanBetUser.objects.annotate(
         crate_count=Count('crate_opens', distinct=True),
@@ -90,24 +97,45 @@ def leaderboard(request):
         last_crate=Max('crate_opens__opened_at'),
     )
 
-    if sort == 'rarity':
-        qs = qs.order_by('best_rarity', 'rarity_achieved')
-    elif sort == 'crates':
-        qs = qs.order_by('-crate_count', 'last_crate')
-    else:
-        qs = qs.order_by('-bit_balance')
+    users = list(qs)
 
-    total = qs.count()
+    for u in users:
+        inventory_entries = list(u.inventory.select_related('item').all())
+        inventory_value = 0
+        for e in inventory_entries:
+            inventory_value += quicksell_values.get(e.item.rarity, 0) * e.quantity
+        u.account_value = u.bit_balance + inventory_value
+
+    if sort == 'rarity':
+        users.sort(key=lambda u: (
+            u.best_rarity if u.best_rarity is not None else 'ZZZ',
+            u.rarity_achieved if u.rarity_achieved is not None else timezone.now()
+        ))
+    elif sort == 'crates':
+        users.sort(key=lambda u: (
+            -(u.crate_count or 0),
+            u.last_crate if u.last_crate is not None else timezone.make_aware(timezone.datetime.min)
+        ), reverse=False)
+    elif sort == 'bits':
+        users.sort(key=lambda u: u.bit_balance, reverse=True)
+    else:
+        sort = 'account_value'
+        users.sort(key=lambda u: u.account_value, reverse=True)
+
+    total = len(users)
     total_pages = max(1, (total + per_page - 1) // per_page)
-    entries = qs[(page - 1) * per_page : page * per_page]
+    start = (page - 1) * per_page
+    end = page * per_page
+    page_users = users[start:end]
 
     results = []
-    for i, u in enumerate(entries):
-        rank = (page - 1) * per_page + i + 1
+    for i, u in enumerate(page_users):
+        rank = start + i + 1
         results.append({
             'rank': rank,
             'username': u.username,
             'bits': u.bit_balance,
+            'account_value': u.account_value,
             'crates': u.crate_count,
             'is_you': request.user.is_authenticated and u.pk == request.user.pk,
         })

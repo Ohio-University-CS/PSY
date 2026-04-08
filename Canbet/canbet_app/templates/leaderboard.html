@@ -128,54 +128,74 @@
     .brand-text { display: none; }
   }
 </style>
-</head>
-<body>
-<nav class="topnav">
-  <a href="/main/"><img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo" alt="Logo"></a>
-  <a href="/main/" class="nav-back">◀ Menu</a>
-</nav>
-<div class="page">
-  <section>
-    <div class="section-label">Leaderboard</div>
-      <div style="display:flex; gap:6px; margin-bottom:12px;">
-      <a href="?sort=bits&amp;page=1" class="page-btn {% if sort == 'bits' %}active{% endif %}">Bits</a>
-      <a href="?sort=rarity&amp;page=1" class="page-btn {% if sort == 'rarity' %}active{% endif %}">Rarest item</a>
-      <a href="?sort=crates&amp;page=1" class="page-btn {% if sort == 'crates' %}active{% endif %}">Crates</a>
-    </div>
-    <div class="lb-header">
-      <div class="lb-th">#</div>
-      <div class="lb-th">Username</div>
-      <div class="lb-th">Bit Balance</div>
-      <div class="lb-th">Crates</div>
-    </div>
-    <div class="lb-list">
-      {% for entry in entries %}
-      <div class="lb-row {% if entry.is_you %}you{% endif %}">
-        <span class="rank-num {% if entry.rank == 1 %}gold{% elif entry.rank == 2 %}silver{% elif entry.rank == 3 %}bronze{% endif %}">#{{ entry.rank }}</span>
-        <span class="lb-name {% if entry.is_you %}you{% endif %}">
-          {{ entry.username }}{% if entry.is_you %} (you){% endif %}
-        </span>
-        <span class="lb-score">{{ entry.bits|intcomma }}</span>
-        <span class="lb-crates">{{ entry.crates }}</span>
+  </head>
+  <body>
+    <nav class="topnav">
+      <a href="/main/"><img
+          src="{% get_static_prefix %}images/canBet%20symbol%20sym..png"
+          class="logo" alt="Logo"></a>
+      <a href="/main/" class="nav-back">◀ Menu</a>
+    </nav>
+    <div class="page">
+      <section>
+        <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;">
+          <a href="?sort=account_value&amp;page=1"
+            class="page-btn {% if sort == 'account_value' %}active{% endif %}">Account
+            value</a>
+          <a href="?sort=bits&amp;page=1"
+            class="page-btn {% if sort == 'bits' %}active{% endif %}">Bits</a>
+          <a href="?sort=rarity&amp;page=1"
+            class="page-btn {% if sort == 'rarity' %}active{% endif %}">Rarest
+            item</a>
+          <a href="?sort=crates&amp;page=1"
+            class="page-btn {% if sort == 'crates' %}active{% endif %}">Crates</a>
+        </div>
+        <div class="lb-header">
+          <div class="lb-th">#</div>
+          <div class="lb-th">Username</div>
+          <div class="lb-th">{% if sort == 'account_value' %}Account Value{%
+            else %}Bit Balance{% endif %}</div>
+          <div class="lb-th">Crates</div>
+        </div>
+        <div class="lb-list">
+          {% for entry in entries %}
+          <div class="lb-row {% if entry.is_you %}you{% endif %}">
+            <span
+              class="rank-num {% if entry.rank == 1 %}gold{% elif entry.rank == 2 %}silver{% elif entry.rank == 3 %}bronze{% endif %}">#{{
+              entry.rank }}</span>
+            <span class="lb-name {% if entry.is_you %}you{% endif %}">
+              {{ entry.username }}{% if entry.is_you %} (you){% endif %}
+            </span>
+            <span class="lb-score">
+              {% if sort == 'account_value' %}
+              {{ entry.account_value|intcomma }}
+              {% else %}
+              {{ entry.bits|intcomma }}
+              {% endif %}
+            </span>
+            <span class="lb-crates">{{ entry.crates }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      <div class="pagination">
+        {% if page > 1 %}
+        <a href="?sort={{ sort }}&amp;page={{ page|add:'-1' }}"
+          class="page-btn">◀</a>
+        {% endif %}
+
+        {% for p in total_pages|ljust:total_pages %}
+        <a href="?sort={{ sort }}&amp;page={{ forloop.counter }}"
+          class="page-btn {% if forloop.counter == page %}active{% endif %}">
+          {{ forloop.counter }}
+        </a>
+        {% endfor %}
+
+        {% if page < total_pages %}
+        <a href="?sort={{ sort }}&amp;page={{ page|add:'1' }}"
+          class="page-btn">▶</a>
+        {% endif %}
       </div>
-      {% endfor %}
     </div>
-    </section>
-  <div class="pagination">
-    {% if page > 1 %}
-    <a href="?sort={{ sort }}&amp;page={{ page|add:'-1' }}" class="page-btn">◀</a>
-    {% endif %}
-
-    {% for p in total_pages|ljust:total_pages %}
-      <a href="?sort={{ sort }}&amp;page={{ forloop.counter }}" class="page-btn {% if forloop.counter == page %}active{% endif %}">
-        {{ forloop.counter }}
-      </a>
-    {% endfor %}
-
-    {% if page < total_pages %}
-      <a href="?sort={{ sort }}&amp;page={{ page|add:'1' }}" class="page-btn">▶</a>
-    {% endif %}
-  </div>
-</div>
-</body>
+  </body>
 </html>
