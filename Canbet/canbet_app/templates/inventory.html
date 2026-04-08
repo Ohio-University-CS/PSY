@@ -469,12 +469,25 @@ function sel(el) {
 
   if (entryType === 'crate') {
     const qtyNum = parseInt(quantity || '0', 10);
+
     document.getElementById('selContent').innerHTML = `
       <div class="sel-icon">${crateIconHtml(crateType)}</div>
       <div class="sel-name">${name}</div>
       <div class="sel-rarity" style="color:#5b8db8; border-color:#5b8db8;">CRATE</div>
       <div class="sel-qty sel-qty-crate">x${qtyNum} owned</div>
-      <button class="popup-btn" onclick="openSelectedCrate('${crateType}')" ${qtyNum < 1 ? 'disabled' : ''}>OPEN CRATE</button>
+
+      <button class="popup-btn"
+        onclick="openSelectedCrate('${crateType}')"
+        ${qtyNum < 1 ? 'disabled' : ''}>
+        OPEN CRATE
+      </button>
+
+      <button class="popup-btn"
+        onclick="openAllCrates('${crateType}', ${qtyNum})"
+        ${qtyNum < 2 ? 'disabled' : ''}>
+        OPEN ALL CRATES
+      </button>
+
       <div class="sel-qty" id="openResult"></div>
     `;
     return;
@@ -754,6 +767,63 @@ async function openSelectedCrate(crateType) {
   }
 }
 
+async function openAllCrates(crateType, total) {
+  const result = document.getElementById('openResult');
+
+  if (total <= 0) return;
+
+  result.textContent = `Opening ${total} crates...`;
+  result.style.color = '#5b8db8';
+
+  let opened = 0;
+  let rewards = {};
+
+  for (let i = 0; i < total; i++) {
+    try {
+      const resp = await fetch('/api/crate/open/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': CSRF
+        },
+        body: JSON.stringify({ crate_type: crateType })
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        result.textContent = data.error || 'Error opening crates.';
+        result.style.color = '#a00000';
+        return;
+      }
+
+      const item = data.item;
+
+      // track rewards
+      rewards[item.name] = (rewards[item.name] || 0) + 1;
+      opened++;
+
+    } catch (err) {
+      result.textContent = 'Error opening crates.';
+      result.style.color = '#a00000';
+      return;
+    }
+  }
+
+  // format output
+  const summary = Object.entries(rewards)
+    .map(([name, count]) => `${name} x${count}`)
+    .join(', ');
+
+  result.textContent = `Opened ${opened}: ${summary}`;
+  result.style.color = '#2e8a56';
+
+  // refresh inventory after short delay
+  setTimeout(() => {
+    window.location.reload();
+  }, 1200);
+}
+
 window.addEventListener('resize', normalizeGridPadding);
 
 setPrimaryFilter(activePrimaryFilter);
@@ -763,3 +833,4 @@ normalizeGridPadding();
 
   </body>
 </html>
+
