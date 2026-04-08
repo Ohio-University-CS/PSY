@@ -297,6 +297,59 @@ def api_buy_item(request):
     return Response({'new_balance': user.bit_balance})
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_buy_daily_item(request):
+    item = get_object_or_404(Item, pk=request.data.get('item_id'))
+    user = request.user
+
+    daily_items = get_daily_shop_items()
+    featured_ids = {
+        featured.id
+        for featured in daily_items.values()
+        if featured is not None
+    }
+
+    if item.id not in featured_ids:
+        return Response(
+            {'error': 'Item is not in today’s daily shop.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    daily_prices = {
+        'COMMON': 100,
+        'RARE': 300,
+        'EPIC': 1000,
+        'LEGENDARY': 2000,
+    }
+
+    price = daily_prices.get(item.rarity)
+    if price is None:
+        return Response(
+            {'error': 'Invalid item rarity.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if user.bit_balance < price:
+        return Response(
+            {'error': 'Not enough Bits.'},
+            status=status.HTTP_402_PAYMENT_REQUIRED
+        )
+
+    if InventoryEntry.objects.filter(user=user, item=item).exists():
+        return Response(
+            {'error': 'Already owned.'},
+            status=status.HTTP_409_CONFLICT
+        )
+
+    with transaction.atomic():
+        user.bit_balance -= price
+        user.save(update_fields=['bit_balance'])
+        InventoryEntry.objects.create(user=user, item=item)
+        ShopPurchase.objects.create(user=user, item=item, bits_spent=price)
+
+    return Response({'new_balance': user.bit_balance})
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_inventory(request):
@@ -521,8 +574,8 @@ def get_daily_shop_items():
         items = list(Item.objects.filter(rarity=rarity))
         if not items:
             return None
-        random.seed(f"{today}-{rarity}")
-        return random.choice(items)
+        rng = random.Random(f"{today.isoformat()}-{rarity}")
+        return rng.choice(items)
 
     return {
         'COMMON': pick('COMMON'),
