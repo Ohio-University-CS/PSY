@@ -489,7 +489,7 @@ def get_daily_shop_items():
 def api_trade(request):
     try:
         rarity_map = {
-            'COMMON': ('RARE', 4),
+            'COMMON': ('RARE', 3),
             'RARE': ('EPIC', 3),
             'EPIC': ('LEGENDARY', 3),
         }
@@ -610,10 +610,10 @@ def api_quicksell_item(request):
         return Response({'error': 'Not enough copies.'}, status=400)
 
     quicksell_values = {
-        'COMMON': 100,
-        'RARE': 200,
-        'EPIC': 600,
-        'LEGENDARY': 1000,
+        'COMMON': 75,
+        'RARE': 300,
+        'EPIC': 800,
+        'LEGENDARY': 2000,
     }
 
     sell_value = quicksell_values.get(entry.item.rarity)
