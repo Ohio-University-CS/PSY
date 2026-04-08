@@ -992,7 +992,15 @@
           })
         });
 
-        const data = await res.json();
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          const text = await res.text();
+          console.error("Non-JSON response:", text);
+          showToast("SERVER ERROR (check logs)");
+          return;
+        }
 
         if (res.ok) {
           selected = {};

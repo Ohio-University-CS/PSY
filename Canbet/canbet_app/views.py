@@ -478,7 +478,7 @@ def get_daily_shop_items():
         'EPIC': pick('EPIC'),
         'LEGENDARY': pick('LEGENDARY'),
     }
-    
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_trade(request):
@@ -527,31 +527,31 @@ def api_trade(request):
             status=400
         )
 
-    entries = {
-        e.item_id: e
-        for e in InventoryEntry.objects.select_for_update().select_related('item').filter(
-            user=user,
-            item_id__in=[x['item_id'] for x in cleaned],
-            item__rarity=from_rarity
-        )
-    }
-
-    if len(entries) != len(cleaned):
-        return Response({'error': 'One or more selected items are invalid.'}, status=400)
-
-    for row in cleaned:
-        entry = entries[row['item_id']]
-        if entry.quantity < row['amount']:
-            return Response(
-                {'error': f'Not enough copies of {entry.item.name}.'},
-                status=400
-            )
-
     reward_item = Item.objects.filter(rarity=to_rarity).order_by('?').first()
     if not reward_item:
         return Response({'error': f'No {to_rarity} items available.'}, status=400)
 
     with transaction.atomic():
+        entries = {
+            e.item_id: e
+            for e in InventoryEntry.objects.select_for_update().select_related('item').filter(
+                user=user,
+                item_id__in=[x['item_id'] for x in cleaned],
+                item__rarity=from_rarity
+            )
+        }
+
+        if len(entries) != len(cleaned):
+            return Response({'error': 'One or more selected items are invalid.'}, status=400)
+
+        for row in cleaned:
+            entry = entries[row['item_id']]
+            if entry.quantity < row['amount']:
+                return Response(
+                    {'error': f'Not enough copies of {entry.item.name}.'},
+                    status=400
+                )
+
         for row in cleaned:
             entry = entries[row['item_id']]
             entry.quantity -= row['amount']
