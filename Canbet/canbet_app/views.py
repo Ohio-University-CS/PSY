@@ -151,14 +151,30 @@ def leaderboard(request):
 def profile(request):
     user = request.user
     RARITY_ORDER = {'LEGENDARY': 0, 'EPIC': 1, 'RARE': 2, 'COMMON': 3}
+    QUICKSELL_VALUES = {
+        'COMMON': 75,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1500,
+    }
+
     entries = list(user.inventory.select_related('item'))
     entries.sort(key=lambda e: RARITY_ORDER.get(e.item.rarity, 99))
-    best_pulls  = entries[:5]
-    best_pull   = entries[0].item.name if entries else None
-    total_spent = user.purchases.aggregate(total=Sum('bits_spent'))['total'] or 0
+
+    best_pulls = entries[:5]
+    best_pull = entries[0].item.name if entries else None
+
+    inventory_value = sum(
+        QUICKSELL_VALUES.get(entry.item.rarity, 0) * entry.quantity
+        for entry in entries
+    )
+    account_value = user.bit_balance + inventory_value
+
     return render(request, 'profile.html', {
-        'user': user, 'best_pulls': best_pulls,
-        'best_pull': best_pull, 'total_spent': total_spent,
+        'user': user,
+        'best_pulls': best_pulls,
+        'best_pull': best_pull,
+        'account_value': account_value,
     })
 
 @login_required

@@ -1,12 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>canBet • Profile</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet">
-  <style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet • Profile</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
+      rel="stylesheet">
+    <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     :root {
@@ -116,96 +118,103 @@
       .brand-text { display: none; }
     }
   </style>
-</head>
-<body>
+  </head>
+  <body>
 
-  <nav class="topnav">
-    <div class="nav-left">
-      <a href="{% url 'main' %}"><img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo" alt="Logo"></a>
-      <span class="brand-text">canBet</span>
-    </div>
-    <div class="nav-right">
-      <div class="nav-bal">{{ user.bit_balance|default:"0" }} BITS</div>
-      <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
-    </div>
-  </nav>
-
-  <div class="page">
-    <section>
-      <div class="section-label">User Profile</div>
-      <div class="profile-card">
-        <div class="avatar-wrap">
-          {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" class="avatar" alt="{{ user.username }}">
-          {% else %}
-            <img src="{% static 'images/pfp.png' %}" class="avatar" alt="{{ user.username }}" onerror="this.src='https://via.placeholder.com/120/c4c9cf/1a1a1a?text=USER'">
-          {% endif %}
-          <div class="avatar-badge">★</div>
-        </div>
-        <div class="profile-info">
-          <div class="profile-name">{{ user.username }}</div>
-          <div class="profile-handle">ACCOUNT CREATED: {{ user.date_joined|date:"Y" }}</div>
-        </div>
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="{% url 'main' %}"><img
+            src="{% get_static_prefix %}images/canBet%20symbol%20sym..png"
+            class="logo" alt="Logo"></a>
+        <span class="brand-text">canBet</span>
       </div>
-    </section>
+      <div class="nav-right">
+        <div class="nav-bal">{{ user.bit_balance|default:"0" }} BITS</div>
+        <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
+      </div>
+    </nav>
 
-    <section>
-      <div class="section-label">Performance Metrics</div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-label">Current Balance</span>
-          <span class="stat-val green">{{ user.bit_balance }} BITS</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Network Rank</span>
-          <span class="stat-val gold">RANK #{{ user.rank }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Crates Decrypted</span>
-          <span class="stat-val blue">{{ user.crates_opened }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Inventory Size</span>
-          <span class="stat-val">{{ user.inventory.count }} ITEMS</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Total Expenditure</span>
-          <span class="stat-val">{{ total_spent|default:"0" }} BITS</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">High-Value Pull</span>
-          <span class="stat-val" style="font-size:0.7rem">
-            {% if best_pull.item.name %}
-              {{ best_pull.item.name }}
-            {% elif best_pull %}
-              {{ best_pull }}
+    <div class="page">
+      <section>
+        <div class="section-label">User Profile</div>
+        <div class="profile-card">
+          <div class="avatar-wrap">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" class="avatar"
+              alt="{{ user.username }}">
             {% else %}
-              NONE DETECTED
+            <img src="{% static 'images/pfp.png' %}" class="avatar"
+              alt="{{ user.username }}"
+              onerror="this.src='https://via.placeholder.com/120/c4c9cf/1a1a1a?text=USER'">
             {% endif %}
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-label">Premium Hall</div>
-      <div class="wins-list">
-        {% for entry in best_pulls %}
-        <div class="win-row">
-          <img src="{% static entry.item.sprite_path %}" class="win-sprite" alt="{{ entry.item.name }}">
-          <div class="win-name">{{ entry.item.name }}</div>
-          <div class="win-rarity rarity-{{ entry.item.rarity|lower }}">
-            {{ entry.item.rarity }}
+            <div class="avatar-badge">★</div>
+          </div>
+          <div class="profile-info">
+            <div class="profile-name">{{ user.username }}</div>
+            <div class="profile-handle">ACCOUNT CREATED: {{
+              user.date_joined|date:"Y" }}</div>
           </div>
         </div>
-        {% empty %}
-        <div class="win-row" style="justify-content: center; opacity: 0.5;">
-          <div class="win-name">NO HIGH-RARITY ASSETS DETECTED.</div>
-        </div>
-        {% endfor %}
-      </div>
-    </section>
-  </div>
+      </section>
 
-</body>
+      <section>
+        <div class="section-label">Performance Metrics</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Current Balance</span>
+            <span class="stat-val green">{{ user.bit_balance }} BITS</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Network Rank</span>
+            <span class="stat-val gold">RANK #{{ user.rank }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Crates Decrypted</span>
+            <span class="stat-val blue">{{ user.crates_opened }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Inventory Size</span>
+            <span class="stat-val">{{ user.inventory.count }} ITEMS</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Account Value</span>
+            <span class="stat-val">{{ account_value|default:"0" }} BITS</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">High-Value Pull</span>
+            <span class="stat-val" style="font-size:0.7rem">
+              {% if best_pull.item.name %}
+              {{ best_pull.item.name }}
+              {% elif best_pull %}
+              {{ best_pull }}
+              {% else %}
+              NONE DETECTED
+              {% endif %}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Premium Hall</div>
+        <div class="wins-list">
+          {% for entry in best_pulls %}
+          <div class="win-row">
+            <img src="{% static entry.item.sprite_path %}" class="win-sprite"
+              alt="{{ entry.item.name }}">
+            <div class="win-name">{{ entry.item.name }}</div>
+            <div class="win-rarity rarity-{{ entry.item.rarity|lower }}">
+              {{ entry.item.rarity }}
+            </div>
+          </div>
+          {% empty %}
+          <div class="win-row" style="justify-content: center; opacity: 0.5;">
+            <div class="win-name">NO HIGH-RARITY ASSETS DETECTED.</div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+  </body>
 </html>
