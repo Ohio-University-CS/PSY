@@ -164,6 +164,8 @@ def profile(request):
     best_pulls = entries[:5]
     best_pull = entries[0].item.name if entries else None
 
+    total_spent = user.purchases.aggregate(total=Sum('bits_spent'))['total'] or 0
+
     inventory_value = sum(
         QUICKSELL_VALUES.get(entry.item.rarity, 0) * entry.quantity
         for entry in entries
@@ -174,6 +176,7 @@ def profile(request):
         'user': user,
         'best_pulls': best_pulls,
         'best_pull': best_pull,
+        'total_spent': total_spent,
         'account_value': account_value,
     })
 
