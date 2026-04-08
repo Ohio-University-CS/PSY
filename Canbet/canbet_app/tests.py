@@ -1016,12 +1016,12 @@ class TestCanvasSyncEndpoint(TestCase):
     # Normal cases
     # ------------------------------------------------------------------
     def test_sync_awards_bits_for_new_submission(self):
-        # Normal case: a single new on-time submission awards 50 bits.
+        # Normal case: a single new on-time submission awards 200 bits.
         payload = self._make_payload(submissions=[self._one_submission()])
         response = self.client.post(self.SYNC_URL, payload, format='json')
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.bit_balance, 1050)  # 1000 default + 50
+        self.assertEqual(self.user.bit_balance, 1200)  # 1000 default + 200
 
     def test_sync_response_reports_created_count_and_bits(self):
         # Normal case: response body includes 'created' and 'bits_awarded' fields.
@@ -1030,7 +1030,7 @@ class TestCanvasSyncEndpoint(TestCase):
         self.assertIn('created', response.data)
         self.assertIn('bits_awarded', response.data)
         self.assertEqual(response.data['created'], 1)
-        self.assertEqual(response.data['bits_awarded'], 50)
+        self.assertEqual(response.data['bits_awarded'], 200)
 
     def test_sync_creates_canvas_submission_record(self):
         # Normal case: a CanvasSubmission row is created for the new submission.
@@ -1041,7 +1041,7 @@ class TestCanvasSyncEndpoint(TestCase):
         )
 
     def test_sync_multiple_new_submissions_all_awarded(self):
-        # Normal case: two new submissions each award 50 bits (100 total).
+        # Normal case: two new submissions each award 200 bits (400 total).
         payload = self._make_payload(submissions=[
             self._one_submission(assignment_id='1'),
             self._one_submission(assignment_id='2'),
@@ -1049,7 +1049,7 @@ class TestCanvasSyncEndpoint(TestCase):
         response = self.client.post(self.SYNC_URL, payload, format='json')
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.bit_balance, 1100)  # 1000 + 50 + 50
+        self.assertEqual(self.user.bit_balance, 1400)  # 1000 + 200 + 200
 
     # ------------------------------------------------------------------
     # Edge cases
@@ -1108,9 +1108,9 @@ class TestCanvasSyncEndpoint(TestCase):
         ])
         response = self.client.post(self.SYNC_URL, payload, format='json')
         self.assertEqual(response.data['created'], 1)
-        self.assertEqual(response.data['bits_awarded'], 50)
+        self.assertEqual(response.data['bits_awarded'], 200)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.bit_balance, 1050)
+        self.assertEqual(self.user.bit_balance, 1200)
 
     # ------------------------------------------------------------------
     # Error cases
