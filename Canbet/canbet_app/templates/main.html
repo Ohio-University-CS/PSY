@@ -1,12 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet • Main Interface</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet">
-<style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet • Main Interface</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
+      rel="stylesheet">
+    <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   
   :root {
@@ -205,94 +207,108 @@
     .hero-name { font-size: 1.2rem; }
   }
 </style>
-</head>
-<body>
+  </head>
+  <body>
 
-<nav class="topnav">
-  <div class="nav-left">
-    <a href="{% url 'main' %}"><img src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo" alt="Logo"></a>
-    <span class="brand-text">canBet</span>
-  </div>
-  <div class="nav-right">
-    <div class="nav-bal">
-      {{ user.bit_balance|default:"0" }} BITS
-    </div>
-    <a href="{% url 'logout' %}" class="nav-back">LOGOUT</a>
-  </div>
-</nav>
-
-<div class="page">
-  <section>
-    <div class="hero">
-      <div class="hero-greeting">WELCOME BACK</div>
-      <div class="hero-name">{{ user.username }}</div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="hero-stat-label">CRATES OPENED</span>
-          <span class="hero-stat-val blue">{{ user.crates_opened }}</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-label">BIT BALANCE</span>
-          <span class="hero-stat-val green">{{ user.bit_balance }}</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-label">GLOBAL RANK</span>
-          <span class="hero-stat-val">#{{ user.rank }}</span>
-        </div>
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="{% url 'main' %}"><img
+            src="{% get_static_prefix %}images/canBet%20symbol%20sym..png"
+            class="logo" alt="Logo"></a>
+        <span class="brand-text">canBet</span>
       </div>
-    </div>
-  </section>
+      <div class="nav-right">
+        <div class="nav-bal">
+          {{ user.bit_balance|default:"0" }} BITS
+        </div>
+        <a href="{% url 'logout' %}" class="nav-back">LOGOUT</a>
+      </div>
+    </nav>
 
-  <section>
-    <div class="section-label">Main Menu</div>
-    <div class="nav-grid">
-      <a href="{% url 'inventory' %}" class="nav-btn"><span>Inventory</span> <span>▶</span></a>
-      <a href="{% url 'leaderboard' %}" class="nav-btn"><span>Leaderboard</span> <span>▶</span></a>
-      <a href="{% url 'crate' %}" class="nav-btn"><span>Crate Hub</span> <span>▶</span></a>
-      <a href="{% url 'shop' %}" class="nav-btn"><span>Marketplace</span> <span>▶</span></a>
-      <a href="{% url 'profile' %}" class="nav-btn"><span>My Profile</span> <span>▶</span></a>
-      <a href="{% url 'settings' %}" class="nav-btn"><span>Settings</span> <span>▶</span></a>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-label">Log Feed</div>
-    <div class="list-block">
-      {% for activity in recent_activity %}
-        <div class="list-row">
-          <div class="dot {% if activity.item_won %}dot-won{% else %}dot-bought{% endif %}"></div>
-          <div style="flex: 1;">
-            {% if activity.item_won %}
-              GOT: {{ activity.item_won.rarity }} - {{ activity.item_won.name }}
-            {% else %}
-              BOUGHT: {{ activity.item.name }}
-            {% endif %}
+    <div class="page">
+      <section>
+        <div class="hero">
+          <div class="hero-greeting">WELCOME BACK</div>
+          <div class="hero-name">{{ user.username }}</div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="hero-stat-label">CRATES OPENED</span>
+              <span class="hero-stat-val blue">{{ user.crates_opened }}</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-label">BIT BALANCE</span>
+              <span class="hero-stat-val green">{{ user.bit_balance }}</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-label">GLOBAL RANK</span>
+              <span class="hero-stat-val">#{{ user.rank }}</span>
+            </div>
           </div>
-          <div style="opacity: 0.6; font-size: 0.5rem;">{{ activity.opened_at|timesince }}{{ activity.purchased_at|timesince }} ago</div>
         </div>
-      {% empty %}
-        <div class="list-row" style="opacity: 0.5;">No system logs found. Go open a crate!</div>
-      {% endfor %}
-    </div>
-  </section>
+      </section>
 
-  <section>
-    <div class="section-label">Top Competitors</div>
-    <div class="list-block">
-      {% for player in top5 %}
-      <div class="list-row{% if player == user %} list-row-you{% endif %}">
-        <span class="lb-rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
-          #{{ forloop.counter }}
-        </span>
-        <span style="flex: 1;">{{ player.username }}{% if player == user %} (YOU){% endif %}</span>
-        <span class="green">{{ player.bit_balance }} BITS</span>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
-</div>
+      <section>
+        <div class="section-label">Main Menu</div>
+        <div class="nav-grid">
+          <a href="{% url 'inventory' %}" class="nav-btn"><span>Inventory</span>
+            <span>▶</span></a>
+          <a href="{% url 'leaderboard' %}"
+            class="nav-btn"><span>Leaderboard</span> <span>▶</span></a>
+          <a href="{% url 'crate' %}" class="nav-btn"><span>Crate Hub</span>
+            <span>▶</span></a>
+          <a href="{% url 'shop' %}" class="nav-btn"><span>Marketplace</span>
+            <span>▶</span></a>
+          <a href="{% url 'profile' %}" class="nav-btn"><span>My Profile</span>
+            <span>▶</span></a>
+          <a href="{% url 'settings' %}" class="nav-btn"><span>Settings</span>
+            <span>▶</span></a>
+        </div>
+      </section>
 
-<script>
+      <section>
+        <div class="section-label">Log Feed</div>
+        <div class="list-block">
+          {% for activity in recent_activity %}
+          <div class="list-row">
+            <div
+              class="dot {% if activity.item_won %}dot-won{% else %}dot-bought{% endif %}"></div>
+            <div style="flex: 1;">
+              {% if activity.item_won %}
+              GOT: {{ activity.item_won.rarity }} - {{ activity.item_won.name }}
+              {% else %}
+              BOUGHT: {{ activity.item.name }}
+              {% endif %}
+            </div>
+            <div style="opacity: 0.6; font-size: 0.5rem;">{{
+              activity.opened_at|timesince }}{{ activity.purchased_at|timesince
+              }} ago</div>
+          </div>
+          {% empty %}
+          <div class="list-row" style="opacity: 0.5;">No system logs found. Go
+            open a crate!</div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Top Competitors</div>
+        <div class="list-block">
+          {% for player in top5 %}
+          <div class="list-row{% if player == user %} list-row-you{% endif %}">
+            <span
+              class="lb-rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+              #{{ forloop.counter }}
+            </span>
+            <span style="flex: 1;">{{ player.username }}{% if player == user %}
+              (YOU){% endif %}</span>
+            <span class="green">{{ player.account_value }} BITS</span>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <script>
   (async function syncExtensionToken() {
     const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
     try {
@@ -309,5 +325,5 @@
   })();
 </script>
 
-</body>
+  </body>
 </html>

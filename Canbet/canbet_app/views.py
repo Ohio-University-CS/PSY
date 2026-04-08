@@ -59,17 +59,45 @@ def logout_view(request):
 
 @login_required
 def main(request):
-    user  = request.user
-    top5  = CanBetUser.objects.order_by('-bit_balance')[:5]
-    opens = list(user.crate_opens.select_related('item_won')[:5])
-    buys  = list(user.purchases.select_related('item')[:5])
-    recent = sorted(
-        opens + buys,
+    QUICKSELL_VALUES = {
+        'COMMON': 75,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1500,
+    }
+
+    recent_opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:5]
+    recent_purchases = ShopPurchase.objects.select_related('user', 'item').order_by('-purchased_at')[:5]
+    recent_activity = sorted(
+        list(recent_opens) + list(recent_purchases),
         key=lambda x: getattr(x, 'opened_at', None) or getattr(x, 'purchased_at', None),
         reverse=True
     )[:5]
+
+    top5 = list(CanBetUser.objects.all())
+
+    for player in top5:
+        inventory_entries = player.inventory.select_related('item').all()
+        inventory_value = sum(
+            QUICKSELL_VALUES.get(entry.item.rarity, 0) * entry.quantity
+            for entry in inventory_entries
+        )
+        player.account_value = player.bit_balance + inventory_value
+
+    top5.sort(key=lambda p: p.account_value, reverse=True)
+    top5 = top5[:5]
+
+    rank = 1
+    for player in top5:
+        if player.pk == request.user.pk:
+            request.user.rank = rank
+            break
+        rank += 1
+
     return render(request, 'main.html', {
-        'user': user, 'top5': top5, 'recent_activity': recent,
+        'user': request.user,
+        'recent_activity': recent_activity,
+        'top5': top5,
     })
 
 @login_required
