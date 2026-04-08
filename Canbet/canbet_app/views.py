@@ -139,9 +139,14 @@ def settings_view(request):
 
 @login_required
 def shop(request):
+    items = Item.objects.filter(shop_price__gt=0).order_by('collection', 'shop_price', 'name')
+    owned_ids = set(request.user.inventory.values_list('item_id', flat=True))
     daily_items = get_daily_shop_items()
+
     return render(request, 'shop.html', {
-        'daily_items': daily_items
+        'items': items,
+        'owned_ids': owned_ids,
+        'daily_items': daily_items,
     })
 
 @login_required
