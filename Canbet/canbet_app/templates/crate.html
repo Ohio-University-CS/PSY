@@ -25,7 +25,8 @@
     --rarity-rare: #5b8db8;
     --rarity-epic: #a855f7;
     --rarity-legendary: #c8943a;
-  }
+    --rarity-secret: #ff1717;
+  } 
 
   body {
     width: 100%; min-height: 100vh;
@@ -34,6 +35,7 @@
     color: var(--text);
     line-height: 1.4;
   }
+  
 
   /* --- UNIFIED NAVIGATION (FIXED) --- */
   .topnav {
@@ -350,7 +352,7 @@
     <script>
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
 const RARITY_COLORS = {
-  COMMON: '#2e8a56', RARE: '#5b8db8', EPIC: '#a855f7', LEGENDARY: '#c8943a'
+  COMMON: '#2e8a56', RARE: '#5b8db8', EPIC: '#a855f7', LEGENDARY: '#c8943a', SECRET: "#FF1717"
 };
 const CRATE_ICONS = {
   SPOOKY: 'sprites/Items/SpookyCollection/Spooky collection box.png',
