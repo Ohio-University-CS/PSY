@@ -200,12 +200,30 @@ def profile(request):
     )
     account_value = user.bit_balance + inventory_value
 
+    all_users = list(CanBetUser.objects.all())
+    for u in all_users:
+        inv_entries = u.inventory.select_related('item').all()
+        inv_value = sum(
+            QUICKSELL_VALUES.get(entry.item.rarity, 0) * entry.quantity
+            for entry in inv_entries
+        )
+        u.account_value = u.bit_balance + inv_value
+
+    all_users.sort(key=lambda u: u.account_value, reverse=True)
+
+    rank = None
+    for idx, u in enumerate(all_users, start=1):
+        if u.pk == user.pk:
+            rank = idx
+            break
+
     return render(request, 'profile.html', {
         'user': user,
         'best_pulls': best_pulls,
         'best_pull': best_pull,
         'total_spent': total_spent,
         'account_value': account_value,
+        'rank': rank,
     })
 
 @login_required
