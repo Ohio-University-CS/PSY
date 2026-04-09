@@ -73,7 +73,7 @@ def delete_spooky_crate(apps, schema_editor):
         loot_box.delete()
 
     Item.objects.filter(
-        name__in=[name for name, _, _ in SPOOKY_ITEMS],
+        name__in=[name for name, _, _, _ in SPOOKY_ITEMS],
         collection='SPOOKY'
     ).delete()
 
