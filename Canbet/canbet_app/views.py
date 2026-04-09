@@ -116,6 +116,7 @@ def leaderboard(request):
         'RARE': 200,
         'EPIC': 600,
         'LEGENDARY': 1500,
+        'SECRET': 4000,
     }
 
     qs = CanBetUser.objects.annotate(
@@ -178,12 +179,13 @@ def leaderboard(request):
 @login_required
 def profile(request):
     user = request.user
-    RARITY_ORDER = {'LEGENDARY': 0, 'EPIC': 1, 'RARE': 2, 'COMMON': 3}
+    RARITY_ORDER = {'SECRET': 0, 'LEGENDARY': 1, 'EPIC': 2, 'RARE': 3, 'COMMON': 4}
     QUICKSELL_VALUES = {
         'COMMON': 75,
         'RARE': 200,
         'EPIC': 600,
         'LEGENDARY': 1500,
+        'SECRET': 4000,
     }
 
     entries = list(user.inventory.select_related('item'))
@@ -761,6 +763,7 @@ def api_quicksell_item(request):
         'RARE': 200,
         'EPIC': 600,
         'LEGENDARY': 1500,
+        'SECRET': 4000,
     }
 
     sell_value = quicksell_values.get(entry.item.rarity)
