@@ -30,6 +30,7 @@
     --green: #2e8a56;
     --red: #a33a3a;
     --text: #1a1a1a;
+    --rarity-secret: #ff1717;
   }
 
   body {
@@ -389,7 +390,7 @@
             data-rarity="{{ entry.item.rarity }}"
             data-collection="{{ entry.item.collection }}"
             data-sprite-path="{{ entry.item.sprite_path }}"
-            data-color="{% if entry.item.rarity == 'LEGENDARY' %}#c8943a{% elif entry.item.rarity == 'EPIC' %}#a855f7{% elif entry.item.rarity == 'RARE' %}#5b8db8{% else %}#2e8a56{% endif %}"
+            data-color="{% if entry.item.rarity == 'SECRET' %}#FF1717{% elif entry.item.rarity == 'LEGENDARY' %}#c8943a{% elif entry.item.rarity == 'EPIC' %}#a855f7{% elif entry.item.rarity == 'RARE' %}#5b8db8{% else %}#2e8a56{% endif %}"
             data-img="{% static entry.item.sprite_path %}"
             data-quantity="{{ entry.quantity }}"
             onclick="sel(this)">
@@ -425,13 +426,14 @@
     <script>
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
 const RARITY_COLORS = {
-  COMMON: '#2e8a56', RARE: '#5b8db8', EPIC: '#a855f7', LEGENDARY: '#c8943a'
+  COMMON: '#2e8a56', RARE: '#5b8db8', EPIC: '#a855f7', LEGENDARY: '#c8943a', SECRET: '#FF1717'
 };
 const QUICKSELL_VALUES = {
         'COMMON': 75,
         'RARE': 200,
         'EPIC': 600,
         'LEGENDARY': 1500,
+        'SECRET': 4000
     };
 const CRATE_ICON_PATHS = {
   SPOOKY: '/static/sprites/Items/SpookyCollection/Spooky collection box.png',
