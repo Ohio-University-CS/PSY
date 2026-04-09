@@ -20,6 +20,7 @@
       --green: #2e8a56;
       --text: #1a1a1a;
       --gold: #c8943a;
+      --rarity-secret: #ff1717;
     }
 
     body {
@@ -111,6 +112,7 @@
     .win-rarity.rarity-epic { color: #a855f7; }
     .win-rarity.rarity-rare { color: var(--accent-blue); }
     .win-rarity.rarity-common { color: var(--green); }
+    .win-rarity.rarity-secret { color: #FF1717; }
 
     @media (max-width: 768px) {
       .profile-card { flex-direction: column; text-align: center; }
@@ -165,7 +167,7 @@
           </div>
           <div class="stat-card">
             <span class="stat-label">Network Rank</span>
-            <span class="stat-val gold">RANK #{{ rank }}</span>
+            <span class="stat-val gold">RANK #{{ user.rank }}</span>
           </div>
           <div class="stat-card">
             <span class="stat-label">Crates Decrypted</span>
