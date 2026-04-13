@@ -218,8 +218,12 @@
           <div class="lb-th">
             {% if sort == 'account_value' %}
             Account Value
-            {% else %}
+            {% elif sort == 'bits' %}
             Bit Balance
+            {% elif sort == 'rarity' %}
+            Rarest Item
+            {% else %}
+            Crates
             {% endif %}
           </div>
           <div class="lb-th">Crates</div>
@@ -240,8 +244,12 @@
             <span class="lb-score">
               {% if sort == 'account_value' %}
               {{ entry.account_value|intcomma }}
-              {% else %}
+              {% elif sort == 'bits' %}
               {{ entry.bits|intcomma }}
+              {% elif sort == 'rarity' %}
+              {{ entry.rarest_item }}
+              {% else %}
+              {{ entry.crates }}
               {% endif %}
             </span>
 

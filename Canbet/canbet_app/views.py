@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator
+
 
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -119,9 +121,16 @@ def leaderboard(request):
         'SECRET': 4000,
     }
 
+    rarity_order = {
+        'COMMON': 1,
+        'RARE': 2,
+        'EPIC': 3,
+        'LEGENDARY': 4,
+        'SECRET': 5,
+    }
+
     qs = CanBetUser.objects.annotate(
         crate_count=Count('crate_opens', distinct=True),
-        best_rarity=Min('inventory__item__rarity'),
         rarity_achieved=Min('inventory__obtained_at'),
         last_crate=Max('crate_opens__opened_at'),
     )
@@ -131,20 +140,52 @@ def leaderboard(request):
     for u in users:
         inventory_entries = list(u.inventory.select_related('item').all())
         inventory_value = 0
+
+        rarest_item_name = 'None'
+        rarest_item_rarity = None
+        rarest_item_score = 0
+        rarest_item_obtained_at = None
+
         for e in inventory_entries:
             inventory_value += quicksell_values.get(e.item.rarity, 0) * e.quantity
+
+            item_rarity_score = rarity_order.get(e.item.rarity, 0)
+
+            if item_rarity_score > rarest_item_score:
+                rarest_item_score = item_rarity_score
+                rarest_item_rarity = e.item.rarity
+                rarest_item_name = e.item.name
+                rarest_item_obtained_at = e.obtained_at
+            elif item_rarity_score == rarest_item_score and item_rarity_score > 0:
+                if rarest_item_obtained_at is None or (
+                    e.obtained_at is not None and e.obtained_at < rarest_item_obtained_at
+                ):
+                    rarest_item_rarity = e.item.rarity
+                    rarest_item_name = e.item.name
+                    rarest_item_obtained_at = e.obtained_at
+
         u.account_value = u.bit_balance + inventory_value
+        u.rarest_item_name = rarest_item_name
+        u.rarest_item_rarity = rarest_item_rarity
+        u.rarest_item_score = rarest_item_score
+        u.rarest_item_obtained_at = rarest_item_obtained_at
 
     if sort == 'rarity':
-        users.sort(key=lambda u: (
-            u.best_rarity if u.best_rarity is not None else 'ZZZ',
-            u.rarity_achieved if u.rarity_achieved is not None else timezone.now()
-        ))
+        users.sort(
+            key=lambda u: (
+                -(u.rarest_item_score or 0),
+                u.rarest_item_obtained_at if u.rarest_item_obtained_at is not None else timezone.now(),
+                u.username.lower()
+            )
+        )
     elif sort == 'crates':
-        users.sort(key=lambda u: (
-            -(u.crate_count or 0),
-            u.last_crate if u.last_crate is not None else timezone.make_aware(timezone.datetime.min)
-        ), reverse=False)
+        users.sort(
+            key=lambda u: (
+                -(u.crate_count or 0),
+                u.last_crate if u.last_crate is not None else timezone.make_aware(timezone.datetime.min)
+            ),
+            reverse=False
+        )
     elif sort == 'bits':
         users.sort(key=lambda u: u.bit_balance, reverse=True)
     else:
@@ -153,6 +194,12 @@ def leaderboard(request):
 
     total = len(users)
     total_pages = max(1, (total + per_page - 1) // per_page)
+
+    if page < 1:
+        page = 1
+    elif page > total_pages:
+        page = total_pages
+
     start = (page - 1) * per_page
     end = page * per_page
     page_users = users[start:end]
@@ -166,6 +213,8 @@ def leaderboard(request):
             'bits': u.bit_balance,
             'account_value': u.account_value,
             'crates': u.crate_count,
+            'rarest_item': u.rarest_item_name,
+            'rarest_item_rarity': u.rarest_item_rarity,
             'is_you': request.user.is_authenticated and u.pk == request.user.pk,
         })
 
