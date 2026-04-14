@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator
+
 
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -14,6 +16,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
+
+from datetime import date
 
 import random
 from .models import CanBetUser, Item, InventoryEntry, CrateOpen, ShopPurchase, Lootbox, LootboxInventoryEntry, CanvasSubmission
@@ -57,56 +61,160 @@ def logout_view(request):
 
 @login_required
 def main(request):
-    user  = request.user
-    top5  = CanBetUser.objects.order_by('-bit_balance')[:5]
-    opens = list(user.crate_opens.select_related('item_won')[:5])
-    buys  = list(user.purchases.select_related('item')[:5])
-    recent = sorted(
-        opens + buys,
+    QUICKSELL_VALUES = {
+        'COMMON': 75,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1500,
+    }
+
+    recent_opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:5]
+    recent_purchases = ShopPurchase.objects.select_related('user', 'item').order_by('-purchased_at')[:5]
+    recent_activity = sorted(
+        list(recent_opens) + list(recent_purchases),
         key=lambda x: getattr(x, 'opened_at', None) or getattr(x, 'purchased_at', None),
         reverse=True
     )[:5]
+
+    players = list(CanBetUser.objects.all())
+
+    for player in players:
+        inventory_entries = player.inventory.select_related('item').all()
+        inventory_value = sum(
+            QUICKSELL_VALUES.get(entry.item.rarity, 0) * entry.quantity
+            for entry in inventory_entries
+        )
+        player.account_value = player.bit_balance + inventory_value
+
+    players.sort(key=lambda p: p.account_value, reverse=True)
+    top5 = players[:5]
+
+    user_rank = None
+    for idx, player in enumerate(players, start=1):
+        if player.pk == request.user.pk:
+            user_rank = idx
+            break
+
     return render(request, 'main.html', {
-        'user': user, 'top5': top5, 'recent_activity': recent,
+        'user': request.user,
+        'recent_activity': recent_activity,
+        'top5': top5,
+        'rank': user_rank,
     })
 
 @login_required
 def inventory(request):
-    entries = request.user.inventory.select_related('item').order_by('item__rarity', 'item__name')
+    entries = request.user.inventory.select_related('item').order_by('item__collection', 'item__rarity', 'item__name')
     return render(request, 'inventory.html', {'entries': entries})
 
 @login_required
 def leaderboard(request):
-    sort = request.GET.get('sort', 'bits')
+    sort = request.GET.get('sort', 'account_value')
     page = int(request.GET.get('page', 1))
     per_page = 10
 
+    quicksell_values = {
+        'COMMON': 75,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1500,
+        'SECRET': 4000,
+    }
+
+    rarity_order = {
+        'COMMON': 1,
+        'RARE': 2,
+        'EPIC': 3,
+        'LEGENDARY': 4,
+        'SECRET': 5,
+    }
+
     qs = CanBetUser.objects.annotate(
         crate_count=Count('crate_opens', distinct=True),
-        best_rarity=Min('inventory__item__rarity'),
         rarity_achieved=Min('inventory__obtained_at'),
         last_crate=Max('crate_opens__opened_at'),
     )
 
-    if sort == 'rarity':
-        qs = qs.order_by('best_rarity', 'rarity_achieved')
-    elif sort == 'crates':
-        qs = qs.order_by('-crate_count', 'last_crate')
-    else:
-        qs = qs.order_by('-bit_balance')
+    users = list(qs)
 
-    total = qs.count()
+    for u in users:
+        inventory_entries = list(u.inventory.select_related('item').all())
+        inventory_value = 0
+
+        rarest_item_name = 'None'
+        rarest_item_rarity = None
+        rarest_item_score = 0
+        rarest_item_obtained_at = None
+
+        for e in inventory_entries:
+            inventory_value += quicksell_values.get(e.item.rarity, 0) * e.quantity
+
+            item_rarity_score = rarity_order.get(e.item.rarity, 0)
+
+            if item_rarity_score > rarest_item_score:
+                rarest_item_score = item_rarity_score
+                rarest_item_rarity = e.item.rarity
+                rarest_item_name = e.item.name
+                rarest_item_obtained_at = e.obtained_at
+            elif item_rarity_score == rarest_item_score and item_rarity_score > 0:
+                if rarest_item_obtained_at is None or (
+                    e.obtained_at is not None and e.obtained_at < rarest_item_obtained_at
+                ):
+                    rarest_item_rarity = e.item.rarity
+                    rarest_item_name = e.item.name
+                    rarest_item_obtained_at = e.obtained_at
+
+        u.account_value = u.bit_balance + inventory_value
+        u.rarest_item_name = rarest_item_name
+        u.rarest_item_rarity = rarest_item_rarity
+        u.rarest_item_score = rarest_item_score
+        u.rarest_item_obtained_at = rarest_item_obtained_at
+
+    if sort == 'rarity':
+        users.sort(
+            key=lambda u: (
+                -(u.rarest_item_score or 0),
+                u.rarest_item_obtained_at if u.rarest_item_obtained_at is not None else timezone.now(),
+                u.username.lower()
+            )
+        )
+    elif sort == 'crates':
+        users.sort(
+            key=lambda u: (
+                -(u.crate_count or 0),
+                u.last_crate if u.last_crate is not None else timezone.make_aware(timezone.datetime.min)
+            ),
+            reverse=False
+        )
+    elif sort == 'bits':
+        users.sort(key=lambda u: u.bit_balance, reverse=True)
+    else:
+        sort = 'account_value'
+        users.sort(key=lambda u: u.account_value, reverse=True)
+
+    total = len(users)
     total_pages = max(1, (total + per_page - 1) // per_page)
-    entries = qs[(page - 1) * per_page : page * per_page]
+
+    if page < 1:
+        page = 1
+    elif page > total_pages:
+        page = total_pages
+
+    start = (page - 1) * per_page
+    end = page * per_page
+    page_users = users[start:end]
 
     results = []
-    for i, u in enumerate(entries):
-        rank = (page - 1) * per_page + i + 1
+    for i, u in enumerate(page_users):
+        rank = start + i + 1
         results.append({
             'rank': rank,
             'username': u.username,
             'bits': u.bit_balance,
+            'account_value': u.account_value,
             'crates': u.crate_count,
+            'rarest_item': u.rarest_item_name,
+            'rarest_item_rarity': u.rarest_item_rarity,
             'is_you': request.user.is_authenticated and u.pk == request.user.pk,
         })
 
@@ -120,15 +228,53 @@ def leaderboard(request):
 @login_required
 def profile(request):
     user = request.user
-    RARITY_ORDER = {'LEGENDARY': 0, 'EPIC': 1, 'RARE': 2, 'COMMON': 3}
+    RARITY_ORDER = {'SECRET': 0, 'LEGENDARY': 1, 'EPIC': 2, 'RARE': 3, 'COMMON': 4}
+    QUICKSELL_VALUES = {
+        'COMMON': 75,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1500,
+        'SECRET': 4000,
+    }
+
     entries = list(user.inventory.select_related('item'))
     entries.sort(key=lambda e: RARITY_ORDER.get(e.item.rarity, 99))
-    best_pulls  = entries[:5]
-    best_pull   = entries[0].item.name if entries else None
+
+    best_pulls = entries[:5]
+    best_pull = entries[0].item.name if entries else None
+
     total_spent = user.purchases.aggregate(total=Sum('bits_spent'))['total'] or 0
+
+    inventory_value = sum(
+        QUICKSELL_VALUES.get(entry.item.rarity, 0) * entry.quantity
+        for entry in entries
+    )
+    account_value = user.bit_balance + inventory_value
+
+    all_users = list(CanBetUser.objects.all())
+    for u in all_users:
+        inv_entries = u.inventory.select_related('item').all()
+        inv_value = sum(
+            QUICKSELL_VALUES.get(entry.item.rarity, 0) * entry.quantity
+            for entry in inv_entries
+        )
+        u.account_value = u.bit_balance + inv_value
+
+    all_users.sort(key=lambda u: u.account_value, reverse=True)
+
+    rank = None
+    for idx, u in enumerate(all_users, start=1):
+        if u.pk == user.pk:
+            rank = idx
+            break
+
     return render(request, 'profile.html', {
-        'user': user, 'best_pulls': best_pulls,
-        'best_pull': best_pull, 'total_spent': total_spent,
+        'user': user,
+        'best_pulls': best_pulls,
+        'best_pull': best_pull,
+        'total_spent': total_spent,
+        'account_value': account_value,
+        'rank': rank,
     })
 
 @login_required
@@ -137,9 +283,15 @@ def settings_view(request):
 
 @login_required
 def shop(request):
-    items     = Item.objects.filter(shop_price__gt=0).order_by('collection', 'shop_price')
+    items = Item.objects.filter(shop_price__gt=0).order_by('collection', 'shop_price', 'name')
     owned_ids = set(request.user.inventory.values_list('item_id', flat=True))
-    return render(request, 'shop.html', {'items': items, 'owned_ids': owned_ids})
+    daily_items = get_daily_shop_items()
+
+    return render(request, 'shop.html', {
+        'items': items,
+        'owned_ids': owned_ids,
+        'daily_items': daily_items,
+    })
 
 @login_required
 def crate(request):
@@ -223,19 +375,78 @@ def api_open_crate(request):
 def api_buy_item(request):
     item = get_object_or_404(Item, pk=request.data.get('item_id'))
     user = request.user
+
     if item.shop_price <= 0:
         return Response({'error': 'Item not for sale.'}, status=status.HTTP_400_BAD_REQUEST)
+
     if user.bit_balance < item.shop_price:
         return Response({'error': 'Not enough Bits.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
+
     if InventoryEntry.objects.filter(user=user, item=item).exists():
         return Response({'error': 'Already owned.'}, status=status.HTTP_409_CONFLICT)
+
     with transaction.atomic():
         user.bit_balance -= item.shop_price
         user.save(update_fields=['bit_balance'])
         InventoryEntry.objects.create(user=user, item=item)
         ShopPurchase.objects.create(user=user, item=item, bits_spent=item.shop_price)
+
     return Response({'new_balance': user.bit_balance})
 
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_buy_daily_item(request):
+    item = get_object_or_404(Item, pk=request.data.get('item_id'))
+    user = request.user
+
+    daily_items = get_daily_shop_items()
+    featured_ids = {
+        featured.id
+        for featured in daily_items.values()
+        if featured is not None
+    }
+
+    if item.id not in featured_ids:
+        return Response(
+            {'error': 'Item is not in today’s daily shop.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    daily_prices = {
+        'COMMON': 100,
+        'RARE': 300,
+        'EPIC': 1000,
+        'LEGENDARY': 2000,
+    }
+
+    price = daily_prices.get(item.rarity)
+    if price is None:
+        return Response(
+            {'error': 'Invalid item rarity.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if user.bit_balance < price:
+        return Response(
+            {'error': 'Not enough Bits.'},
+            status=status.HTTP_402_PAYMENT_REQUIRED
+        )
+
+    if InventoryEntry.objects.filter(user=user, item=item).exists():
+        return Response(
+            {'error': 'Already owned.'},
+            status=status.HTTP_409_CONFLICT
+        )
+
+    with transaction.atomic():
+        user.bit_balance -= price
+        user.save(update_fields=['bit_balance'])
+        InventoryEntry.objects.create(user=user, item=item)
+        ShopPurchase.objects.create(user=user, item=item, bits_spent=price)
+
+    return Response({'new_balance': user.bit_balance})
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -354,10 +565,29 @@ def api_token_login(request):
     return Response({'token': token.key, 'username': user.username})
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_crate_pool(request, crate_type):
+    try:
+        lootbox = Lootbox.objects.get(crate_type=crate_type.upper(), is_active=True)
+    except Lootbox.DoesNotExist:
+        return Response({'error': 'Crate not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    entries = lootbox.entries.select_related('item').all()
+    return Response([
+        {
+            'name': e.item.name,
+            'rarity': e.item.rarity,
+            'sprite_path': e.item.sprite_path,
+            'weight': e.weight,
+        }
+        for e in entries
+    ])
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  EXTENSION SYNC API
 
-BITS_PER_SUBMISSION = 50
+BITS_PER_SUBMISSION = 200
 
 @csrf_exempt
 @api_view(['POST'])
@@ -433,4 +663,179 @@ def api_canvas_sync(request):
         'created':      created_count,
         'bits_awarded': bits_awarded,
         'new_balance':  user.bit_balance,
+    })
+
+def get_daily_shop_items():
+    today = date.today()
+
+    def pick(rarity):
+        items = list(Item.objects.filter(rarity=rarity))
+        if not items:
+            return None
+        rng = random.Random(f"{today.isoformat()}-{rarity}")
+        return rng.choice(items)
+
+    return {
+        'COMMON': pick('COMMON'),
+        'RARE': pick('RARE'),
+        'EPIC': pick('EPIC'),
+        'LEGENDARY': pick('LEGENDARY'),
+    }
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_trade(request):
+    try:
+        rarity_map = {
+            'COMMON': ('RARE', 3),
+            'RARE': ('EPIC', 3),
+            'EPIC': ('LEGENDARY', 3),
+        }
+
+        from_rarity = str(request.data.get('from', '')).upper()
+        selections = request.data.get('selections', [])
+        user = request.user
+
+        if from_rarity not in rarity_map:
+            return Response({'error': 'Invalid trade.'}, status=400)
+
+        if not isinstance(selections, list) or not selections:
+            return Response({'error': 'No items selected.'}, status=400)
+
+        to_rarity, required = rarity_map[from_rarity]
+
+        cleaned = []
+        total_selected = 0
+        seen_ids = set()
+
+        for row in selections:
+            if not isinstance(row, dict):
+                continue
+
+            try:
+                item_id = int(row.get('item_id'))
+                amount = int(row.get('amount'))
+            except (TypeError, ValueError):
+                continue
+
+            if item_id in seen_ids or amount < 1:
+                continue
+
+            seen_ids.add(item_id)
+            cleaned.append({'item_id': item_id, 'amount': amount})
+            total_selected += amount
+
+        if total_selected != required:
+            return Response(
+                {'error': f'Select exactly {required} {from_rarity} item copies.'},
+                status=400
+            )
+
+        reward_item = Item.objects.filter(rarity=to_rarity).order_by('?').first()
+        if not reward_item:
+            return Response({'error': f'No {to_rarity} items available.'}, status=400)
+
+        with transaction.atomic():
+            entries = {
+                e.item_id: e
+                for e in InventoryEntry.objects.select_for_update().select_related('item').filter(
+                    user=user,
+                    item_id__in=[x['item_id'] for x in cleaned],
+                    item__rarity=from_rarity
+                )
+            }
+
+            if len(entries) != len(cleaned):
+                return Response({'error': 'One or more selected items are invalid.'}, status=400)
+
+            for row in cleaned:
+                entry = entries[row['item_id']]
+                if entry.quantity < row['amount']:
+                    return Response(
+                        {'error': f'Not enough copies of {entry.item.name}.'},
+                        status=400
+                    )
+
+            for row in cleaned:
+                entry = entries[row['item_id']]
+                entry.quantity -= row['amount']
+                if entry.quantity <= 0:
+                    entry.delete()
+                else:
+                    entry.save(update_fields=['quantity'])
+
+            reward_entry, _ = InventoryEntry.objects.get_or_create(
+                user=user,
+                item=reward_item,
+                defaults={'quantity': 0}
+            )
+            reward_entry.quantity += 1
+            reward_entry.save(update_fields=['quantity'])
+
+        return Response({
+            'success': True,
+            'item': reward_item.name,
+            'rarity': reward_item.rarity,
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({'error': f'Server exception: {str(e)}'}, status=500)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_quicksell_item(request):
+    item_id = request.data.get('item_id')
+    amount = request.data.get('amount', 1)
+    user = request.user
+
+    try:
+        amount = int(amount)
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid amount.'}, status=400)
+
+    if amount < 1:
+        return Response({'error': 'Amount must be at least 1.'}, status=400)
+
+    entry = get_object_or_404(
+        InventoryEntry.objects.select_related('item'),
+        user=user,
+        item_id=item_id
+    )
+
+    if entry.quantity < amount:
+        return Response({'error': 'Not enough copies.'}, status=400)
+
+    quicksell_values = {
+        'COMMON': 75,
+        'RARE': 200,
+        'EPIC': 600,
+        'LEGENDARY': 1500,
+        'SECRET': 4000,
+    }
+
+    sell_value = quicksell_values.get(entry.item.rarity)
+    if sell_value is None:
+        return Response({'error': 'Item cannot be sold.'}, status=400)
+
+    total_earned = sell_value * amount
+
+    with transaction.atomic():
+        entry.quantity -= amount
+        if entry.quantity <= 0:
+            entry.delete()
+        else:
+            entry.save(update_fields=['quantity'])
+
+        user.bit_balance += total_earned
+        user.save(update_fields=['bit_balance'])
+
+    return Response({
+        'success': True,
+        'item_name': entry.item.name,
+        'amount_sold': amount,
+        'earned': total_earned,
+        'new_balance': user.bit_balance,
+        'remaining_quantity': max(0, entry.quantity),
     })

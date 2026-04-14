@@ -15,6 +15,7 @@ SPACE_ITEMS = [
     ('Neptune',   'EPIC',       15, 'sprites/Items/SpaceCollection/Neptune.png'),
     ('Gargantua', 'LEGENDARY',   5, 'sprites/Items/SpaceCollection/Gargantua.png'),
     ('Dyson Sphere', 'LEGENDARY', 5, 'sprites/Items/SpaceCollection/DysonSphere.png'),
+    ('Qu',         'SECRET',     1, 'sprites/Items/SpaceCollection/Qu.png'),
 ]
 
 
@@ -73,7 +74,7 @@ def delete_space_crate(apps, schema_editor):
         loot_box.delete()
 
     Item.objects.filter(
-        name__in=[name for name, _, _ in SPACE_ITEMS],
+        name__in=[name for name, _, _, _ in SPACE_ITEMS],
         collection='SPACE'
     ).delete()
 

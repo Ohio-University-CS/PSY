@@ -1,0 +1,18 @@
+# --- Basic Settings ---
+char-encoding: utf8
+quiet: yes
+show-warnings: no
+show-info: no
+wrap: 0
+
+# --- Django Template Tag Support ---
+# This prevents tidy from throwing errors when it sees {% ... %} tags
+new-blocklevel-tags: load, static, url, if, endif, for, endfor, empty, block, endblock, with, endwith, extends, comment, endcomment, get_static_prefix
+new-inline-tags: load, static, url, if, endif, for, endfor, empty, block, endblock, with, endwith, extends, comment, endcomment, get_static_prefix
+
+# --- Compliance & Formatting ---
+# Ensures tidy ignores common Django syntax within attributes (like {% static '...' %})
+output-html: yes
+indent: yes
+indent-spaces: 2
+tidy-mark: no

@@ -1,0 +1,38 @@
+name: HTML Validation
+
+on: [push, pull_request]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  html-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install HTML Tidy
+        run: sudo apt-get update -y && sudo apt-get install -y tidy
+      - name: Check HTML syntax
+        run: |
+          set -euo pipefail
+          if [ -d Canbet ]; then cd Canbet; fi
+          ROOT="$(pwd)"
+          fail=0
+          
+          while IFS= read -r -d '' f; do
+            # Tidy returns 0 for success, 1 for warnings, and 2 for errors.
+            # We allow 0 and 1, but fail on 2.
+            tidy -e -config "${ROOT}/.tidyrc" "$f" 2>"/tmp/tidy-$$.err" || {
+              exit_code=$?
+              if [ $exit_code -eq 2 ]; then
+                echo "::group::tidy failed: $f"
+                cat "/tmp/tidy-$$.err" || true
+                echo "::endgroup::"
+                fail=1
+              fi
+            }
+          done < <(find . -name "*.html" -not -path "./venv/*" -not -path "./.git/*" -print0)
+          
+          rm -f "/tmp/tidy-$$.err"
+          exit "$fail"

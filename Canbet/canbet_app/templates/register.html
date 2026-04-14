@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>canBet • Register</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
       rel="stylesheet">
     <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -177,7 +177,7 @@
     <nav class="topnav">
       <div class="nav-left">
         <a href="{% url 'home' %}"><img
-            src="{% static 'images/canBet symbol sym..png' %}" class="logo"
+            src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo"
             alt="Logo"></a>
         <span class="brand-text">canBet</span>
       </div>

@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "canBet",
-  "version": "1.3",
+  "version": "2.1",
   "description": "Canvas gamification extension",
   "permissions": [
     "storage"
   ],
   "host_permissions": [
     "*://*.instructure.com/*",
+    "*://canvas.*.edu/*",
     "https://canbet.live/*",
     "https://www.canbet.live/*"
   ],
@@ -18,6 +19,7 @@
     {
       "matches": [
         "*://*.instructure.com/*",
+        "*://canvas.*.edu/*",
         "https://canbet.live/*",
         "https://www.canbet.live/*"
       ],

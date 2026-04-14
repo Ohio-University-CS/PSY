@@ -39,6 +39,7 @@ class Item(models.Model):
         ('RARE',      'Rare'),
         ('EPIC',      'Epic'),
         ('LEGENDARY', 'Legendary'),
+        ('SECRET', 'Secret'),
     ]
 
     COLLECTION_CHOICES = [
