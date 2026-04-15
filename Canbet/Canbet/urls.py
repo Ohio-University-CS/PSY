@@ -41,6 +41,8 @@ urlpatterns = [
     path('api/crate-pool/<str:crate_type>/', views.api_crate_pool, name='api_crate_pool'),
     path('api/trade/', views.api_trade, name='api_trade'),
     path('api/inventory/quicksell/', views.api_quicksell_item, name='api_quicksell_item'),
+    path('api/avatar/set-item/', views.api_set_avatar_item, name='api_set_avatar_item'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
