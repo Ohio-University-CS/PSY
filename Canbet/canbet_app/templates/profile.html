@@ -114,6 +114,67 @@
     .win-rarity.rarity-common { color: var(--green); }
     .win-rarity.rarity-secret { color: #FF1717; }
 
+    /* --- AVATAR EDIT --- */
+    .avatar-wrap { cursor: pointer; }
+    .avatar-edit-hint {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.55); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; text-align: center; line-height: 1.6;
+      opacity: 0; transition: opacity 0.15s;
+      border: 6px solid var(--border);
+    }
+    .avatar-wrap:hover .avatar-edit-hint { opacity: 1; }
+
+    /* --- AVATAR PICKER MODAL --- */
+    .picker-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+    }
+    .picker-overlay.open { display: flex; }
+    .picker-modal {
+      background: var(--panel); border: 8px solid var(--border);
+      box-shadow: 16px 16px 0 rgba(0,0,0,0.25);
+      max-width: 540px; width: 90%; max-height: 80vh;
+      display: flex; flex-direction: column;
+    }
+    .picker-header {
+      padding: 20px 24px; border-bottom: 4px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .picker-title { font-size: 0.75rem; text-transform: uppercase; }
+    .picker-close {
+      font-size: 1rem; cursor: pointer; background: none; border: none;
+      font-family: inherit; padding: 4px 8px;
+    }
+    .picker-close:hover { background: var(--border); color: #fff; }
+    .picker-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 12px; padding: 20px; overflow-y: auto;
+    }
+    .picker-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 10px 6px; border: 4px solid transparent; cursor: pointer;
+      background: var(--panel2); transition: 0.1s;
+    }
+    .picker-item:hover { border-color: var(--accent-blue); }
+    .picker-item.selected { border-color: var(--gold); background: #fff; }
+    .picker-item img {
+      width: 52px; height: 52px; image-rendering: pixelated; object-fit: contain;
+    }
+    .picker-item-name { font-size: 0.4rem; text-align: center; line-height: 1.4; }
+    .picker-empty { padding: 40px 20px; text-align: center; font-size: 0.65rem; opacity: 0.5; }
+    .picker-footer {
+      padding: 16px 24px; border-top: 4px solid var(--border);
+      display: flex; gap: 12px; justify-content: flex-end;
+    }
+    .picker-btn {
+      font-family: inherit; font-size: 0.65rem; padding: 10px 20px;
+      border: 4px solid var(--border); cursor: pointer; background: var(--panel2);
+    }
+    .picker-btn.primary { background: var(--accent-blue); color: #fff; }
+    .picker-btn:hover { opacity: 0.85; }
+
     @media (max-width: 768px) {
       .profile-card { flex-direction: column; text-align: center; }
       .stats-grid { grid-template-columns: 1fr; }
@@ -140,15 +201,19 @@
       <section>
         <div class="section-label">User Profile</div>
         <div class="profile-card">
-          <div class="avatar-wrap">
-            {% if user.avatar %}
+          <div class="avatar-wrap" id="avatar-wrap" title="Change profile picture">
+            {% if user.avatar_item %}
+            <img src="{% static user.avatar_item.sprite_path %}" class="avatar"
+              id="avatar-img" alt="{{ user.username }}">
+            {% elif user.avatar %}
             <img src="{{ user.avatar.url }}" class="avatar"
-              alt="{{ user.username }}">
+              id="avatar-img" alt="{{ user.username }}">
             {% else %}
             <img src="{% static 'images/pfp.png' %}" class="avatar"
-              alt="{{ user.username }}"
+              id="avatar-img" alt="{{ user.username }}"
               onerror="this.src='https://via.placeholder.com/120/c4c9cf/1a1a1a?text=USER'">
             {% endif %}
+            <div class="avatar-edit-hint">CHANGE<br>AVATAR</div>
             <div class="avatar-badge">★</div>
           </div>
           <div class="profile-info">
@@ -217,7 +282,94 @@
       </section>
     </div>
 
+  <!-- Avatar picker modal -->
+  <div class="picker-overlay" id="picker-overlay">
+    <div class="picker-modal">
+      <div class="picker-header">
+        <span class="picker-title">Choose Avatar</span>
+        <button class="picker-close" id="picker-close">✕</button>
+      </div>
+      <div class="picker-grid" id="picker-grid">
+        {% if inventory_entries %}
+          {% for entry in inventory_entries %}
+          <div class="picker-item{% if user.avatar_item and user.avatar_item.id == entry.item.id %} selected{% endif %}"
+               data-item-id="{{ entry.item.id }}"
+               data-sprite="{% static entry.item.sprite_path %}">
+            <img src="{% static entry.item.sprite_path %}" alt="{{ entry.item.name }}">
+            <span class="picker-item-name">{{ entry.item.name }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="picker-empty" style="grid-column:1/-1">
+            NO ITEMS IN INVENTORY
+          </div>
+        {% endif %}
+      </div>
+      <div class="picker-footer">
+        <button class="picker-btn" id="picker-cancel">CANCEL</button>
+        <button class="picker-btn primary" id="picker-confirm">SET AVATAR</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+  (function avatarPicker() {
+    const overlay   = document.getElementById('picker-overlay');
+    const grid      = document.getElementById('picker-grid');
+    const avatarImg = document.getElementById('avatar-img');
+    const wrap      = document.getElementById('avatar-wrap');
+
+    let pendingItemId   = null;
+    let pendingSprite   = null;
+
+    function openPicker() { overlay.classList.add('open'); }
+    function closePicker() { overlay.classList.remove('open'); }
+
+    wrap.addEventListener('click', openPicker);
+    document.getElementById('picker-close').addEventListener('click', closePicker);
+    document.getElementById('picker-cancel').addEventListener('click', closePicker);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closePicker(); });
+
+    grid.addEventListener('click', (e) => {
+      const tile = e.target.closest('.picker-item');
+      if (!tile) return;
+      grid.querySelectorAll('.picker-item').forEach(t => t.classList.remove('selected'));
+      tile.classList.add('selected');
+      pendingItemId = tile.dataset.itemId;
+      pendingSprite = tile.dataset.sprite;
+    });
+
+    document.getElementById('picker-confirm').addEventListener('click', async () => {
+      if (!pendingItemId) { closePicker(); return; }
+      try {
+        const res = await fetch('/api/avatar/set-item/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify({ item_id: parseInt(pendingItemId, 10) }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          alert(data.error || 'Failed to set avatar.');
+          return;
+        }
+        avatarImg.src = pendingSprite;
+        closePicker();
+      } catch (_) {
+        alert('Network error.');
+      }
+    });
+
+    function getCookie(name) {
+      const val = `; ${document.cookie}`;
+      const parts = val.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return '';
+    }
+  })();
+
   (function pollBitBalance() {
     let prevBits = null;
     let prevSubmissions = null;
