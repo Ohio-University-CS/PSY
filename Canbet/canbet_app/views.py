@@ -275,6 +275,7 @@ def profile(request):
         'total_spent': total_spent,
         'account_value': account_value,
         'rank': rank,
+        'inventory_entries': entries,
     })
 
 @login_required
@@ -786,6 +787,29 @@ def api_trade(request):
         traceback.print_exc()
         return Response({'error': f'Server exception: {str(e)}'}, status=500)
     
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_set_avatar_item(request):
+    item_id = request.data.get('item_id')
+    user = request.user
+
+    if item_id is None:
+        # Clear the avatar
+        user.avatar_item = None
+        user.save(update_fields=['avatar_item'])
+        return Response({'avatar_sprite': None})
+
+    item = get_object_or_404(Item, pk=item_id)
+
+    if not user.inventory.filter(item=item).exists():
+        return Response({'error': 'You do not own this item.'}, status=status.HTTP_403_FORBIDDEN)
+
+    user.avatar_item = item
+    user.save(update_fields=['avatar_item'])
+
+    return Response({'avatar_sprite': item.sprite_path})
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_quicksell_item(request):
