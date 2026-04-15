@@ -313,6 +313,19 @@
     </div>
 
     <script>
+  (function pollBitBalance() {
+    async function refreshBalance() {
+      try {
+        const res = await fetch('/api/me/');
+        if (!res.ok) return;
+        const { bit_balance } = await res.json();
+        document.querySelector('.nav-bal').textContent = bit_balance + ' BITS';
+        document.querySelector('.hero-stat-val.green').textContent = bit_balance;
+      } catch (_) {}
+    }
+    setInterval(refreshBalance, 10000);
+  })();
+
   (async function syncExtensionToken() {
     const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
     try {

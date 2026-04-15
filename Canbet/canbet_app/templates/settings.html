@@ -166,5 +166,19 @@
       </section>
     </div>
 
+  <script>
+  (function pollBitBalance() {
+    async function refreshBalance() {
+      try {
+        const res = await fetch('/api/me/');
+        if (!res.ok) return;
+        const { bit_balance } = await res.json();
+        document.querySelector('.nav-bal').textContent = bit_balance + ' BITS';
+      } catch (_) {}
+    }
+    setInterval(refreshBalance, 10000);
+  })();
+  </script>
+
   </body>
 </html>
