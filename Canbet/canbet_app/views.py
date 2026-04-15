@@ -333,9 +333,12 @@ def register_view(request):
 @permission_classes([IsAuthenticated])
 def api_me(request):
     u = request.user
+    from .models import CanvasSubmission
+    submission_count = CanvasSubmission.objects.filter(user=u).count()
     return Response({
         'username': u.username, 'bit_balance': u.bit_balance,
         'crates_opened': u.crates_opened, 'rank': u.rank,
+        'submission_count': submission_count,
     })
 
 
