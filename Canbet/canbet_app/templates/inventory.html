@@ -544,6 +544,13 @@ function setPrimaryFilter(filter) {
   document.querySelectorAll('.filter-btn[data-primary-filter]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.primaryFilter === filter);
   });
+  if (filter !== 'ITEM') {
+    activeItemFilter = 'ALL';
+    document.querySelectorAll('.filter-btn[data-item-filter]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.itemFilter === 'ALL');
+    });
+  }
+
   document.getElementById('itemSubfilters').classList.toggle('hidden', filter !== 'ITEM');
   applyFilters();
 }
