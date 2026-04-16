@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
 
     # !! Replace '0001_initial' with the name of your actual last migration !!
     dependencies = [
-        ('canbet_app', '0003_lootbox_lootboxentry_lootboxinventoryentry'),
+        ('canbet_app', '0001_initial'),
     ]
 
     operations = [
