@@ -81,7 +81,7 @@ def delete_spooky_crate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('canbet_app', '0002_space_collection'),
+        ('canbet_app', '0003_lootbox_lootboxentry_lootboxinventoryentry'),
     ]
 
     operations = [
