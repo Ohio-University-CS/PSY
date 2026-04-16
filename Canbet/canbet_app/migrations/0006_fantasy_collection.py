@@ -43,7 +43,7 @@ def create_fantasy_crate(apps, schema_editor):
             item.save()
         items.append((item, weight))
 
-    # 2. Create the Fantasy LootBox
+    # 2. Create the Fantasy Lootbox
     loot_box, _ = Lootbox.objects.get_or_create(
         name='Fantasy Crate',
         defaults={
@@ -65,12 +65,12 @@ def create_fantasy_crate(apps, schema_editor):
 def delete_fantasy_crate(apps, schema_editor):
     """Reverse migration — removes all Fantasy crate data."""
     Item         = apps.get_model('canbet_app', 'Item')
-    LootBox      = apps.get_model('canbet_app', 'LootBox')
-    LootBoxEntry = apps.get_model('canbet_app', 'LootBoxEntry')
+    Lootbox      = apps.get_model('canbet_app', 'Lootbox')
+    LootboxEntry = apps.get_model('canbet_app', 'LootboxEntry')
 
-    loot_box = LootBox.objects.filter(name='Fantasy Crate').first()
+    loot_box = Lootbox.objects.filter(name='Fantasy Crate').first()
     if loot_box:
-        LootBoxEntry.objects.filter(loot_box=loot_box).delete()
+        LootboxEntry.objects.filter(loot_box=loot_box).delete()
         loot_box.delete()
 
     Item.objects.filter(
