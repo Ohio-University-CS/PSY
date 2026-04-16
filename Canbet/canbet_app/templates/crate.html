@@ -348,12 +348,18 @@
           </div>
         </div>
 
-        <div class="crate-card locked" data-crate-type="FANTASY">
-          <div class="crate-badge badge-soon">SOON</div>
-          <div class="crate-emoji">🏰</div>
+        <div class="crate-card" data-crate-type="FANTASY">
+          <div class="crate-badge badge-new">NEW</div>
+          <div class="crate-emoji" data-icon-type="FANTASY"></div>
           <div class="crate-name">Fantasy Crate</div>
           <div class="crate-desc">Legendary encrypted artifacts.</div>
-          <div class="crate-price locked-price">??? Bits</div>
+          <div class="crate-price" data-price-type="buy">Loading...</div>
+          <div class="crate-owned" data-owned-type="FANTASY"></div>
+          <div class="crate-actions">
+            <button class="popup-btn crate-action-btn" onclick="buyCrateByType('FANTASY','Fantasy Crate')">BUY</button>
+            <button class="popup-btn crate-action-btn" onclick="openMultiBuyModal('FANTASY','Fantasy Crate')">BUY MULTI</button>
+            <button class="popup-btn crate-action-btn hidden" data-open-type="FANTASY" onclick="openLootbox('FANTASY')" disabled>OPEN</button>
+          </div>
         </div>
 
         <div class="crate-card locked" data-crate-type="WEATHER">
