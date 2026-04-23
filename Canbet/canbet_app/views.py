@@ -281,6 +281,7 @@ def profile(request):
         'total_spent': total_spent,
         'account_value': account_value,
         'rank': rank,
+        'inventory_entries': entries,
     })
 
 @login_required
