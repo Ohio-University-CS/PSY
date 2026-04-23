@@ -4,7 +4,8 @@
   "version": "2.1",
   "description": "Canvas gamification extension",
   "permissions": [
-    "storage"
+    "storage",
+    "notifications"
   ],
   "host_permissions": [
     "*://*.instructure.com/*",

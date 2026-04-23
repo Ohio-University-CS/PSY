@@ -5,6 +5,7 @@
   "description": "Canvas gamification extension",
   "permissions": [
     "storage",
+    "notifications",
     "*://*.instructure.com/*",
     "*://canvas.*.edu/*",
     "https://canbet.live/*",
