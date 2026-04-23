@@ -668,6 +668,7 @@ def api_canvas_sync(request):
         'created':      created_count,
         'bits_awarded': bits_awarded,
         'new_balance':  user.bit_balance,
+    }) # barbaque chicken check
     })
 
 def get_daily_shop_items():

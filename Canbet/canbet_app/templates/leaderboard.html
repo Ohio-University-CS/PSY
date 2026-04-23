@@ -10,6 +10,198 @@
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet">
     <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #c8c8c8;
+    --panel: #f2f3f5;
+    --panel2: #e8eaed;
+    --border: #1a1a1a;
+    --accent-blue: #5b8db8;
+    --green: #2e8a56;
+    --text: #1a1a1a;
+    --gold: #c8943a;
+    --silver: #8a9199;
+    --bronze: #a0623a;
+  }
+
+  body {
+    width: 100%; min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+    overflow-x: hidden;
+  }
+
+  /* --- UNIFIED NAVIGATION --- */
+  .topnav {
+    width: 100%; height: 80px; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 40px; background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+    position: sticky; top: 0; z-index: 100; border-bottom: 4px solid var(--border);
+  }
+  .nav-left { display: flex; align-items: center; gap: 18px; height: 100%; }
+  .logo { height: 44px; width: auto; }
+  .brand-text { font-size: 1rem; letter-spacing: 2px; text-transform: none; }
+
+  .nav-right { display: flex; align-items: center; gap: 24px; }
+  
+  .nav-bal { 
+    font-size: 0.8rem; color: var(--green); background: #fff; 
+    padding: 10px 16px; border: 4px solid var(--border); 
+  }
+  
+  .nav-back {
+    font-size: 0.8rem; color: #000; text-decoration: none;
+    padding: 10px 20px; border: 4px solid #000; border-radius: 8px;
+    background: rgba(255,255,255,0.4); transition: 0.1s;
+  }
+  .nav-back:hover { background: #000; color: #fff; }
+
+  /* --- LAYOUT --- */
+  .page {
+    max-width: 900px; margin: 0 auto; padding: 60px 24px 80px; /* Reduced bottom padding */
+    display: flex; flex-direction: column; gap: 40px;
+  }
+  .section-label {
+    font-size: 1rem; margin-bottom: 30px; padding-left: 16px;
+    border-left: 10px solid var(--accent-blue); text-transform: uppercase;
+  }
+
+  /* --- LEADERBOARD --- */
+  .lb-container {
+    border: 8px solid var(--border);
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.15);
+    background: var(--panel);
+    overflow: hidden;
+  }
+
+  .lb-header {
+    display: grid;
+    grid-template-columns: 60px 1fr 140px 200px 120px;;
+    padding: 20px;
+    background: var(--border);
+    color: #fff;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+  }
+
+  .lb-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 140px 200px 120px;;
+    padding: 20px;
+    align-items: center;
+    border-bottom: 4px solid #ddd;
+    background: var(--panel);
+    font-size: 0.8rem;
+    transition: 0.1s;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row:hover { background: #fff; }
+  .lb-row.you { background: rgba(91,141,184,0.1); border-left: 8px solid var(--accent-blue); }
+
+  .rank-num { font-size: 0.9rem; color: #777; }
+  .rank-num.gold { color: var(--gold); }
+  .rank-num.silver { color: var(--silver); }
+  .rank-num.bronze { color: var(--bronze); }
+
+  .user-name { color: var(--text); }
+  .user-name.you { color: var(--accent-blue); }
+  
+  .bit-score { color: var(--green); }
+  .crate-count { color: #666; font-size: 0.7rem; }
+
+  /* --- PAGINATION --- */
+  .pagination { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+  .page-btn {
+    font-family: 'Press Start 2P', monospace; font-size: 0.8rem;
+    background: #fff; border: 4px solid var(--border);
+    padding: 12px 18px; cursor: pointer; transition: 0.1s;
+  }
+  .page-btn:hover:not(.active) { background: var(--panel2); transform: translateY(-2px); }
+  .page-btn.active { background: var(--accent-blue); color: white; border-color: var(--border); }
+
+  @media (max-width: 768px) {
+    .lb-header, .lb-row { grid-template-columns: 60px 1fr 140px 160px 80px; }
+    .lb-th:nth-child(n+3), .lb-row span:nth-child(n+3) { display: none; }
+    .lb-th:nth-child(2), .lb-th:nth-child(3) { display: block; }
+    .brand-text { display: none; }
+  }
+
+  .lb-sort {
+    text-decoration: none;
+    color: rgba(255,255,255,0.7);
+    transition: color 0.1s;
+    cursor: pointer;
+  }
+  .lb-sort:hover { color: #fff; }
+  .lb-sort.sort-active { color: #fff; }
+
+  .rarity-badge {
+    font-size: 0.55rem;
+    padding: 4px 8px;
+    border: 2px solid currentColor;
+    display: inline-block;
+    max-width: 120px;
+  }
+
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="/main/"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
+  <a href="/main/" class="nav-back">◀ Menu</a>
+</nav>
+<div class="page">
+  <section>
+    
+    <div class="lb-header">
+      <div class="lb-th">#</div>
+      <div class="lb-th">Username</div>
+      <a href="?sort=bits&page=1" class="lb-th lb-sort {% if sort == 'bits' %}sort-active{% endif %}">Bit Balance {% if sort == 'bits' %}▼{% endif %}</a>
+      <a href="?sort=rarity&page=1" class="lb-th lb-sort {% if sort == 'rarity' %}sort-active{% endif %}">Rarest Item {% if sort == 'rarity' %}▼{% endif %}</a>
+      <a href="?sort=crates&page=1" class="lb-th lb-sort {% if sort == 'crates' %}sort-active{% endif %}">Crates {% if sort == 'crates' %}▼{% endif %}</a>
+    </div>
+    <div class="lb-list">
+      {% for entry in entries %}
+      <div class="lb-row {% if entry.is_you %}you{% endif %}">
+      <span class="lb-rank
+        {% if entry.rank == 1 %}gold
+        {% elif entry.rank == 2 %}silver
+        {% elif entry.rank == 3 %}bronze
+        {% endif %}
+        {% if entry.is_you %}" style="color:var(--accent2){% endif %}">
+        #{{ entry.rank }}
+      </span>
+      <span class="lb-name {% if entry.is_you %}you{% endif %}">
+        {{ entry.username }}{% if entry.is_you %} (you){% endif %}
+      </span>
+      <span class="lb-score">{{ entry.bits|intcomma }}</span>
+      <span class="rarity-badge" style="color: {{ entry.rarity_color }};">{{ entry.rarity_label }}</span>
+      <span class="lb-crates">{{ entry.crates }}</span>
+    </div>
+    {% endfor %}
+    </section>
+  <div class="pagination">
+    {% if page > 1 %}
+    <a href="?sort={{ sort }}&page={{ page|add:'-1' }}"><button class="page-btn">◀</button></a>
+    {% endif %}
+
+    {% for p in total_pages|ljust:total_pages %}
+      <a href="?sort={{ sort }}&page={{ forloop.counter }}">
+        <button class="page-btn {% if forloop.counter == page %}active{% endif %}">
+          {{ forloop.counter }}
+        </button>
+      </a>
+    {% endfor %}
+
+    {% if page < total_pages %}
+      <a href="?sort={{ sort }}&page={{ page|add:'1' }}"><button class="page-btn">▶</button></a>
+    {% endif %}
+  </div>
+</div>
+</body>
+</html>
       * { margin: 0; padding: 0; box-sizing: border-box; }
 
       :root {
