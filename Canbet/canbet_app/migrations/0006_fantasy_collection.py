@@ -48,7 +48,7 @@ def create_fantasy_crate(apps, schema_editor):
         name='Fantasy Crate',
         defaults={
             'crate_type': 'FANTASY',
-            'cost_bits':  200,
+            'cost_bits':  400,
             'is_active':  True,
         }
     )
