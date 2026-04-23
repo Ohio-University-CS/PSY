@@ -66,6 +66,7 @@ def main(request):
         'RARE': 200,
         'EPIC': 600,
         'LEGENDARY': 1500,
+        'SECRET': 4000,
     }
 
     recent_opens = CrateOpen.objects.select_related('user', 'item_won').order_by('-opened_at')[:5]
