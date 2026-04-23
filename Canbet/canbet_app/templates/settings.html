@@ -4,9 +4,9 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>canBet — Settings</title>
+    <title>canBet • Settings</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
       rel="stylesheet">
     <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -92,7 +92,7 @@
     font-family: 'Press Start 2P', monospace; font-size: 0.8rem; 
     padding: 15px 25px; cursor: pointer; background: #fff; 
     color: var(--danger); border: 4px solid var(--danger);
-    transition: 0.1s;
+    transition: 0.1s; text-decoration: none; display: inline-block;
   }
   .danger-btn:hover { background: var(--danger); color: white; box-shadow: 6px 6px 0px var(--border); }
 
@@ -116,7 +116,7 @@
     <nav class="topnav">
       <div class="nav-left">
         <a href="{% url 'main' %}"><img
-            src="{% static 'images/canBet symbol sym..png' %}" class="logo"
+            src="{% get_static_prefix %}images/canBet%20symbol%20sym..png" class="logo"
             alt="Logo"></a>
         <span class="brand-text">canBet</span>
       </div>
@@ -144,8 +144,7 @@
             <div><div class="setting-label">Logout</div><div
                 class="setting-sub">Disconnect safely from the
                 network.</div></div>
-            <a href="{% url 'logout' %}"><button
-                class="danger-btn">LOGOUT</button></a>
+            <a href="{% url 'logout' %}" class="danger-btn">LOGOUT</a>
           </div>
 
           <div class="setting-row">
@@ -166,6 +165,52 @@
         </div>
       </section>
     </div>
+
+  <script>
+  (function pollBitBalance() {
+    let prevBits = null;
+    let prevSubmissions = null;
+
+    function showBitsToast(gained, newAssignments) {
+      let toast = document.getElementById('bits-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'bits-toast';
+        toast.style.cssText = [
+          'position:fixed','bottom:32px','right:32px','z-index:9999',
+          'background:#fff','border:6px solid #000','padding:20px 28px',
+          'font-family:"Press Start 2P",monospace','font-size:0.7rem',
+          'box-shadow:8px 8px 0 #000','max-width:280px','line-height:1.8',
+          'transition:opacity 0.4s','opacity:0','pointer-events:none',
+        ].join(';');
+        document.body.appendChild(toast);
+      }
+      const assignLine = newAssignments > 0
+        ? `<div style="color:#555;margin-top:8px">${newAssignments} assignment${newAssignments > 1 ? 's' : ''} completed!</div>`
+        : '';
+      toast.innerHTML = `<div style="color:#22c55e">+${gained} BITS</div>${assignLine}`;
+      toast.style.opacity = '1';
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+    }
+
+    async function refreshBalance() {
+      try {
+        const res = await fetch('/api/me/');
+        if (!res.ok) return;
+        const { bit_balance, submission_count } = await res.json();
+        if (prevBits !== null && bit_balance > prevBits) {
+          const newAssignments = submission_count - (prevSubmissions ?? submission_count);
+          showBitsToast(bit_balance - prevBits, Math.max(0, newAssignments));
+        }
+        prevBits = bit_balance;
+        prevSubmissions = submission_count;
+        document.querySelector('.nav-bal').textContent = bit_balance + ' BITS';
+      } catch (_) {}
+    }
+    setInterval(refreshBalance, 10000);
+  })();
+  </script>
 
   </body>
 </html>

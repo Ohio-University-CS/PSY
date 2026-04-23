@@ -1,17 +1,48 @@
 (function () {
   const CANVAS_DOMAIN = window.location.hostname;
+  const IS_CANBET = CANVAS_DOMAIN === 'canbet.live' || CANVAS_DOMAIN === 'www.canbet.live';
+  const IS_CANVAS =
+    CANVAS_DOMAIN.endsWith('.instructure.com') &&
+    !CANVAS_DOMAIN.includes('.login.instructure.com');
 
-  fetch(`https://${CANVAS_DOMAIN}/api/v1/users/self`, {
-    credentials: 'include'
-  })
-    .then(res => res.json())
+  function fetchCanvasJson(url, errorLabel) {
+    return fetch(url, { credentials: 'include' })
+      .then((res) => {
+        const contentType = res.headers.get('content-type') || '';
+        if (!res.ok) {
+          throw new Error(`${errorLabel}: ${res.status}`);
+        }
+        if (!contentType.includes('application/json')) {
+          throw new Error(`${errorLabel}: expected JSON`);
+        }
+        return res.json();
+      });
+  }
+
+  if (IS_CANBET) {
+    window.addEventListener('message', (event) => {
+      if (event.source !== window) return;
+      if (event.data?.type === 'CANBET_TOKEN' && event.data?.token) {
+        browser.runtime.sendMessage({
+          type: 'CANBET_TOKEN',
+          token: event.data.token,
+        });
+      }
+    });
+    return; // nothing else to do on canbet.live
+  }
+
+  // ── Canvas data sync (instructure.com pages only) ───────────────────────────
+  if (!IS_CANVAS) return;
+
+  fetchCanvasJson(`https://${CANVAS_DOMAIN}/api/v1/users/self`, 'Failed to fetch user')
     .then(user_data => {
       const STUDENT_ID = user_data.id;
 
-      return fetch(`https://${CANVAS_DOMAIN}/api/v1/courses?per_page=100&enrollment_state=active`, {
-        credentials: 'include'
-      })
-        .then(res => res.json())
+      return fetchCanvasJson(
+        `https://${CANVAS_DOMAIN}/api/v1/courses?per_page=100&enrollment_state=active`,
+        'Failed to fetch courses'
+      )
         .then(courses => ({ user_data, STUDENT_ID, courses }));
     })
     .then(({ user_data, STUDENT_ID, courses }) => {
@@ -19,19 +50,18 @@
       const requests = courses.map(course => {
         const COURSE_ID = course.id;
 
-        const submissionsReq = fetch(
+        const submissionsReq = fetchCanvasJson(
           `https://${CANVAS_DOMAIN}/api/v1/courses/${COURSE_ID}/students/submissions?student_ids[]=${STUDENT_ID}&per_page=100`,
-          { credentials: 'include' }
-        ).then(res => res.json());
+          `Failed submissions fetch for course ${COURSE_ID}`
+        );
 
-        const assignmentsReq = fetch(
+        const assignmentsReq = fetchCanvasJson(
           `https://${CANVAS_DOMAIN}/api/v1/courses/${COURSE_ID}/assignments?per_page=100`,
-          { credentials: 'include' }
-        ).then(res => res.json());
+          `Failed assignments fetch for course ${COURSE_ID}`
+        );
 
         return Promise.all([submissionsReq, assignmentsReq])
           .then(([submissions, assignments]) => {
-            // Build lookup map: assignment_id -> { title, points_possible }
             const assignmentMap = {};
             if (Array.isArray(assignments)) {
               assignments.forEach(a => {
@@ -42,7 +72,6 @@
               });
             }
 
-            // Join submissions with assignment metadata
             const data = Array.isArray(submissions) ? submissions.map(sub => ({
               assignment_id: sub.assignment_id,
               title: assignmentMap[sub.assignment_id]?.title ?? 'Unknown',

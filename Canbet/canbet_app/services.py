@@ -20,10 +20,8 @@ def open_loot_box(user, loot_box):
         weights = [e.weight for e in pool]
         won_entry = random.choices(pool, weights=weights, k=1)[0]
         won_item = won_entry.item
-        inv, _ = InventoryEntry.objects.get_or_create(
-            user=user, item=won_item,
-            defaults={'quantity': 0}
-        )
+
+        inv, _ = InventoryEntry.objects.get_or_create(user=user, item=won_item, defaults={'quantity': 0})       
         inv.quantity += 1
         inv.save()
 

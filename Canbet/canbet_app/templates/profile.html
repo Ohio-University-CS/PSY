@@ -1,12 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>canBet — Profile</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet • Profile</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
+      rel="stylesheet">
+    <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     :root {
@@ -18,6 +20,7 @@
       --green: #2e8a56;
       --text: #1a1a1a;
       --gold: #c8943a;
+      --rarity-secret: #ff1717;
     }
 
     body {
@@ -105,6 +108,72 @@
     .win-sprite { width: 60px; height: 60px; image-rendering: pixelated; object-fit: contain; }
     .win-name { font-size: 0.85rem; flex: 1; }
     .win-rarity { font-size: 0.7rem; text-transform: uppercase; }
+    .win-rarity.rarity-legendary { color: var(--gold); }
+    .win-rarity.rarity-epic { color: #a855f7; }
+    .win-rarity.rarity-rare { color: var(--accent-blue); }
+    .win-rarity.rarity-common { color: var(--green); }
+    .win-rarity.rarity-secret { color: #FF1717; }
+
+    /* --- AVATAR EDIT --- */
+    .avatar-wrap { cursor: pointer; }
+    .avatar-edit-hint {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.55); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; text-align: center; line-height: 1.6;
+      opacity: 0; transition: opacity 0.15s;
+      border: 6px solid var(--border);
+    }
+    .avatar-wrap:hover .avatar-edit-hint { opacity: 1; }
+
+    /* --- AVATAR PICKER MODAL --- */
+    .picker-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.6); align-items: center; justify-content: center;
+    }
+    .picker-overlay.open { display: flex; }
+    .picker-modal {
+      background: var(--panel); border: 8px solid var(--border);
+      box-shadow: 16px 16px 0 rgba(0,0,0,0.25);
+      max-width: 540px; width: 90%; max-height: 80vh;
+      display: flex; flex-direction: column;
+    }
+    .picker-header {
+      padding: 20px 24px; border-bottom: 4px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .picker-title { font-size: 0.75rem; text-transform: uppercase; }
+    .picker-close {
+      font-size: 1rem; cursor: pointer; background: none; border: none;
+      font-family: inherit; padding: 4px 8px;
+    }
+    .picker-close:hover { background: var(--border); color: #fff; }
+    .picker-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 12px; padding: 20px; overflow-y: auto;
+    }
+    .picker-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 10px 6px; border: 4px solid transparent; cursor: pointer;
+      background: var(--panel2); transition: 0.1s;
+    }
+    .picker-item:hover { border-color: var(--accent-blue); }
+    .picker-item.selected { border-color: var(--gold); background: #fff; }
+    .picker-item img {
+      width: 52px; height: 52px; image-rendering: pixelated; object-fit: contain;
+    }
+    .picker-item-name { font-size: 0.4rem; text-align: center; line-height: 1.4; }
+    .picker-empty { padding: 40px 20px; text-align: center; font-size: 0.65rem; opacity: 0.5; }
+    .picker-footer {
+      padding: 16px 24px; border-top: 4px solid var(--border);
+      display: flex; gap: 12px; justify-content: flex-end;
+    }
+    .picker-btn {
+      font-family: inherit; font-size: 0.65rem; padding: 10px 20px;
+      border: 4px solid var(--border); cursor: pointer; background: var(--panel2);
+    }
+    .picker-btn.primary { background: var(--accent-blue); color: #fff; }
+    .picker-btn:hover { opacity: 0.85; }
 
     @media (max-width: 768px) {
       .profile-card { flex-direction: column; text-align: center; }
@@ -112,96 +181,240 @@
       .brand-text { display: none; }
     }
   </style>
-</head>
-<body>
+  </head>
+  <body>
 
-  <nav class="topnav">
-    <div class="nav-left">
-      <a href="{% url 'main' %}"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-      <span class="brand-text">canBet</span>
-    </div>
-    <div class="nav-right">
-      <div class="nav-bal">{{ user.bit_balance|default:"0" }} BITS</div>
-      <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
-    </div>
-  </nav>
-
-  <div class="page">
-    <section>
-      <div class="section-label">User Profile</div>
-      <div class="profile-card">
-        <div class="avatar-wrap">
-          {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" class="avatar" alt="{{ user.username }}">
-          {% else %}
-            <img src="{% static 'images/pfp.png' %}" class="avatar" alt="{{ user.username }}" onerror="this.src='https://via.placeholder.com/120/c4c9cf/1a1a1a?text=USER'">
-          {% endif %}
-          <div class="avatar-badge">★</div>
-        </div>
-        <div class="profile-info">
-          <div class="profile-name">{{ user.username }}</div>
-          <div class="profile-handle">ACCOUNT CREATED: {{ user.date_joined|date:"Y" }}</div>
-        </div>
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="{% url 'main' %}"><img
+            src="{% get_static_prefix %}images/canBet%20symbol%20sym..png"
+            class="logo" alt="Logo"></a>
+        <span class="brand-text">canBet</span>
       </div>
-    </section>
+      <div class="nav-right">
+        <div class="nav-bal">{{ user.bit_balance|default:"0" }} BITS</div>
+        <a href="{% url 'main' %}" class="nav-back">◀ BACK</a>
+      </div>
+    </nav>
 
-    <section>
-      <div class="section-label">Performance Metrics</div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-label">Current Balance</span>
-          <span class="stat-val green">{{ user.bit_balance }} BITS</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Network Rank</span>
-          <span class="stat-val gold">RANK #{{ user.rank }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Crates Decrypted</span>
-          <span class="stat-val blue">{{ user.crates_opened }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Inventory Size</span>
-          <span class="stat-val">{{ user.inventory.count }} ITEMS</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Total Expenditure</span>
-          <span class="stat-val">{{ total_spent|default:"0" }} BITS</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">High-Value Pull</span>
-          <span class="stat-val" style="font-size:0.7rem">
-            {% if best_pull.item.name %}
-              {{ best_pull.item.name }}
-            {% elif best_pull %}
-              {{ best_pull }}
+    <div class="page">
+      <section>
+        <div class="section-label">User Profile</div>
+        <div class="profile-card">
+          <div class="avatar-wrap" id="avatar-wrap" title="Change profile picture">
+            {% if user.avatar_item %}
+            <img src="{% static user.avatar_item.sprite_path %}" class="avatar"
+              id="avatar-img" alt="{{ user.username }}">
+            {% elif user.avatar %}
+            <img src="{{ user.avatar.url }}" class="avatar"
+              id="avatar-img" alt="{{ user.username }}">
             {% else %}
-              NONE DETECTED
+            <img src="{% static 'images/pfp.png' %}" class="avatar"
+              id="avatar-img" alt="{{ user.username }}"
+              onerror="this.src='https://via.placeholder.com/120/c4c9cf/1a1a1a?text=USER'">
             {% endif %}
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-label">Premium Hall</div>
-      <div class="wins-list">
-        {% for entry in best_pulls %}
-        <div class="win-row">
-          <img src="{% static entry.item.sprite_path %}" class="win-sprite" alt="{{ entry.item.name }}">
-          <div class="win-name">{{ entry.item.name }}</div>
-          <div class="win-rarity" style="color:{% if entry.item.rarity == 'LEGENDARY' %}var(--gold){% elif entry.item.rarity == 'EPIC' %}#a855f7{% elif entry.item.rarity == 'RARE' %}var(--accent-blue){% else %}var(--green){% endif %}">
-            {{ entry.item.rarity }}
+            <div class="avatar-edit-hint">CHANGE<br>AVATAR</div>
+            <div class="avatar-badge">★</div>
+          </div>
+          <div class="profile-info">
+            <div class="profile-name">{{ user.username }}</div>
+            <div class="profile-handle">ACCOUNT CREATED: {{ user.date_joined|date:"Y" }}</div>
           </div>
         </div>
-        {% empty %}
-        <div class="win-row" style="justify-content: center; opacity: 0.5;">
-          <div class="win-name">NO HIGH-RARITY ASSETS DETECTED.</div>
+      </section>
+
+      <section>
+        <div class="section-label">Performance Metrics</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Current Balance</span>
+            <span class="stat-val green">{{ user.bit_balance }} BITS</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Network Rank</span>
+            <span class="stat-val gold">RANK #{{ user.rank }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Crates Opened</span>
+            <span class="stat-val blue">{{ user.crates_opened }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Inventory Size</span>
+            <span class="stat-val">{{ user.inventory.count }} ITEMS</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Account Value</span>
+            <span class="stat-val">{{ account_value|default:"0" }} BITS</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">High-Value Pull</span>
+            <span class="stat-val" style="font-size:0.7rem">
+              {% if best_pull.item.name %}
+              {{ best_pull.item.name }}
+              {% elif best_pull %}
+              {{ best_pull }}
+              {% else %}
+              NONE DETECTED
+              {% endif %}
+            </span>
+          </div>
         </div>
-        {% endfor %}
+      </section>
+
+      <section>
+        <div class="section-label">Premium Hall</div>
+        <div class="wins-list">
+          {% for entry in best_pulls %}
+          <div class="win-row">
+            <img src="{% static entry.item.sprite_path %}" class="win-sprite"
+              alt="{{ entry.item.name }}">
+            <div class="win-name">{{ entry.item.name }}</div>
+            <div class="win-rarity rarity-{{ entry.item.rarity|lower }}">
+              {{ entry.item.rarity }}
+            </div>
+          </div>
+          {% empty %}
+          <div class="win-row" style="justify-content: center; opacity: 0.5;">
+            <div class="win-name">NO HIGH-RARITY ASSETS DETECTED.</div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+  <!-- Avatar picker modal -->
+  <div class="picker-overlay" id="picker-overlay">
+    <div class="picker-modal">
+      <div class="picker-header">
+        <span class="picker-title">Choose Avatar</span>
+        <button class="picker-close" id="picker-close">✕</button>
       </div>
-    </section>
+      <div class="picker-grid" id="picker-grid">
+        {% if inventory_entries %}
+          {% for entry in inventory_entries %}
+          <div class="picker-item{% if user.avatar_item and user.avatar_item.id == entry.item.id %} selected{% endif %}"
+               data-item-id="{{ entry.item.id }}"
+               data-sprite="{% static entry.item.sprite_path %}">
+            <img src="{% static entry.item.sprite_path %}" alt="{{ entry.item.name }}">
+            <span class="picker-item-name">{{ entry.item.name }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="picker-empty" style="grid-column:1/-1">
+            NO ITEMS IN INVENTORY
+          </div>
+        {% endif %}
+      </div>
+      <div class="picker-footer">
+        <button class="picker-btn" id="picker-cancel">CANCEL</button>
+        <button class="picker-btn primary" id="picker-confirm">SET AVATAR</button>
+      </div>
+    </div>
   </div>
 
-</body>
+  <script>
+  (function avatarPicker() {
+    const overlay   = document.getElementById('picker-overlay');
+    const grid      = document.getElementById('picker-grid');
+    const avatarImg = document.getElementById('avatar-img');
+    const wrap      = document.getElementById('avatar-wrap');
+
+    let pendingItemId   = null;
+    let pendingSprite   = null;
+
+    function openPicker() { overlay.classList.add('open'); }
+    function closePicker() { overlay.classList.remove('open'); }
+
+    wrap.addEventListener('click', openPicker);
+    document.getElementById('picker-close').addEventListener('click', closePicker);
+    document.getElementById('picker-cancel').addEventListener('click', closePicker);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closePicker(); });
+
+    grid.addEventListener('click', (e) => {
+      const tile = e.target.closest('.picker-item');
+      if (!tile) return;
+      grid.querySelectorAll('.picker-item').forEach(t => t.classList.remove('selected'));
+      tile.classList.add('selected');
+      pendingItemId = tile.dataset.itemId;
+      pendingSprite = tile.dataset.sprite;
+    });
+
+    document.getElementById('picker-confirm').addEventListener('click', async () => {
+      if (!pendingItemId) { closePicker(); return; }
+      try {
+        const res = await fetch('/api/avatar/set-item/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify({ item_id: parseInt(pendingItemId, 10) }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          alert(data.error || 'Failed to set avatar.');
+          return;
+        }
+        avatarImg.src = pendingSprite;
+        closePicker();
+      } catch (_) {
+        alert('Network error.');
+      }
+    });
+
+    function getCookie(name) {
+      const val = `; ${document.cookie}`;
+      const parts = val.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return '';
+    }
+  })();
+
+  (function pollBitBalance() {
+    let prevBits = null;
+    let prevSubmissions = null;
+
+    function showBitsToast(gained, newAssignments) {
+      let toast = document.getElementById('bits-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'bits-toast';
+        toast.style.cssText = [
+          'position:fixed','bottom:32px','right:32px','z-index:9999',
+          'background:#fff','border:6px solid #000','padding:20px 28px',
+          'font-family:"Press Start 2P",monospace','font-size:0.7rem',
+          'box-shadow:8px 8px 0 #000','max-width:280px','line-height:1.8',
+          'transition:opacity 0.4s','opacity:0','pointer-events:none',
+        ].join(';');
+        document.body.appendChild(toast);
+      }
+      const assignLine = newAssignments > 0
+        ? `<div style="color:#555;margin-top:8px">${newAssignments} assignment${newAssignments > 1 ? 's' : ''} completed!</div>`
+        : '';
+      toast.innerHTML = `<div style="color:#22c55e">+${gained} BITS</div>${assignLine}`;
+      toast.style.opacity = '1';
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+    }
+
+    async function refreshBalance() {
+      try {
+        const res = await fetch('/api/me/');
+        if (!res.ok) return;
+        const { bit_balance, submission_count } = await res.json();
+        if (prevBits !== null && bit_balance > prevBits) {
+          const newAssignments = submission_count - (prevSubmissions ?? submission_count);
+          showBitsToast(bit_balance - prevBits, Math.max(0, newAssignments));
+        }
+        prevBits = bit_balance;
+        prevSubmissions = submission_count;
+        document.querySelector('.nav-bal').textContent = bit_balance + ' BITS';
+        document.querySelector('.stat-val.green').textContent = bit_balance + ' BITS';
+      } catch (_) {}
+    }
+    setInterval(refreshBalance, 10000);
+  })();
+  </script>
+
+  </body>
 </html>

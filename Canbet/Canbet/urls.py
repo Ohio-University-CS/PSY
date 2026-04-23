@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/me/', views.api_me, name='api_me'),
     path('api/crate/open/', views.api_open_crate, name='api_open_crate'),
     path('api/inventory/', views.api_inventory, name='api_inventory'),
+    path('api/token-login/', views.api_token_login, name='api_token_login'),
     path('api/leaderboard/', views.api_leaderboard, name='api_leaderboard'),
     path('api/recent-opens/', views.api_recent_opens, name='api_recent_opens'),
     path('api/lootboxes/', views.api_lootboxes, name='api_lootboxes'),
@@ -35,6 +36,13 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('delete-account/', views.delete_account, name='delete_account'),
     path('api/canvas/sync/', views.api_canvas_sync, name='api_canvas_sync'),
+    path('api/daily-shop/buy/', views.api_buy_daily_item, name='api_buy_daily_item'),
+    path('api/shop/buy/', views.api_buy_item, name='api_buy_item'),
+    path('api/crate-pool/<str:crate_type>/', views.api_crate_pool, name='api_crate_pool'),
+    path('api/trade/', views.api_trade, name='api_trade'),
+    path('api/inventory/quicksell/', views.api_quicksell_item, name='api_quicksell_item'),
+    path('api/avatar/set-item/', views.api_set_avatar_item, name='api_set_avatar_item'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

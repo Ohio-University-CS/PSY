@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=128, unique=True)),
-                ('rarity', models.CharField(choices=[('COMMON', 'Common'), ('RARE', 'Rare'), ('EPIC', 'Epic'), ('LEGENDARY', 'Legendary')], default='COMMON', max_length=16)),
+                ('rarity', models.CharField(choices=[('COMMON', 'Common'), ('RARE', 'Rare'), ('EPIC', 'Epic'), ('LEGENDARY', 'Legendary'), ('SECRET', 'Secret')], default='COMMON', max_length=16)),
                 ('collection', models.CharField(choices=[('SPOOKY', 'Spooky'), ('SPACE', 'Space'), ('FANTASY', 'Fantasy'), ('WEATHER', 'Weather')], default='SPOOKY', max_length=16)),
                 ('sprite_path', models.CharField(blank=True, max_length=256)),
                 ('shop_price', models.IntegerField(default=0)),

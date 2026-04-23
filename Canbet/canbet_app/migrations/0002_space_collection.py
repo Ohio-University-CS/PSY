@@ -8,6 +8,7 @@ SPACE_ITEMS = [
     # (name, rarity, crate_weight, sprite_path)
     ('Mercury',   'COMMON',    100, 'sprites/Items/SpaceCollection/Mercury.png'),
     ('Star',      'COMMON',    100, 'sprites/Items/SpaceCollection/Star.png'),
+    ('Comet',     'COMMON',    100, 'sprites/Items/SpaceCollection/Comet.png'), 
     ('Mars',      'RARE',       40, 'sprites/Items/SpaceCollection/Mars.png'),
     ('Jupiter',   'RARE',       40, 'sprites/Items/SpaceCollection/Jupiter.png'),
     ('Earth',     'RARE',       40, 'sprites/Items/SpaceCollection/Earth.png'),
@@ -15,6 +16,7 @@ SPACE_ITEMS = [
     ('Neptune',   'EPIC',       15, 'sprites/Items/SpaceCollection/Neptune.png'),
     ('Gargantua', 'LEGENDARY',   5, 'sprites/Items/SpaceCollection/Gargantua.png'),
     ('Dyson Sphere', 'LEGENDARY', 5, 'sprites/Items/SpaceCollection/DysonSphere.png'),
+    ('Qu',        'SECRET',      1, 'sprites/Items/SpaceCollection/Qu.png'),
 ]
 
 
@@ -64,16 +66,16 @@ def create_space_crate(apps, schema_editor):
 def delete_space_crate(apps, schema_editor):
     """Reverse migration — removes all Space crate data."""
     Item         = apps.get_model('canbet_app', 'Item')
-    LootBox      = apps.get_model('canbet_app', 'LootBox')
-    LootBoxEntry = apps.get_model('canbet_app', 'LootBoxEntry')
+    Lootbox      = apps.get_model('canbet_app', 'Lootbox')
+    LootboxEntry = apps.get_model('canbet_app', 'LootboxEntry')
 
-    loot_box = LootBox.objects.filter(name='Space Crate').first()
+    loot_box = Lootbox.objects.filter(name='Space Crate').first()
     if loot_box:
-        LootBoxEntry.objects.filter(loot_box=loot_box).delete()
+        LootboxEntry.objects.filter(loot_box=loot_box).delete()
         loot_box.delete()
 
     Item.objects.filter(
-        name__in=[name for name, _, _ in SPACE_ITEMS],
+        name__in=[name for name, _, _, _ in SPACE_ITEMS],
         collection='SPACE'
     ).delete()
 

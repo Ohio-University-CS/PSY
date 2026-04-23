@@ -16,6 +16,11 @@ class CanBetUser(AbstractUser):
     # profile picture stored in media/avatars/
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
+    # inventory item used as avatar sprite
+    avatar_item = models.ForeignKey(
+        'Item', null=True, blank=True, on_delete=models.SET_NULL, related_name='avatar_users'
+    )
+
     class Meta:
         ordering = ['-bit_balance']
 
@@ -39,6 +44,7 @@ class Item(models.Model):
         ('RARE',      'Rare'),
         ('EPIC',      'Epic'),
         ('LEGENDARY', 'Legendary'),
+        ('SECRET', 'Secret'),
     ]
 
     COLLECTION_CHOICES = [

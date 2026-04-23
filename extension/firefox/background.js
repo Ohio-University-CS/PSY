@@ -1,15 +1,13 @@
-const BACKEND_URL = 'https://canbet.live/api/canvas/sync/';
+const BACKEND_URL = 'https://www.canbet.live/api/canvas/sync/';
 
-browser.runtime.onMessage.addListener((message) => {
-  if (message.type !== 'CANVAS_ASSIGNMENTS') return;
+let pendingPayload = null;
 
-  const { user_data, courses } = message.payload;
-
+function doSync(user_data, courses) {
   const submissions = [];
   courses.forEach(({ COURSE_ID, courseName, data }) => {
     if (!Array.isArray(data)) return;
     data.forEach(sub => {
-      if (!sub.submitted_at) return; 
+      if (!sub.submitted_at) return;
       submissions.push({
         course_id:     String(COURSE_ID),
         course_name:   courseName,
@@ -22,22 +20,54 @@ browser.runtime.onMessage.addListener((message) => {
 
   if (submissions.length === 0) return;
 
-  fetch(BACKEND_URL, {
-    method: 'POST',
-    credentials: 'include',    
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      canvas_user_id: String(user_data.id),
-      submissions,
-    }),
-  })
-    .then(async res => {
-      const data = await res.json();
-      if (!res.ok) {
-        console.error('[canBet] Sync failed:', data);
-      } else {
-        console.log(`[canBet] Synced ${data.created} new submission(s). Bits awarded: ${data.bits_awarded}`);
-      }
+  browser.storage.local.get('authToken').then(({ authToken }) => {
+    if (!authToken) {
+      console.warn('[canBet] No auth token yet — sync queued, will retry on login.');
+      pendingPayload = { user_data, courses };
+      return;
+    }
+
+    pendingPayload = null;
+
+    fetch(BACKEND_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${authToken}`,
+      },
+      body: JSON.stringify({
+        canvas_user_id: String(user_data.id),
+        submissions,
+      }),
     })
-    .catch(err => console.error('[canBet] Sync error:', err));
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+          console.error('[canBet] Sync failed:', data);
+        } else {
+          console.log(`[canBet] Synced ${data.created} new submission(s). Bits awarded: ${data.bits_awarded}`);
+        }
+      })
+      .catch(err => console.error('[canBet] Sync error:', err));
+  });
+}
+
+browser.runtime.onMessage.addListener((message) => {
+  if (message.type === 'CANBET_TOKEN') {
+    browser.storage.local.set({ authToken: message.token }).then(() => {
+      console.log('[canBet] Auth token saved.');
+
+      if (pendingPayload) {
+        console.log('[canBet] Retrying queued sync with new token...');
+        const { user_data, courses } = pendingPayload;
+        doSync(user_data, courses);
+      }
+    });
+    return;
+  }
+
+  if (message.type !== 'CANVAS_ASSIGNMENTS') return;
+
+  const { user_data, courses } = message.payload;
+  doSync(user_data, courses);
 });

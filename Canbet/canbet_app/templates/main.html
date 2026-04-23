@@ -1,12 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>canBet — Main Interface</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canBet • Main Interface</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap"
+      rel="stylesheet">
+    <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   
   :root {
@@ -30,7 +32,7 @@
   /* --- UNIFIED NAVIGATION --- */
 .topnav {
   width: 100%; 
-  height: 80px; /* Fixed height for consistency */
+  height: 80px;
   display: flex; 
   justify-content: space-between; 
   align-items: center;
@@ -51,7 +53,7 @@
 }
 
 .logo { 
-  height: 44px; /* Standardized logo height */
+  height: 44px;
   width: auto; 
 }
 
@@ -82,7 +84,6 @@
   color: #fff; 
 }
 
-/* Standardized Balance Display for Shop/Main */
 .nav-bal { 
   font-size: 0.8rem; 
   color: var(--green); 
@@ -173,6 +174,12 @@
 
   .list-row:last-child { border-bottom: none; }
   .dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .dot-won { background-color: var(--green); }
+  .dot-bought { background-color: var(--accent-blue); }
+  .list-row-you {
+    background: rgba(91,141,184,0.1);
+    border-left: 8px solid var(--accent-blue);
+  }
   
   .lb-rank { width: 50px; font-size: 0.8rem; }
   .gold { color: #c8943a; }
@@ -200,95 +207,172 @@
     .hero-name { font-size: 1.2rem; }
   }
 </style>
-</head>
-<body>
+  </head>
+  <body>
 
-<nav class="topnav">
-  <div class="nav-left">
-    <a href="{% url 'main' %}"><img src="{% static 'images/canBet symbol sym..png' %}" class="logo" alt="Logo"></a>
-    <span class="brand-text">canBet</span>
-  </div>
-  <div class="nav-right">
-    <div class="nav-bal">
-      {{ user.bit_balance|default:"0" }} BITS
-    </div>
-    <a href="{% url 'logout' %}" class="nav-back">LOGOUT</a>
-  </div>
-</nav>
-
-<div class="page">
-  <section>
-    <div class="hero">
-      <div class="hero-greeting">WELCOME BACK</div>
-      <div class="hero-name">{{ user.username }}</div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="hero-stat-label">CRATES OPENED</span>
-          <span class="hero-stat-val blue">{{ user.crates_opened }}</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-label">BIT BALANCE</span>
-          <span class="hero-stat-val green">{{ user.bit_balance }}</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-label">GLOBAL RANK</span>
-          <span class="hero-stat-val">#{{ user.rank }}</span>
-        </div>
+    <nav class="topnav">
+      <div class="nav-left">
+        <a href="{% url 'main' %}"><img
+            src="{% get_static_prefix %}images/canBet%20symbol%20sym..png"
+            class="logo" alt="Logo"></a>
+        <span class="brand-text">canBet</span>
       </div>
-    </div>
-  </section>
+      <div class="nav-right">
+        <div class="nav-bal">
+          {{ user.bit_balance|default:"0" }} BITS
+        </div>
+        <a href="{% url 'logout' %}" class="nav-back">LOGOUT</a>
+      </div>
+    </nav>
 
-  <section>
-    <div class="section-label">Main Menu</div>
-    <div class="nav-grid">
-      <a href="{% url 'inventory' %}" class="nav-btn"><span>Inventory</span> <span>▶</span></a>
-      <a href="{% url 'leaderboard' %}" class="nav-btn"><span>Leaderboard</span> <span>▶</span></a>
-      <a href="{% url 'crate' %}" class="nav-btn"><span>Crate Hub</span> <span>▶</span></a>
-      <a href="{% url 'shop' %}" class="nav-btn"><span>Marketplace</span> <span>▶</span></a>
-      <a href="{% url 'profile' %}" class="nav-btn"><span>My Profile</span> <span>▶</span></a>
-      <a href="{% url 'settings' %}" class="nav-btn"><span>Settings</span> <span>▶</span></a>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-label">Log Feed</div>
-    <div class="list-block">
-      {% for activity in recent_activity %}
-        <div class="list-row">
-          <div class="dot {% if activity.item_won %}green{% else %}blue{% endif %}" 
-               style="background-color: {% if activity.item_won %}var(--green){% else %}var(--accent-blue){% endif %};"></div>
-          <div style="flex: 1;">
-            {% if activity.item_won %}
-              GOT: {{ activity.item_won.rarity }} - {{ activity.item_won.name }}
-            {% else %}
-              BOUGHT: {{ activity.item.name }}
-            {% endif %}
+    <div class="page">
+      <section>
+        <div class="hero">
+          <div class="hero-greeting">WELCOME BACK</div>
+          <div class="hero-name">{{ user.username }}</div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="hero-stat-label">CRATES OPENED</span>
+              <span class="hero-stat-val blue">{{ user.crates_opened }}</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-label">BIT BALANCE</span>
+              <span class="hero-stat-val green">{{ user.bit_balance }}</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-label">GLOBAL RANK</span>
+              <span class="hero-stat-val">#{{ rank }}</span>
+            </div>
           </div>
-          <div style="opacity: 0.6; font-size: 0.5rem;">{{ activity.opened_at|timesince }}{{ activity.purchased_at|timesince }} AGO</div>
         </div>
-      {% empty %}
-        <div class="list-row" style="opacity: 0.5;">No system logs found. Go open a crate!</div>
-      {% endfor %}
+      </section>
+
+      <section>
+        <div class="section-label">Main Menu</div>
+        <div class="nav-grid">
+          <a href="{% url 'inventory' %}" class="nav-btn"><span>Inventory</span>
+            <span>▶</span></a>
+          <a href="{% url 'leaderboard' %}"
+            class="nav-btn"><span>Leaderboard</span> <span>▶</span></a>
+          <a href="{% url 'crate' %}" class="nav-btn"><span>Crate Hub</span>
+            <span>▶</span></a>
+          <a href="{% url 'shop' %}" class="nav-btn"><span>Marketplace</span>
+            <span>▶</span></a>
+          <a href="{% url 'profile' %}" class="nav-btn"><span>My Profile</span>
+            <span>▶</span></a>
+          <a href="{% url 'settings' %}" class="nav-btn"><span>Settings</span>
+            <span>▶</span></a>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Log Feed</div>
+        <div class="list-block">
+          {% for activity in recent_activity %}
+          <div class="list-row">
+            <div
+              class="dot {% if activity.item_won %}dot-won{% else %}dot-bought{% endif %}"></div>
+            <div style="flex: 1;">
+              {% if activity.item_won %}
+              GOT: {{ activity.item_won.rarity }} - {{ activity.item_won.name }}
+              {% else %}
+              BOUGHT: {{ activity.item.name }}
+              {% endif %}
+            </div>
+            <div style="opacity: 0.6; font-size: 0.5rem;">
+              {% if activity.opened_at %}
+              {{ activity.opened_at|timesince }} ago
+              {% elif activity.purchased_at %}
+              {{ activity.purchased_at|timesince }} ago
+              {% endif %}
+            </div>
+          </div>
+          {% empty %}
+          <div class="list-row" style="opacity: 0.5;">No system logs found. Go
+            open a crate!</div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Top Competitors</div>
+        <div class="list-block">
+          {% for player in top5 %}
+          <div class="list-row{% if player == user %} list-row-you{% endif %}">
+            <span
+              class="lb-rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+              #{{ forloop.counter }}
+            </span>
+            <span style="flex: 1;">{{ player.username }}{% if player == user %}
+              (YOU){% endif %}</span>
+            <span class="green">{{ player.account_value }} BITS</span>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
     </div>
-  </section>
 
-  <section>
-    <div class="section-label">Top Competitors</div>
-    <div class="list-block">
-      {% for player in top5 %}
-      <div class="list-row" {% if player == user %}style="background:rgba(91,141,184,0.1); border-left: 8px solid var(--accent-blue);"{% endif %}>
-        <span class="lb-rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
-          #{{ forloop.counter }}
-        </span>
-        <span style="flex: 1;">{{ player.username }}{% if player == user %} (YOU){% endif %}</span>
-        <span class="green">{{ player.bit_balance }} BITS</span>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
-</div>
+    <script>
+  (function pollBitBalance() {
+    let prevBits = null;
+    let prevSubmissions = null;
 
+    function showBitsToast(gained, newAssignments) {
+      let toast = document.getElementById('bits-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'bits-toast';
+        toast.style.cssText = [
+          'position:fixed','bottom:32px','right:32px','z-index:9999',
+          'background:#fff','border:6px solid #000','padding:20px 28px',
+          'font-family:"Press Start 2P",monospace','font-size:0.7rem',
+          'box-shadow:8px 8px 0 #000','max-width:280px','line-height:1.8',
+          'transition:opacity 0.4s','opacity:0','pointer-events:none',
+        ].join(';');
+        document.body.appendChild(toast);
+      }
+      const assignLine = newAssignments > 0
+        ? `<div style="color:#555;margin-top:8px">${newAssignments} assignment${newAssignments > 1 ? 's' : ''} completed!</div>`
+        : '';
+      toast.innerHTML = `<div style="color:#22c55e">+${gained} BITS</div>${assignLine}`;
+      toast.style.opacity = '1';
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+    }
 
+    async function refreshBalance() {
+      try {
+        const res = await fetch('/api/me/');
+        if (!res.ok) return;
+        const { bit_balance, submission_count } = await res.json();
+        if (prevBits !== null && bit_balance > prevBits) {
+          const newAssignments = submission_count - (prevSubmissions ?? submission_count);
+          showBitsToast(bit_balance - prevBits, Math.max(0, newAssignments));
+        }
+        prevBits = bit_balance;
+        prevSubmissions = submission_count;
+        document.querySelector('.nav-bal').textContent = bit_balance + ' BITS';
+        document.querySelector('.hero-stat-val.green').textContent = bit_balance;
+      } catch (_) {}
+    }
+    setInterval(refreshBalance, 10000);
+  })();
 
-</body>
+  (async function syncExtensionToken() {
+    const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '';
+    try {
+      const res = await fetch('/api/token-login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+        body: JSON.stringify({ session: true }),
+      });
+      if (res.ok) {
+        const { token } = await res.json();
+        window.postMessage({ type: 'CANBET_TOKEN', token }, window.location.origin);
+      }
+    } catch (_) {}
+  })();
+</script>
+
+  </body>
 </html>

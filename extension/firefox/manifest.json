@@ -1,16 +1,25 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "canBet",
-  "version": "1.1",
+  "version": "2.2",
   "description": "Canvas gamification extension",
   "permissions": [
-    "storage",
-    "activeTab",
-    "*://*.instructure.com/*"
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.instructure.com/*",
+    "*://*.edu/*",
+    "https://canbet.live/*",
+    "https://www.canbet.live/*"
   ],
   "content_scripts": [
     {
-      "matches": ["*://*.instructure.com/*"],
+      "matches": [
+        "*://*.instructure.com/*",
+        "*://*.edu/*",
+        "https://canbet.live/*",
+        "https://www.canbet.live/*"
+      ],
       "js": ["content_script.js"],
       "run_at": "document_start"
     }
@@ -18,10 +27,17 @@
   "background": {
     "scripts": ["background.js"]
   },
+  "action": {
+    "default_title": "canBet",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/canbet.png"
+    }
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "canbet@extension",
-      "strict_min_version": "140.0",
+      "strict_min_version": "142.0",
       "data_collection_permissions": {
         "required": ["none"],
         "optional": []
