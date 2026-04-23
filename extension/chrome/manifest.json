@@ -1,25 +1,32 @@
 {
   "manifest_version": 3,
   "name": "canBet",
-  "version": "2.1",
+  "version": "2.2",
   "description": "Canvas gamification extension",
   "permissions": [
     "storage"
   ],
   "host_permissions": [
     "*://*.instructure.com/*",
-    "*://canvas.*.edu/*",
+    "*://*.edu/*",
     "https://canbet.live/*",
     "https://www.canbet.live/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
+  "action": {
+    "default_title": "canBet",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/canbet.png"
+    }
+  },
   "content_scripts": [
     {
       "matches": [
         "*://*.instructure.com/*",
-        "*://canvas.*.edu/*",
+        "*://*.edu/*",
         "https://canbet.live/*",
         "https://www.canbet.live/*"
       ],

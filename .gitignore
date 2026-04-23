@@ -29,6 +29,9 @@ env/
 build/
 dist/
 *.egg-info/
+*.zip
+__MACOSX/
+._*
 
 # Logs
 *.log

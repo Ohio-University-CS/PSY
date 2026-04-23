@@ -370,6 +370,7 @@
             <button class="filter-btn active" data-primary-filter="ALL" onclick="setPrimaryFilter('ALL')">ALL</button>
             <button class="filter-btn" data-primary-filter="ITEM" onclick="setPrimaryFilter('ITEM')">ITEMS</button>
             <button class="filter-btn" data-primary-filter="CRATE" onclick="setPrimaryFilter('CRATE')">CRATES</button>
+            <button class="filter-btn" style="background:var(--red);color:#fff;border-color:var(--red);" onclick="initSellDuplicates()">SELL DUPLICATES</button>
           </div>
           <div class="filter-row item-subfilters" id="itemSubfilters">
             <button class="filter-btn active" data-item-filter="ALL" onclick="setItemFilter('ALL')">ALL ITEMS</button>
@@ -544,6 +545,13 @@ function setPrimaryFilter(filter) {
   document.querySelectorAll('.filter-btn[data-primary-filter]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.primaryFilter === filter);
   });
+  if (filter !== 'ITEM') {
+    activeItemFilter = 'ALL';
+    document.querySelectorAll('.filter-btn[data-item-filter]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.itemFilter === 'ALL');
+    });
+  }
+
   document.getElementById('itemSubfilters').classList.toggle('hidden', filter !== 'ITEM');
   applyFilters();
 }
@@ -827,7 +835,80 @@ window.addEventListener('resize', normalizeGridPadding);
 setPrimaryFilter(activePrimaryFilter);
 renderCratesInGrid();
 normalizeGridPadding();
+
+function initSellDuplicates() {
+  const slots = document.querySelectorAll('.inv-slot[data-entry-type="item"]');
+  let totalItems = 0;
+  let totalBits = 0;
+  const lines = [];
+
+  slots.forEach(slot => {
+    const qty = parseInt(slot.dataset.quantity || '0', 10);
+    if (qty < 2) return;
+    const dupes = qty - 1;
+    const rarity = slot.dataset.rarity;
+    const value = (QUICKSELL_VALUES[rarity] || 0) * dupes;
+    totalItems += dupes;
+    totalBits += value;
+    lines.push(`${slot.dataset.name} x${dupes} = ${value} Bits`);
+  });
+
+  if (totalItems === 0) {
+    showToast('NO DUPLICATES TO SELL');
+    return;
+  }
+
+  document.getElementById('sellDupeSummary').innerHTML =
+    lines.join('<br>') + `<br><br>TOTAL: ${totalBits} BITS`;
+  document.getElementById('sellDupeOverlay').style.display = 'flex';
+}
+
+async function confirmSellDuplicates() {
+  document.getElementById('sellDupeOverlay').style.display = 'none';
+
+  const slots = Array.from(document.querySelectorAll('.inv-slot[data-entry-type="item"]'))
+    .filter(slot => parseInt(slot.dataset.quantity || '0', 10) >= 2);
+
+  let totalEarned = 0;
+  let totalSold = 0;
+
+  for (const slot of slots) {
+    const qty = parseInt(slot.dataset.quantity, 10);
+    const dupes = qty - 1;
+    const itemId = slot.dataset.entryId;
+
+    const resp = await fetch('/api/inventory/quicksell/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ item_id: itemId, amount: dupes })
+    });
+    const data = await resp.json();
+    if (!resp.ok) continue;
+
+    totalEarned += data.earned;
+    totalSold += data.amount_sold;
+
+    // Update slot in place — keep 1, remove badge
+    slot.dataset.quantity = '1';
+    const badge = slot.querySelector('.qty-badge');
+    if (badge) badge.remove();
+  }
+
+  showToast(`SOLD ${totalSold} DUPES FOR ${totalEarned} BITS`);
+  normalizeGridPadding();
+}
 </script>
+
+  <div id="sellDupeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px);">
+  <div style="background:#fff;border:10px solid var(--border);padding:50px 40px;text-align:center;display:flex;flex-direction:column;gap:20px;min-width:320px;max-width:90vw;box-shadow:20px 20px 0px var(--red);">
+    <div style="font-size:0.9rem;line-height:1.8;">SELL ALL DUPLICATES?</div>
+    <div id="sellDupeSummary" style="font-size:0.6rem;color:#555;line-height:2;border:4px solid #ddd;padding:12px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="popup-btn sell-btn" style="flex:1;" onclick="confirmSellDuplicates()">CONFIRM</button>
+      <button class="popup-btn" style="flex:1;background:#888;" onclick="document.getElementById('sellDupeOverlay').style.display='none'">CANCEL</button>
+    </div>
+  </div>
+</div>
 
   </body>
 </html>

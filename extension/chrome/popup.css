@@ -1,0 +1,91 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  --ink: #161616;
+  --muted: #636363;
+  --panel: #ffffff;
+  --accent: #2f7fd6;
+  --accent-dark: #1d5fa4;
+  --border: #111111;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 280px;
+  background: #f4f7fb;
+  color: var(--ink);
+}
+
+.popup {
+  padding: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+p,
+.label,
+.status {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.balance-card {
+  background: var(--panel);
+  border: 3px solid var(--border);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.12);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.bits {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-top: 4px;
+}
+
+.status {
+  min-height: 16px;
+  margin-top: 8px;
+}
+
+.spend-link {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 800;
+  color: #ffffff;
+  background: var(--accent);
+  border: 3px solid var(--border);
+  padding: 12px;
+}
+
+.spend-link:hover {
+  background: var(--accent-dark);
+}

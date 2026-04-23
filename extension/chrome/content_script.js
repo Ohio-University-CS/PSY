@@ -2,7 +2,23 @@
   const CANVAS_DOMAIN = window.location.hostname;
   const IS_CANBET =
     CANVAS_DOMAIN === 'canbet.live' || CANVAS_DOMAIN === 'www.canbet.live';
-  const IS_CANVAS = CANVAS_DOMAIN.endsWith('.instructure.com');
+  const IS_CANVAS =
+    CANVAS_DOMAIN.endsWith('.instructure.com') &&
+    !CANVAS_DOMAIN.includes('.login.instructure.com');
+
+  function fetchCanvasJson(url, errorLabel) {
+    return fetch(url, { credentials: 'include' })
+      .then((res) => {
+        const contentType = res.headers.get('content-type') || '';
+        if (!res.ok) {
+          throw new Error(`${errorLabel}: ${res.status}`);
+        }
+        if (!contentType.includes('application/json')) {
+          throw new Error(`${errorLabel}: expected JSON`);
+        }
+        return res.json();
+      });
+  }
 
   if (IS_CANBET) {
     window.addEventListener('message', (event) => {
@@ -20,55 +36,32 @@
 
   if (!IS_CANVAS) return;
 
-  fetch(`https://${CANVAS_DOMAIN}/api/v1/users/self`, {
-    credentials: 'include',
-  })
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error(`Failed to fetch user: ${res.status}`);
-      }
-      return res.json();
-    })
+  fetchCanvasJson(
+    `https://${CANVAS_DOMAIN}/api/v1/users/self`,
+    'Failed to fetch user'
+  )
     .then((user_data) => {
       const STUDENT_ID = user_data.id;
 
-      return fetch(
+      return fetchCanvasJson(
         `https://${CANVAS_DOMAIN}/api/v1/courses?per_page=100&enrollment_state=active`,
-        {
-          credentials: 'include',
-        }
+        'Failed to fetch courses'
       )
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`Failed to fetch courses: ${res.status}`);
-          }
-          return res.json();
-        })
         .then((courses) => ({ user_data, STUDENT_ID, courses }));
     })
     .then(({ user_data, STUDENT_ID, courses }) => {
       const requests = courses.map((course) => {
         const COURSE_ID = course.id;
 
-        const submissionsReq = fetch(
+        const submissionsReq = fetchCanvasJson(
           `https://${CANVAS_DOMAIN}/api/v1/courses/${COURSE_ID}/students/submissions?student_ids[]=${STUDENT_ID}&per_page=100`,
-          { credentials: 'include' }
-        ).then((res) => {
-          if (!res.ok) {
-            throw new Error(`Failed submissions fetch for course ${COURSE_ID}: ${res.status}`);
-          }
-          return res.json();
-        });
+          `Failed submissions fetch for course ${COURSE_ID}`
+        );
 
-        const assignmentsReq = fetch(
+        const assignmentsReq = fetchCanvasJson(
           `https://${CANVAS_DOMAIN}/api/v1/courses/${COURSE_ID}/assignments?per_page=100`,
-          { credentials: 'include' }
-        ).then((res) => {
-          if (!res.ok) {
-            throw new Error(`Failed assignments fetch for course ${COURSE_ID}: ${res.status}`);
-          }
-          return res.json();
-        });
+          `Failed assignments fetch for course ${COURSE_ID}`
+        );
 
         return Promise.all([submissionsReq, assignmentsReq])
           .then(([submissions, assignments]) => {
