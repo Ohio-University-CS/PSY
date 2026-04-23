@@ -669,7 +669,6 @@ def api_canvas_sync(request):
         'bits_awarded': bits_awarded,
         'new_balance':  user.bit_balance,
     }) # barbaque chicken check
-    })
 
 def get_daily_shop_items():
     today = date.today()
