@@ -809,7 +809,6 @@ def api_set_avatar_item(request):
 
     return Response({'avatar_sprite': item.sprite_path})
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_quicksell_item(request):
