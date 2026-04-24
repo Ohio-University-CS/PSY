@@ -225,9 +225,10 @@
 
             <span class="lb-score">{{ entry.account_value|intcomma }}</span>
 
-            <span class="hide-mobile">
+            <span class="hide-mobile" style="display:flex; align-items:center; gap:6px;">
               {% if entry.rarity_label != '—' %}
-                <span class="rarity-badge" style="color: {{ entry.rarity_color }};" >{{ entry.rarity_label }}</span>
+                <span class="rarity-badge" style="color: {{ entry.rarity_color }};">{{ entry.rarity_label }}</span>
+                <span style="font-size:0.45rem; color:var(--text);">{{ entry.rarest_item }}</span>
               {% else %}
                 <span style="color:#999; font-size:0.45rem;">—</span>
               {% endif %}
