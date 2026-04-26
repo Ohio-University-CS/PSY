@@ -438,6 +438,7 @@ const QUICKSELL_VALUES = {
     };
 const CRATE_ICON_PATHS = {
   SPOOKY: '/static/sprites/Items/SpookyCollection/Spooky collection box.png',
+  SPACE: '/static/sprites/Items/SpaceCollection/SpaceCrate.png',
 };
 const CRATE_EMOJIS = { SPOOKY: '👻', SPACE: '🌌', FANTASY: '🏰', WEATHER: '⛈️' };
 let activePrimaryFilter = 'ALL';
@@ -518,7 +519,6 @@ function sel(el) {
 }
 
 function crateIconHtml(crateType, spritePath) {
-  if (crateType === 'SPACE') return `<span class="crate-emoji">${CRATE_EMOJIS.SPACE}</span>`;
   if (spritePath) return `<img class="crate-icon" src="/static/${spritePath}" alt="${crateType} crate">`;
   if (CRATE_ICON_PATHS[crateType]) return `<img class="crate-icon" src="${CRATE_ICON_PATHS[crateType]}" alt="${crateType} crate">`;
   return `<span class="crate-emoji">${CRATE_EMOJIS[crateType] || '📦'}</span>`;
