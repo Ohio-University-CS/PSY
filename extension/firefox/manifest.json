@@ -4,9 +4,8 @@
   "version": "2.2",
   "description": "Canvas gamification extension",
   "permissions": [
-    "storage"
-  ],
-  "host_permissions": [
+    "storage",
+    "notifications",
     "*://*.instructure.com/*",
     "*://*.edu/*",
     "https://canbet.live/*",
