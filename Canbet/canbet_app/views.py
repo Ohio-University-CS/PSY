@@ -205,6 +205,9 @@ def leaderboard(request):
     end = page * per_page
     page_users = users[start:end]
 
+    RARITY_LABELS = {'COMMON': 'Common', 'RARE': 'Rare', 'EPIC': 'Epic', 'LEGENDARY': 'Legendary', 'SECRET': 'Secret'}
+    RARITY_COLORS = {'COMMON': '#666', 'RARE': '#5b8db8', 'EPIC': '#9b59b6', 'LEGENDARY': '#c8943a', 'SECRET': '#e74c3c'}
+
     results = []
     for i, u in enumerate(page_users):
         rank = start + i + 1
@@ -216,6 +219,8 @@ def leaderboard(request):
             'crates': u.crate_count,
             'rarest_item': u.rarest_item_name,
             'rarest_item_rarity': u.rarest_item_rarity,
+            'rarity_label': RARITY_LABELS.get(u.rarest_item_rarity, '—'),
+            'rarity_color': RARITY_COLORS.get(u.rarest_item_rarity, '#666'),
             'is_you': request.user.is_authenticated and u.pk == request.user.pk,
         })
 
@@ -335,12 +340,9 @@ def register_view(request):
 @permission_classes([IsAuthenticated])
 def api_me(request):
     u = request.user
-    from .models import CanvasSubmission
-    submission_count = CanvasSubmission.objects.filter(user=u).count()
     return Response({
         'username': u.username, 'bit_balance': u.bit_balance,
         'crates_opened': u.crates_opened, 'rank': u.rank,
-        'submission_count': submission_count,
     })
 
 

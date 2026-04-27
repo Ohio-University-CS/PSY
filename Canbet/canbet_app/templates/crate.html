@@ -348,12 +348,18 @@
           </div>
         </div>
 
-        <div class="crate-card locked" data-crate-type="FANTASY">
-          <div class="crate-badge badge-soon">SOON</div>
-          <div class="crate-emoji">🏰</div>
+        <div class="crate-card" data-crate-type="FANTASY">
+          <div class="crate-badge badge-new">NEW</div>
+          <div class="crate-emoji" data-icon-type="FANTASY"></div>
           <div class="crate-name">Fantasy Crate</div>
           <div class="crate-desc">Legendary encrypted artifacts.</div>
-          <div class="crate-price locked-price">??? Bits</div>
+          <div class="crate-price" data-price-type="buy">Loading...</div>
+          <div class="crate-owned" data-owned-type="FANTASY"></div>
+          <div class="crate-actions">
+            <button class="popup-btn crate-action-btn" onclick="buyCrateByType('FANTASY','Fantasy Crate')">BUY</button>
+            <button class="popup-btn crate-action-btn" onclick="openMultiBuyModal('FANTASY','Fantasy Crate')">BUY MULTI</button>
+            <button class="popup-btn crate-action-btn hidden" data-open-type="FANTASY" onclick="openLootbox('FANTASY')" disabled>OPEN</button>
+          </div>
         </div>
 
         <div class="crate-card locked" data-crate-type="WEATHER">
@@ -459,6 +465,7 @@ const RARITY_COLORS = {
 };
 const CRATE_ICONS = {
   SPOOKY: 'sprites/Items/SpookyCollection/Spooky collection box.png',
+  SPACE: 'sprites/Items/SpaceCollection/SpaceCrate.png',
 };
 const CRATE_EMOJIS = { SPOOKY: '👻', SPACE: '🌌', FANTASY: '🏰', WEATHER: '⛈️' };
 const crateIconPaths = { ...CRATE_ICONS };
@@ -488,11 +495,13 @@ function updateCrateCard(lb) {
   const card = document.querySelector(`[data-crate-type="${lb.crate_type}"]`);
   if (!card || card.classList.contains('locked')) return;
 
-  if (lb.crate_type !== 'SPACE' && lb.sprite_path) crateIconPaths[lb.crate_type] = lb.sprite_path;
+  card.dataset.lootboxId = lb.id;
+  card.dataset.cost = lb.cost_bits;
+
+  if (lb.sprite_path) crateIconPaths[lb.crate_type] = lb.sprite_path;
   const iconWrap = card.querySelector('[data-icon-type]');
   if (iconWrap) {
-    const spritePath = lb.crate_type === 'SPACE' ? '' : lb.sprite_path;
-    iconWrap.innerHTML = getCrateIconHtml(lb.crate_type, spritePath);
+    iconWrap.innerHTML = getCrateIconHtml(lb.crate_type, lb.sprite_path);
   }
 
   const priceEl = card.querySelector('[data-price-type="buy"]');
@@ -521,12 +530,7 @@ async function loadLootboxes() {
   } catch (err) { console.error('Failed to load lootboxes:', err); }
 }
 
-async function buyLootbox(lootboxId, lootboxName, crateType) {
-  const lbResp = await fetch('/api/lootboxes/');
-  const lootboxes = await lbResp.json();
-  const lootbox = lootboxes.find(lb => lb.id === lootboxId);
-  const crateCost = lootbox ? lootbox.cost_bits : 0;
-
+async function buyLootbox(lootboxId, lootboxName, crateType, crateCost) {
   const resp = await fetch('/api/lootbox/buy/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
@@ -538,18 +542,16 @@ async function buyLootbox(lootboxId, lootboxName, crateType) {
     else alert(data.error || 'Could not purchase crate.');
     return;
   }
-  await loadLootboxes();
   showPurchasePopup(lootboxName, crateType);
+  loadLootboxes();
 }
 
 async function buyCrateByType(crateType, crateName) {
-  try {
-    const resp = await fetch('/api/lootboxes/');
-    const lootboxes = await resp.json();
-    const lootbox = lootboxes.find(lb => lb.crate_type === crateType);
-    if (!lootbox) { alert('Crate not found.'); return; }
-    await buyLootbox(lootbox.id, crateName, crateType);
-  } catch (err) { alert('Could not purchase crate.'); }
+  const card = document.querySelector(`[data-crate-type="${crateType}"]`);
+  const lootboxId = card ? parseInt(card.dataset.lootboxId, 10) : null;
+  const crateCost = card ? parseInt(card.dataset.cost || '0', 10) : 0;
+  if (!lootboxId) { alert('Crate not found.'); return; }
+  await buyLootbox(lootboxId, crateName, crateType, crateCost);
 }
 
 //Roll animation — fetches all items in the pool and rolls across them
@@ -563,6 +565,10 @@ async function playRollAnimation(crateType, wonItem) {
     const resp = await fetch(`/api/crate-pool/${crateType}/`);
     pool = await resp.json();
   } catch (e) {}
+
+  //Hide secret from roll
+  const visiblePool = pool.filter(item => item.rarity !== 'SECRET');
+  if (!visiblePool.length) visiblePool.push(...pool);
 
   //Fall back to just the winner if pool fetch failed
   if (!pool.length) pool = [wonItem];
@@ -578,8 +584,7 @@ async function playRollAnimation(crateType, wonItem) {
   for (let i = 0; i < TOTAL; i++) {
     const isWinner = i === WINNER_POS;
     //Pick a random item from the pool for every non-winner slot
-    const poolItem = isWinner ? wonItem : pool[Math.floor(Math.random() * pool.length)];
-
+    const poolItem = isWinner ? wonItem : visiblePool[Math.floor(Math.random() * visiblePool.length)];
     const div = document.createElement('div');
     div.className = 'roll-item' + (isWinner ? ' winner' : '');
     const img = document.createElement('img');
