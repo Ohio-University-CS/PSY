@@ -9,12 +9,12 @@ FANTASY_ITEMS = [
     # ('Mercury',   'COMMON',    100, 'sprites/Items/FantasyCollection/Mercury.png'),
     # ('Star',      'COMMON',    100, 'sprites/Items/FantasyCollection/Star.png'),
     # ('Mars',      'RARE',       40, 'sprites/Items/FantasyCollection/Mars.png'),
-    ('Wizard Tower',   'RARE',       40, 'sprites/Items/FantasyCollection/Jupiter.png'),
-    ('Fairy',     'RARE',       40, 'sprites/Items/FantasyCollection/Earth.png'),
-    ('Chosen Knight',    'EPIC',       15, 'sprites/Items/FantasyCollection/Saturn.png'),
-    ('Dom, the Wizard of Destiny',   'EPIC',       15, 'sprites/Items/FantasyCollection/Neptune.png'),
-    ('Dragon', 'LEGENDARY',   5, 'sprites/Items/FantasyCollection/Gargantua.png'),
-    ('Adventuring party', 'LEGENDARY', 5, 'sprites/Items/FantasyCollection/DysonSphere.png'),
+    ('Wizard Tower',   'RARE',       40, 'sprites/Items/FantasyCollection/Wizard tower.png'),
+    ('Fairy',          'RARE',       40, 'sprites/Items/FantasyCollection/fairy.png'),
+    ('Chosen Knight',  'EPIC',       15, 'sprites/Items/FantasyCollection/Chosen Knight.png'),
+    ('Dom, the Wizard of Destiny', 'EPIC', 15, 'sprites/Items/FantasyCollection/Dom The Wizard Of Destiny.png'),
+    ('Dragon',         'LEGENDARY',   5, 'sprites/Items/FantasyCollection/Dragon.png'),
+    ('Adventuring party', 'LEGENDARY', 5, 'sprites/Items/FantasyCollection/aventuring party.png'),
     # ('Qu',         'SECRET',     1, 'sprites/Items/FantasyCollection/Qu.png'),
 ]
 
