@@ -149,12 +149,8 @@
         padding: 3px 6px;
         border: 2px solid currentColor;
         display: inline-block;
-        max-width: 100%;
-        min-width: 0;
-        word-break: break-word;
+        max-width: 155px;
       }
-
-      .lb-row .hide-mobile { min-width: 0; }
 
       .pagination {
         display: flex;
@@ -231,7 +227,7 @@
 
             <span class="hide-mobile" style="display:flex; align-items:center; gap:6px;">
               {% if entry.rarity_label != '—' %}
-                <span class="rarity-badge" style="color: {{ entry.rarity_color }};">{{ entry.rarest_item|truncatewords:3 }}</span>
+                <span class="rarity-badge" style="color: {{ entry.rarity_color }};">{{ entry.rarest_item }}</span>
               {% else %}
                 <span style="color:#999; font-size:0.45rem;">—</span>
               {% endif %}
