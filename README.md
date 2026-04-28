@@ -1,12 +1,12 @@
-# PSY: canBet
+# PSY: Canbet
 
-canBet is a productivity lootbox system that turns coursework activity into a game economy. The project rewards students with Bits for consistent academic effort, lets them spend those Bits on crates and collectible items, and uses leaderboards to create friendly competition around progress.
+Canbet is a productivity lootbox system that turns coursework activity into a game economy. The project rewards students with Bits for consistent academic effort, lets them spend those Bits on crates and collectible items, and uses leaderboards to create friendly competition around progress.
 
 Production site: [canbet.live](https://canbet.live)
 
 ## Project Description
 
-Traditional learning platforms usually track grades and submissions, but they do not do much to make day-to-day academic effort feel engaging. canBet adds a lightweight game layer on top of Canvas by syncing assignment submission data, awarding Bits, and letting users collect themed items through lootboxes, shops, trades, and inventory management.
+Traditional learning platforms usually track grades and submissions, but they do not do much to make day-to-day academic effort feel engaging. Canbet adds a lightweight game layer on top of Canvas by syncing assignment submission data, awarding Bits, and letting users collect themed items through lootboxes, shops, trades, and inventory management.
 
 The repository contains:
 
@@ -56,32 +56,27 @@ The repository contains:
    git clone <repository-url>
    cd PSY
    ```
-
 2. Move into the Django project:
 
    ```bash
    cd Canbet
    ```
-
 3. Create and activate a virtual environment:
 
    ```bash
    python -m venv .venv
    .venv\Scripts\activate
    ```
-
    On macOS or Linux:
 
    ```bash
    source .venv/bin/activate
    ```
-
 4. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
-
 5. Create a `.env` file in `Canbet/` and configure the values needed for your environment:
 
    ```env
@@ -92,19 +87,16 @@ The repository contains:
    CANVAS_DOMAIN=https://ohio.instructure.com
    CANVAS_TOKEN=
    ```
-
 6. Apply database migrations:
 
    ```bash
    python manage.py migrate
    ```
-
 7. Optional: create an admin user:
 
    ```bash
    python manage.py createsuperuser
    ```
-
 ## How to Run
 
 ### Run the Django App Locally
@@ -159,13 +151,13 @@ Chrome status:
 
 - Awaiting approval.
 
-For local browser testing, load the matching extension folder as an unpacked/developer extension and sign in to canBet from the popup.
+For local browser testing, load the matching extension folder as an unpacked/developer extension and sign in to Canbet from the popup.
 
 ## Usage Examples
 
 ### Website Flow
 
-1. Register or log in to a canBet account.
+1. Register or log in to a Canbet account.
 2. View the main dashboard to see your Bit balance, rank, and recent activity.
 3. Open the shop to buy daily items or lootboxes.
 4. Open crates to receive random collectible items.
@@ -175,10 +167,10 @@ For local browser testing, load the matching extension folder as an unpacked/dev
 ### Canvas Sync Flow
 
 1. Install the browser extension.
-2. Log in to canBet from the extension popup.
+2. Log in to Canbet from the extension popup.
 3. Visit a supported Canvas/Instructure page.
 4. The extension reads assignment/submission data from the active Canvas session.
-5. Newly synced submissions are sent to canBet and awarded Bits.
+5. Newly synced submissions are sent to Canbet and awarded Bits.
 
 Example sync response:
 
