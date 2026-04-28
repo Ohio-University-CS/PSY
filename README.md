@@ -217,7 +217,6 @@ Example crate response:
 
 ## Known Issues
 
-- Demo video links still need to be added.
 - Chrome extension approval is still pending.
 - Local setup expects database configuration; the default settings are aimed at PostgreSQL-backed development and deployment.
 - Canvas sync depends on a user's active Canvas session and supported Instructure page structure.
@@ -226,26 +225,22 @@ Example crate response:
 
 ## Future Work
 
-- Add final demo video links and screenshots.
 - Finish Chrome Web Store approval and document install steps once available.
 - Add seed data or a management command for quickly populating local lootboxes and item pools.
 - Expand automated tests for crate odds, shop purchases, trade-ups, quicksell, and Canvas sync.
 - Improve onboarding for first-time users and extension setup.
 - Add richer item collection pages, achievements, and seasonal events.
 - Add clearer admin documentation for managing items, lootboxes, and drop weights.
-- Review encoding issues in older source comments and README history.
 
 ## Contributors
 
 | Contributor | Role |
 | --- | --- |
-| Evan Williamson | Contributor; role to confirm |
-| Jimmy Muhly Jr / Jimmy-cs01 | Contributor; role to confirm |
-| Zane Lyvers / zlyvers | Contributor; role to confirm |
-| Ethan / hartsfi | Contributor; role to confirm |
-| Christian T. / PLOB | Contributor; role to confirm |
-
-Contributor names are based on repository commit history. Replace the role placeholders with each team member's final project responsibilities, such as frontend, backend, extension, design/assets, testing, deployment, or documentation.
+| Evan | Contributor; Design/Assets, Backend |
+| Jimmy-cs01 | Contributor; Frontend, Extension |
+| zlyvers | Contributor; Backend, Extension |
+| hartsfi | Contributor; Backend, Testing, Deployment  |
+| PLOB | Contributor; Design/Assets, Backend |
 
 ## Tech Stack
 
