@@ -45,7 +45,18 @@ function doSync(user_data, courses) {
         if (!res.ok) {
           console.error('[canBet] Sync failed:', data);
         } else {
-          console.log(`[canBet] Synced ${data.created} new submission(s). Bits awarded: ${data.bits_awarded}`);
+          const created = data.created ?? 0;
+          const bits = data.bits_awarded ?? 0;
+          console.log(`[canBet] Synced ${created} new submission(s). Bits awarded: ${bits}`);
+
+          if (bits > 0) {
+            browser.notifications.create({
+              type: 'basic',
+              iconUrl: 'icons/canbet.png',
+              title: 'canBet — Bits Earned!',
+              message: `+${bits} bits for turning in ${created} assignment${created !== 1 ? 's' : ''}!`,
+            });
+          }
         }
       })
       .catch(err => console.error('[canBet] Sync error:', err));

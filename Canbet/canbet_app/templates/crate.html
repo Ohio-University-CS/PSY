@@ -465,6 +465,7 @@ const RARITY_COLORS = {
 };
 const CRATE_ICONS = {
   SPOOKY: 'sprites/Items/SpookyCollection/Spooky collection box.png',
+  SPACE: 'sprites/Items/SpaceCollection/SpaceCrate.png',
 };
 const CRATE_EMOJIS = { SPOOKY: '👻', SPACE: '🌌', FANTASY: '🏰', WEATHER: '⛈️' };
 const crateIconPaths = { ...CRATE_ICONS };
@@ -497,11 +498,10 @@ function updateCrateCard(lb) {
   card.dataset.lootboxId = lb.id;
   card.dataset.cost = lb.cost_bits;
 
-  if (lb.crate_type !== 'SPACE' && lb.sprite_path) crateIconPaths[lb.crate_type] = lb.sprite_path;
+  if (lb.sprite_path) crateIconPaths[lb.crate_type] = lb.sprite_path;
   const iconWrap = card.querySelector('[data-icon-type]');
   if (iconWrap) {
-    const spritePath = lb.crate_type === 'SPACE' ? '' : lb.sprite_path;
-    iconWrap.innerHTML = getCrateIconHtml(lb.crate_type, spritePath);
+    iconWrap.innerHTML = getCrateIconHtml(lb.crate_type, lb.sprite_path);
   }
 
   const priceEl = card.querySelector('[data-price-type="buy"]');
