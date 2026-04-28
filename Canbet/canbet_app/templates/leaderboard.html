@@ -227,7 +227,7 @@
 
             <span class="hide-mobile" style="display:flex; align-items:center; gap:6px;">
               {% if entry.rarity_label != '—' %}
-                <span style="font-size:0.45rem; color:{{ entry.rarity_color }};">{{ entry.rarest_item }}</span>
+                <span class="rarity-badge" style="color: {{ entry.rarity_color }};">{{ entry.rarest_item }}</span>
               {% else %}
                 <span style="color:#999; font-size:0.45rem;">—</span>
               {% endif %}
