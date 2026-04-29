@@ -17,9 +17,10 @@ The repository contains:
 
 ## Demo Videos
 
-- Website demo: Add link here.
-- Browser extension demo: Add link here.
-- Lootbox, shop, and inventory demo: Add link here.
+- Website demo: https://youtu.be/NS6axi1UbBM
+- Browser extension demo: https://youtu.be/bO_pxQfZnDg
+- Lootbox, shop, and inventory demo: https://youtu.be/Kv4K4jWPeLk
+- leaderboard demo https://youtu.be/dXF-8EzorHc
 
 ## Features
 
